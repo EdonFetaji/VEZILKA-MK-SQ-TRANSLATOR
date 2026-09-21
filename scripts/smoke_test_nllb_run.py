@@ -12,7 +12,8 @@ Exit code 0 means every check passed.
   preflight (token, GPU, >= 14 GB free VRAM, private repo, test upload),
   every data source reachable (Gazette, FLORES+ gated access, NTREX, Verbis),
   a background (run_as_future) upload, checkpoints already in the repo,
-  worst-case GPU memory: the memory probe, then a dev-evaluation generation
+  the real Trainer built and one real training step run with this machine's
+  transformers version, worst-case GPU memory: the memory probe, then a dev-evaluation generation
   (batch 32 x 256 new tokens) on top of the training state, then the final
   evaluation's beam-4 batch, and CTranslate2 on this GPU (it converts the base
   model into work/ct2/base_int8/, which the real run then reuses).
@@ -403,6 +404,31 @@ def role_quick(m) -> None:
             del model, enc
             m.free_gpu()
 
+    def trainer_step():
+        # The real TrainingArguments / Trainer / sampler / collator / label-smoothed training_step with
+        # this machine's transformers version -- catches API changes before the real run reaches step 8.
+        real_ckpt = m.CKPT
+        m.CKPT = scratch / "checkpoints"
+        try:
+            args = m.make_training_args(probe)
+        finally:
+            m.CKPT = real_ckpt
+        model = AutoModelForSeq2SeqLM.from_pretrained(m.BASE_MODEL, token=m.TOKEN)
+        params = m.inspect.signature(m.Seq2SeqTrainer.__init__).parameters
+        tok_kw = {"processing_class": tok} if "processing_class" in params else {"tokenizer": tok}
+        trainer = m.BidirectionalTrainer(model=model, args=args, train_dataset=worst, eval_dataset=worst,
+                                         data_collator=m.NllbCollator(tok, model.config.decoder_start_token_id),
+                                         callbacks=[m.TrainingMonitor()], **tok_kw)
+        trainer.setup(tok, {}, None)
+        trainer.create_optimizer_and_scheduler(num_training_steps=10)
+        trainer.current_gradient_accumulation_steps = args.gradient_accumulation_steps  # set by the train loop in v5
+        batch = next(iter(trainer.get_train_dataloader()))
+        loss = float(trainer.training_step(trainer.model, batch))
+        del trainer, model, batch
+        m.free_gpu()
+        assert math.isfinite(loss), f"loss {loss}"
+        return f"transformers {m.transformers.__version__}: Trainer built, one training step OK (loss {loss:.2f})"
+
     def ctranslate2():
         # Converting the base model is step 10's work anyway: written to the real work/ct2/base_int8/.
         if not (m.CT2_BASE / "model.bin").exists():
@@ -420,9 +446,10 @@ def role_quick(m) -> None:
 
     for name, fn in (("GPU: memory probe (worst-case 192+192-token batches)", memory_probe),
                      ("GPU: dev-eval generation on top of the training state", dev_generation_on_top_of_training),
+                     ("GPU: Trainer + one real training step", trainer_step),
                      ("GPU: final-eval generation (beam 4, batch 32)", final_eval_generation),
                      ("CTranslate2: base conversion + GPU run", ctranslate2)):
-        if name.startswith("GPU: dev") and not results.get("GPU: memory probe (worst-case 192+192-token batches)",
+        if name.startswith(("GPU: dev", "GPU: Trainer")) and not results.get("GPU: memory probe (worst-case 192+192-token batches)",
                                                             {}).get("ok"):
             continue
         stage(name, fn)

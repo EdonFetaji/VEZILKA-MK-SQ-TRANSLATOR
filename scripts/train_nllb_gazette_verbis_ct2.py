@@ -1380,6 +1380,9 @@ def make_training_args(probe: dict) -> Seq2SeqTrainingArguments:
     fields = {f.name for f in dataclasses.fields(Seq2SeqTrainingArguments)}
     if "eval_strategy" not in fields:
         wanted["evaluation_strategy"] = wanted.pop("eval_strategy")
+    if "group_by_length" not in fields and "train_sampling_strategy" in fields:  # transformers 5
+        del wanted["group_by_length"]
+        wanted["train_sampling_strategy"] = "group_by_length"
     dropped = sorted(k for k in wanted if k not in fields)
     if set(dropped) - optional:
         raise Fatal(f"this transformers version ({transformers.__version__}) lacks training arguments {dropped}")
@@ -1577,7 +1580,7 @@ class BidirectionalTrainer(Seq2SeqTrainer):
 
     def setup(self, tok, dev_sets: dict, monitor: TrainingMonitor) -> None:
         self.nllb_tok, self.dev_sets, self.monitor = tok, dev_sets, monitor
-        self.tok_count = torch.zeros((), dtype=torch.long, device="cuda")
+        self.tok_count = torch.zeros((), dtype=torch.long, device=self.args.device)
         self.sample_count = 0
 
     def training_step(self, model, inputs, *args, **kwargs):
@@ -1588,7 +1591,10 @@ class BidirectionalTrainer(Seq2SeqTrainer):
         return super().training_step(model, inputs, *args, **kwargs)
 
     def _get_train_sampler(self, *args, **kwargs):
-        if not self.args.group_by_length:
+        # transformers 4: group_by_length=True; transformers 5: train_sampling_strategy="group_by_length"
+        grouped = (getattr(self.args, "group_by_length", False)
+                   or getattr(self.args, "train_sampling_strategy", None) == "group_by_length")
+        if not grouped:
             return super()._get_train_sampler(*args, **kwargs)
         lengths = self.train_dataset.data.column("length").to_pylist()
         return LengthGroupedSampler(self.args.train_batch_size * self.args.gradient_accumulation_steps,
@@ -1660,9 +1666,11 @@ def step8_train():
     args = make_training_args(probe)
     eff = args.per_device_train_batch_size * args.gradient_accumulation_steps
     LOG.info("training settings: batch %d x accumulation %d = effective %d | gradient checkpointing %s | "
-             "adafactor lr %.0e, warmup %d, linear decay, %d epoch | label smoothing %.1f | bf16 + tf32",
+             "adafactor lr %.0e, warmup %d, linear decay, %d epoch | label smoothing %.1f | bf16 + tf32 | "
+             "length-grouped batches | transformers %s",
              args.per_device_train_batch_size, args.gradient_accumulation_steps, eff, args.gradient_checkpointing,
-             args.learning_rate, args.warmup_steps, args.num_train_epochs, args.label_smoothing_factor)
+             args.learning_rate, args.warmup_steps, args.num_train_epochs, args.label_smoothing_factor,
+             transformers.__version__)
     update_run_info(memory_probe=probe, training_args=args.to_dict())
 
     model = AutoModelForSeq2SeqLM.from_pretrained(BASE_MODEL, token=TOKEN)
@@ -1763,8 +1771,8 @@ def _ct2_convert(src: Path, out: Path) -> None:
 def step10_ct2() -> None:
     _ct2_convert(FINAL, CT2_FT)
     if not (CT2_BASE / "model.bin").exists():
-        base_local = Path(snapshot_download(BASE_MODEL, token=TOKEN,
-                                            allow_patterns=["*.json", "*.bin", "*.safetensors", "*.model"]))
+        base_local = Path(BASE_MODEL) if Path(BASE_MODEL).is_dir() else Path(snapshot_download(
+            BASE_MODEL, token=TOKEN, allow_patterns=["*.json", "*.bin", "*.safetensors", "*.model"]))
         _ct2_convert(base_local, CT2_BASE)
     else:
         LOG.info("loaded from disk: %s", rel(CT2_BASE))
