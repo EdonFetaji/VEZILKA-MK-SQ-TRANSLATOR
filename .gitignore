@@ -1,0 +1,26 @@
+./gazzette-parallel-corpus/pairs_sonar_filtered(1).parquet
+./data 
+work/
+
+
+# ── Verbis (APJ) data: licensed, must never be committed ──
+*verbis*.parquet
+*verbis*.jsonl
+*verbis*.csv
+verbis_cache/
+verbis_out/
+data/verbis/
+
+# ── No data files in git at all (datasets live on Hugging Face) ──
+*.parquet
+*.jsonl
+*.arrow
+
+# ── Training outputs: large, and contain Verbis-derived data ──
+work/
+
+# ── Environment, caches, secrets ──
+.venv/
+__pycache__/
+*.pyc
+.env

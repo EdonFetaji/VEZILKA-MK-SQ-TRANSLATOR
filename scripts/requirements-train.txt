@@ -1,0 +1,19 @@
+# Dependencies for scripts/train_nllb_gazette_verbis_ct2.py
+#
+#   uv pip install -r scripts/requirements-train.txt
+#
+# torch is deliberately NOT listed: it is installed separately with a CUDA
+# build that supports the RTX 5080 (Blackwell, sm_120), and installing this
+# file must never replace it.
+
+transformers>=4.46
+datasets>=2.19
+accelerate>=0.34
+sentencepiece>=0.2
+sacrebleu>=2.4
+ctranslate2>=4.5
+sentence-transformers>=3.0
+polars>=1.0
+pyarrow>=17
+huggingface_hub>=0.25
+matplotlib>=3.8
