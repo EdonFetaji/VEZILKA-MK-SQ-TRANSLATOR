@@ -1,0 +1,39 @@
+# D0 corpus preparation. One YAML per run; the filename stem is the run name.
+run_name: prepare_corpus_v1
+
+input:
+  # The raw extractor output. Read-only -- never written back to.
+  path: gazzette-parallel-corpus/pairs_sonar_filtered(1).parquet
+  expected_rows: 295628
+
+output:
+  # Hive-partitioned by split and year, so C3 is enforced by directory structure
+  # rather than by a filter someone forgets.
+  corpus_dir: data/processed/corpus
+  dropped_path: data/processed/near_dup_dropped.parquet
+  report_dir: reports/prepare_corpus_v1
+  compression: zstd
+
+split:
+  # Chronological, issue-disjoint, oldest -> newest (C3).
+  strategy: chronological_issue
+  train_frac: 0.90
+  dev_frac: 0.05
+  test_frac: 0.05
+
+near_dup:
+  # Cross-split MinHash/LSH sweep (C4).
+  enabled: true
+  threshold: 0.85
+  num_perm: 128
+  ngram: 5
+  sides: [mk, sq]
+
+tokens:
+  enabled: true
+  model_name: facebook/nllb-200-distilled-600M
+  mk_lang: mkd_Cyrl
+  sq_lang: als_Latn
+  batch_size: 512
+
+seed: 1

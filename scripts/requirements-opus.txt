@@ -1,0 +1,24 @@
+# Dependencies for scripts/build_opus_mk_sq_dataset.py
+#
+#   python -m venv .venv-opus
+#   .venv-opus/bin/pip install -r scripts/requirements-opus.txt
+#
+# Corpora are fetched over the documented OPUS HTTP API rather than through
+# opustools, so opustools is not required: one less dependency, and the API
+# returns the download URL, version and pair count in the same call.
+#
+# Language identification uses lingua rather than fastText lid.176. fastText
+# publishes no arm64 macOS wheel for Python 3.12 (wheels stop at cp311), and a
+# source build is a poor failure mode for a script started with nohup. lingua is
+# also what notebook 01_1 already uses for this exact check.
+
+datasets>=2.19
+huggingface_hub>=0.23
+transformers>=4.40
+sentencepiece>=0.2
+sentence-transformers>=2.7
+torch>=2.2
+polars>=1.0
+pyarrow>=17
+lingua-language-detector>=2.0
+requests>=2.31
