@@ -303,9 +303,10 @@ def verify_hf_manifest(name: str, repo: str, repo_type: str, revision: str | Non
     LOG.info("%s: %d file(s) verified against data/manifests/%s.json", name, len(want), name)
 
 
-def expect(key: str, value) -> None:
-    """Assert a value recorded in the config's data.expected (E01's recorded counts / fingerprints)."""
-    want = EXPECTED.get("row_counts", {}).get(key, EXPECTED.get("content_sha256", {}).get(key))
+def expect(key: str, value, kind: str = "row_counts") -> None:
+    """Assert a value recorded in the config's data.expected.<kind> (E01's row counts, or content_sha256
+    fingerprints). The kind must be explicit: gazette_test has both a row count and a fingerprint."""
+    want = EXPECTED.get(kind, {}).get(key)
     if want is None:
         return
     if want != value:
@@ -1041,7 +1042,7 @@ def step2_gazette() -> None:
     for name in ("train", "dev", "test"):
         expect(f"gazette_{name}", sizes[f"gazette_{name}"])
     test = pl.read_parquet(outs["test"], columns=["mk", "sq"])
-    expect("gazette_test", X.content_sha256(zip(test["mk"], test["sq"])))
+    expect("gazette_test", X.content_sha256(zip(test["mk"], test["sq"])), "content_sha256")
     update_dataset_sizes(**sizes)
 
 
@@ -1370,7 +1371,7 @@ def build_dev_eval_sets() -> dict:
                          for d, *_ in DIRECTIONS])
         write_parquet(ids, DEV_IDS)
     ids = pl.read_parquet(DEV_IDS)
-    expect("dev_eval_ids", X.content_sha256(zip(ids["direction"], ids["row_idx"].cast(pl.Utf8))))
+    expect("dev_eval_ids", X.content_sha256(zip(ids["direction"], ids["row_idx"].cast(pl.Utf8))), "content_sha256")
     sets = {}
     for d, s_col, t_col, sl, tl in DIRECTIONS:
         rows = dev.select(pl.all().gather(ids.filter(pl.col("direction") == d)["row_idx"].to_list()))
