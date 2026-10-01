@@ -1,0 +1,36 @@
+{
+  "dataset": "ntrex",
+  "name": "NTREX-128 (mkd / sqi)",
+  "source": "https://github.com/MicrosoftTranslator/NTREX",
+  "access": "public",
+  "licence": "CC-BY-SA-4.0",
+  "revision": "468c6b69c7f6a75d31d4743d9daba2af566cc18d",
+  "revision_note": "Pinned for E02 onwards. E01 downloaded from branch main without recording the commit.",
+  "revision_used_by": {
+    "E01_gazette_verbis_mix": "NOT RECORDED (branch main)"
+  },
+  "row_counts": {
+    "test": 1997
+  },
+  "files": [
+    {
+      "path": "NTREX-128/newstest2019-ref.mkd.txt",
+      "size_bytes": 491500,
+      "sha256": "UNTRACKED",
+      "lines": 1997
+    },
+    {
+      "path": "NTREX-128/newstest2019-ref.sqi.txt",
+      "size_bytes": 310123,
+      "sha256": "UNTRACKED",
+      "lines": 1997
+    }
+  ],
+  "hash_policy": "File hashes deliberately not tracked for this external test set (project decision); the dataset is pinned by revision instead.",
+  "produced_by": [
+    "scripts/train/train_nllb_gazette_verbis_ct2.py step 3 (line i of mkd aligned with line i of sqi)"
+  ],
+  "known_issues": [
+    "News domain: measures general-domain retention, not legal quality."
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "dataset": "flores_plus",
+  "name": "FLORES+ devtest (mkd_Cyrl / als_Latn)",
+  "source": "https://huggingface.co/datasets/openlanguagedata/flores_plus",
+  "access": "gated (accept terms on Hugging Face)",
+  "licence": [
+    "cc-by-sa-4.0"
+  ],
+  "revision": "5fec6c13f9e5a4db2f745d4ec0d7c9721ddc4f06",
+  "revision_note": "Pinned for E02 onwards. E01 did not record the revision; the repo HEAD (last modified 2026-07-27 11:55:51+00:00) predates E01's first invocation.",
+  "revision_used_by": {
+    "E01_gazette_verbis_mix": "NOT RECORDED"
+  },
+  "row_counts": {
+    "devtest": 1012
+  },
+  "files": [
+    {
+      "path": "devtest/mkd_Cyrl.jsonl",
+      "size_bytes": 558935,
+      "sha256": "UNTRACKED"
+    },
+    {
+      "path": "devtest/als_Latn.jsonl",
+      "size_bytes": 466550,
+      "sha256": "UNTRACKED"
+    }
+  ],
+  "hash_policy": "File hashes deliberately not tracked for this external test set (project decision); the dataset is pinned by revision instead.",
+  "produced_by": [
+    "scripts/train/train_nllb_gazette_verbis_ct2.py step 3 (joined on id)"
+  ],
+  "known_issues": [
+    "General domain (Wikimedia sources): measures general-domain retention, not legal quality."
+  ]
+}

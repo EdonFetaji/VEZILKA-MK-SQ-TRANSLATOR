@@ -1,0 +1,30 @@
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{llrrrrr}
+\toprule
+Test set & Dir. & System & BLEU & chrF++ & chrF++ 95\% CI & p vs base \\
+\midrule
+Gazette test & MK$\rightarrow$SQ & E00\_base Base (E00) & 27.74 & 50.30 & [49.86, 50.74] & – \\
+Gazette test & MK$\rightarrow$SQ & E01\_gazette\_verbis\_mix FT HF & 54.02 & 72.28 & [71.78, 72.80] & 0.001 \\
+Gazette test & MK$\rightarrow$SQ & E01\_gazette\_verbis\_mix FT CT2 int8 & 54.08 & 72.35 & [71.85, 72.86] & – \\
+Gazette test & SQ$\rightarrow$MK & E00\_base Base (E00) & 29.63 & 52.46 & [52.00, 52.94] & – \\
+Gazette test & SQ$\rightarrow$MK & E01\_gazette\_verbis\_mix FT HF & 63.64 & 78.55 & [77.96, 79.13] & 0.001 \\
+Gazette test & SQ$\rightarrow$MK & E01\_gazette\_verbis\_mix FT CT2 int8 & 63.45 & 78.49 & [77.90, 79.08] & – \\
+FLORES+ devtest & MK$\rightarrow$SQ & E00\_base Base (E00) & 22.08 & 48.58 & [47.84, 49.29] & – \\
+FLORES+ devtest & MK$\rightarrow$SQ & E01\_gazette\_verbis\_mix FT HF & 19.45 & 46.61 & [45.94, 47.25] & 0.001 \\
+FLORES+ devtest & MK$\rightarrow$SQ & E01\_gazette\_verbis\_mix FT CT2 int8 & 19.22 & 46.57 & [45.92, 47.20] & – \\
+FLORES+ devtest & SQ$\rightarrow$MK & E00\_base Base (E00) & 21.39 & 49.50 & [48.76, 50.22] & – \\
+FLORES+ devtest & SQ$\rightarrow$MK & E01\_gazette\_verbis\_mix FT HF & 18.89 & 49.07 & [48.28, 49.84] & 0.089 \\
+FLORES+ devtest & SQ$\rightarrow$MK & E01\_gazette\_verbis\_mix FT CT2 int8 & 18.83 & 48.97 & [48.24, 49.68] & – \\
+NTREX-128 & MK$\rightarrow$SQ & E00\_base Base (E00) & 23.14 & 48.91 & [48.42, 49.40] & – \\
+NTREX-128 & MK$\rightarrow$SQ & E01\_gazette\_verbis\_mix FT HF & 18.13 & 44.49 & [44.01, 45.00] & 0.001 \\
+NTREX-128 & MK$\rightarrow$SQ & E01\_gazette\_verbis\_mix FT CT2 int8 & 18.22 & 44.54 & [44.06, 45.02] & – \\
+NTREX-128 & SQ$\rightarrow$MK & E00\_base Base (E00) & 21.25 & 49.54 & [48.98, 50.11] & – \\
+NTREX-128 & SQ$\rightarrow$MK & E01\_gazette\_verbis\_mix FT HF & 17.98 & 47.05 & [46.49, 47.61] & 0.001 \\
+NTREX-128 & SQ$\rightarrow$MK & E01\_gazette\_verbis\_mix FT CT2 int8 & 17.95 & 47.06 & [46.48, 47.64] & – \\
+\bottomrule
+\end{tabular}
+\caption{BLEU and chrF++ (beam 4) with the chrF++ paired-bootstrap 95\% CI and p-value against the base model. Generated from \texttt{paper/results\_registry.csv}.}
+\label{tab:main-results}
+\end{table}

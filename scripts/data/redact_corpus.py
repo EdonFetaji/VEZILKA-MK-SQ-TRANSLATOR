@@ -37,7 +37,7 @@ from pathlib import Path
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
 from mksq.release import PERSON_CONTEXT, REDACTIONS, person_context_hits, redact  # noqa: E402
 

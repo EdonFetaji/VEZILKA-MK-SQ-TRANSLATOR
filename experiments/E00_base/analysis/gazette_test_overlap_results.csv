@@ -1,0 +1,9 @@
+class,n_pairs,pct_pairs,model,direction,bleu,chrf
+exact_template,1856,18.24,base,mk_sq,32.67,51.88
+exact_template,1856,18.24,base,sq_mk,21.17,50.45
+near_duplicate,3087,30.34,base,mk_sq,28.5,50.59
+near_duplicate,3087,30.34,base,sq_mk,31.25,53.09
+novel,5231,51.42,base,mk_sq,26.46,49.88
+novel,5231,51.42,base,sq_mk,29.93,52.45
+all,10174,100.0,base,mk_sq,27.74,50.3
+all,10174,100.0,base,sq_mk,29.63,52.46

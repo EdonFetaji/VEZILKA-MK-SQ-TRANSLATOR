@@ -1,0 +1,740 @@
+2026-09-21 19:43:49 | INFO    | start | QUICK PREFLIGHT
+2026-09-21 19:43:49 | INFO    | quick preflight: HF token, GPU, >= 14 GB free VRAM, private repo, test upload | repo root: /home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR | work dir: /home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR/work
+2026-09-21 19:43:49 | INFO    | quick preflight: HF token, GPU, >= 14 GB free VRAM, private repo, test upload | Hugging Face token: found (environment variable HF_TOKEN), user EdonFetaji
+2026-09-21 19:43:49 | INFO    | quick preflight: HF token, GPU, >= 14 GB free VRAM, private repo, test upload | GPU: NVIDIA GeForce RTX 5080 | compute capability 12.0 | driver 595.84 | torch 2.14.0+cu130 (CUDA 13.0)
+2026-09-21 19:43:49 | INFO    | quick preflight: HF token, GPU, >= 14 GB free VRAM, private repo, test upload | VRAM: 16.21 GB free of 16.61 GB
+2026-09-21 19:43:49 | INFO    | quick preflight: HF token, GPU, >= 14 GB free VRAM, private repo, test upload | TF32 enabled; bf16 supported
+2026-09-21 19:43:50 | INFO    | quick preflight: HF token, GPU, >= 14 GB free VRAM, private repo, test upload | run info:
+{
+  "script": "train_nllb_gazette_verbis_ct2.py",
+  "git": {
+    "commit": "c165d6f17a26bc7c22ecc8b10de45219d74188d0",
+    "dirty": false
+  },
+  "versions": {
+    "python": "3.12.3",
+    "torch": "2.14.0+cu130",
+    "transformers": "5.17.0",
+    "datasets": "5.0.1",
+    "ctranslate2": "4.8.2",
+    "sacrebleu": "2.6.0",
+    "huggingface_hub": "1.32.0",
+    "accelerate": "1.15.0",
+    "sentence_transformers": "6.1.0",
+    "polars": "1.44.2"
+  },
+  "gpu": {
+    "gpu_name": "NVIDIA GeForce RTX 5080",
+    "compute_capability": "12.0",
+    "driver": "595.84",
+    "cuda_torch": "13.0",
+    "torch": "2.14.0+cu130",
+    "torch_arch_list": [
+      "sm_75",
+      "sm_80",
+      "sm_86",
+      "sm_90",
+      "sm_100",
+      "sm_120"
+    ],
+    "vram_free_gb": 16.21,
+    "vram_total_gb": 16.61
+  },
+  "constants": {
+    "HF_GAZETTE_REPO": "EdonFetaji/slvesnik-mk-sq",
+    "HF_RESULTS_REPO": "EdonFetaji/mk-sq-nllb600m-gazette-verbis",
+    "VERBIS_PATH": "data/verbis_mk_sq.parquet",
+    "VERBIS_HF_PATH": "data/verbis/verbis_mk_sq.parquet",
+    "WORK_DIR": "work",
+    "BASE_MODEL": "facebook/nllb-200-distilled-600M",
+    "SEED": 42,
+    "MK": "mkd_Cyrl",
+    "SQ": "als_Latn",
+    "MAX_TOKENS": 192,
+    "LABSE_MIN_SCORE": 0.7,
+    "DEV_EVAL_SIZE": 500,
+    "EVAL_STEPS": 1000,
+    "FINAL_BEAMS": 4,
+    "MAX_NEW_TOKENS": 256
+  },
+  "results_repo": "https://huggingface.co/EdonFetaji/mk-sq-nllb600m-gazette-verbis",
+  "invocations": [
+    "2026-09-21T19:43:49+00:00"
+  ],
+  "updated_at": "2026-09-21T19:43:50+00:00"
+}
+
+2026-09-21 19:43:50 | INFO    | quick preflight: HF token, GPU, >= 14 GB free VRAM, private repo, test upload | results repo: https://huggingface.co/EdonFetaji/mk-sq-nllb600m-gazette-verbis
+2026-09-21 19:43:50 | INFO    | quick preflight: HF token, GPU, >= 14 GB free VRAM, private repo, test upload | results repo verified PRIVATE: https://huggingface.co/EdonFetaji/mk-sq-nllb600m-gazette-verbis
+2026-09-21 19:43:51 | INFO    | quick preflight: HF token, GPU, >= 14 GB free VRAM, private repo, test upload | uploaded: eval/run_info.json
+2026-09-21 19:43:51 | INFO    | quick preflight: HF token, GPU, >= 14 GB free VRAM, private repo, test upload | preflight test upload OK
+2026-09-21 19:43:52 | INFO    | quick FLORES+ devtest (gated) downloadable | FLORES+ mkd_Cyrl: devtest/mkd_Cyrl.jsonl
+2026-09-21 19:44:26 | WARNING | quick GPU: memory probe (worst-case 192+192-token batches) | memory probe: batch 16 (gradient checkpointing False) ran out of memory
+2026-09-21 19:44:27 | INFO    | quick GPU: memory probe (worst-case 192+192-token batches) | memory probe: batch 8 x accumulation 16 (gradient checkpointing False) OK, peak 10.95 GB
+2026-09-21 19:44:40 | INFO    | quick CTranslate2: base conversion + GPU run | converting /home/edon.fetaji/.cache/huggingface/hub/models--facebook--nllb-200-distilled-600M/snapshots/f8d333a098d19b4fd9a8b18f94170487ad3f821d -> ct2/base_int8 (int8)
+2026-09-21 19:44:50 | INFO    | quick CTranslate2: base conversion + GPU run | wrote ct2/base_int8: ['config.json', 'model.bin', 'sentencepiece.bpe.model', 'shared_vocabulary.json', 'special_tokens_map.json', 'tokenizer.json', 'tokenizer_config.json']
+2026-09-21 19:44:56 | WARNING | quick CTranslate2: base conversion + GPU run | CTranslate2 cannot use this GPU (Traceback (most recent call last):
+  File "<string>", line 6, in <module>
+RuntimeError: Library libcublas.so.12 is not found or cannot be loaded) -- falling back to CPU, compute_type int8, 16 threads
+2026-09-21 19:46:49 | INFO    | start | ==============================================================================
+2026-09-21 19:46:49 | INFO    | start | run started (pid 3485467): scripts/train_nllb_gazette_verbis_ct2.py
+2026-09-21 19:46:49 | INFO    | step  1 preflight | ===== start
+2026-09-21 19:46:49 | INFO    | step  1 preflight | repo root: /home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR | work dir: /home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR/work
+2026-09-21 19:46:50 | INFO    | step  1 preflight | Hugging Face token: found (environment variable HF_TOKEN), user EdonFetaji
+2026-09-21 19:46:50 | INFO    | step  1 preflight | GPU: NVIDIA GeForce RTX 5080 | compute capability 12.0 | driver 595.84 | torch 2.14.0+cu130 (CUDA 13.0)
+2026-09-21 19:46:50 | INFO    | step  1 preflight | VRAM: 16.21 GB free of 16.61 GB
+2026-09-21 19:46:50 | INFO    | step  1 preflight | TF32 enabled; bf16 supported
+2026-09-21 19:46:50 | INFO    | step  1 preflight | run info:
+{
+  "script": "train_nllb_gazette_verbis_ct2.py",
+  "git": {
+    "commit": "c165d6f17a26bc7c22ecc8b10de45219d74188d0",
+    "dirty": false
+  },
+  "versions": {
+    "python": "3.12.3",
+    "torch": "2.14.0+cu130",
+    "transformers": "5.17.0",
+    "datasets": "5.0.1",
+    "ctranslate2": "4.8.2",
+    "sacrebleu": "2.6.0",
+    "huggingface_hub": "1.32.0",
+    "accelerate": "1.15.0",
+    "sentence_transformers": "6.1.0",
+    "polars": "1.44.2"
+  },
+  "gpu": {
+    "gpu_name": "NVIDIA GeForce RTX 5080",
+    "compute_capability": "12.0",
+    "driver": "595.84",
+    "cuda_torch": "13.0",
+    "torch": "2.14.0+cu130",
+    "torch_arch_list": [
+      "sm_75",
+      "sm_80",
+      "sm_86",
+      "sm_90",
+      "sm_100",
+      "sm_120"
+    ],
+    "vram_free_gb": 16.21,
+    "vram_total_gb": 16.61
+  },
+  "constants": {
+    "HF_GAZETTE_REPO": "EdonFetaji/slvesnik-mk-sq",
+    "HF_RESULTS_REPO": "EdonFetaji/mk-sq-nllb600m-gazette-verbis",
+    "VERBIS_PATH": "data/verbis_mk_sq.parquet",
+    "VERBIS_HF_PATH": "data/verbis/verbis_mk_sq.parquet",
+    "WORK_DIR": "work",
+    "BASE_MODEL": "facebook/nllb-200-distilled-600M",
+    "SEED": 42,
+    "MK": "mkd_Cyrl",
+    "SQ": "als_Latn",
+    "MAX_TOKENS": 192,
+    "LABSE_MIN_SCORE": 0.7,
+    "DEV_EVAL_SIZE": 500,
+    "EVAL_STEPS": 1000,
+    "FINAL_BEAMS": 4,
+    "MAX_NEW_TOKENS": 256
+  },
+  "results_repo": "https://huggingface.co/EdonFetaji/mk-sq-nllb600m-gazette-verbis",
+  "invocations": [
+    "2026-09-21T19:43:49+00:00",
+    "2026-09-21T19:46:50+00:00"
+  ],
+  "updated_at": "2026-09-21T19:46:50+00:00"
+}
+
+2026-09-21 19:46:50 | INFO    | step  1 preflight | results repo: https://huggingface.co/EdonFetaji/mk-sq-nllb600m-gazette-verbis
+2026-09-21 19:46:50 | INFO    | step  1 preflight | results repo verified PRIVATE: https://huggingface.co/EdonFetaji/mk-sq-nllb600m-gazette-verbis
+2026-09-21 19:46:51 | INFO    | step  1 preflight | uploaded: eval/run_info.json
+2026-09-21 19:46:51 | INFO    | step  1 preflight | preflight test upload OK
+2026-09-21 19:46:51 | INFO    | step  1 preflight | ===== done in 0h00m01s
+2026-09-21 19:46:51 | INFO    | step  2 gazette corpus | ===== start
+2026-09-21 19:46:59 | INFO    | step  2 gazette corpus | Gazette split 'train': 270083 rows | schema: {'pair_id': 'string', 'mk_text': 'string', 'sq_text': 'string', 'year': 'int16', 'issue_no': 'int16', 'issue_key': 'string', 'mk_component_type': 'string', 'sq_component_type': 'string', 'mk_page': 'int16', 'sq_page': 'int16', 'mk_component': 'int16', 'sq_component': 'int16', 'is_high_quality': 'bool', 'quality_confidence': 'float32', 'sonar_cosine': 'float32', 'gale_church_inferred': 'bool', 'mk_ocr_confidence': 'float32', 'sq_ocr_confidence': 'float32', 'source_pdf': 'string', 'split': 'string', 'redacted': 'bool'}
+2026-09-21 19:46:59 | INFO    | step  2 gazette corpus | Gazette split 'validation': 13355 rows | schema: {'pair_id': 'string', 'mk_text': 'string', 'sq_text': 'string', 'year': 'int16', 'issue_no': 'int16', 'issue_key': 'string', 'mk_component_type': 'string', 'sq_component_type': 'string', 'mk_page': 'int16', 'sq_page': 'int16', 'mk_component': 'int16', 'sq_component': 'int16', 'is_high_quality': 'bool', 'quality_confidence': 'float32', 'sonar_cosine': 'float32', 'gale_church_inferred': 'bool', 'mk_ocr_confidence': 'float32', 'sq_ocr_confidence': 'float32', 'source_pdf': 'string', 'split': 'string', 'redacted': 'bool'}
+2026-09-21 19:46:59 | INFO    | step  2 gazette corpus | Gazette split 'test': 10174 rows | schema: {'pair_id': 'string', 'mk_text': 'string', 'sq_text': 'string', 'year': 'int16', 'issue_no': 'int16', 'issue_key': 'string', 'mk_component_type': 'string', 'sq_component_type': 'string', 'mk_page': 'int16', 'sq_page': 'int16', 'mk_component': 'int16', 'sq_component': 'int16', 'is_high_quality': 'bool', 'quality_confidence': 'float32', 'sonar_cosine': 'float32', 'gale_church_inferred': 'bool', 'mk_ocr_confidence': 'float32', 'sq_ocr_confidence': 'float32', 'source_pdf': 'string', 'split': 'string', 'redacted': 'bool'}
+2026-09-21 19:46:59 | INFO    | step  2 gazette corpus | column mapping: mk_text -> mk, sq_text -> sq (also kept: ['pair_id', 'issue_key'])
+2026-09-21 19:46:59 | INFO    | step  2 gazette corpus | wrote data/processed/gazette_train.parquet (270083 rows)
+2026-09-21 19:46:59 | INFO    | step  2 gazette corpus | wrote data/processed/gazette_test.parquet (10174 rows)
+2026-09-21 19:46:59 | INFO    | step  2 gazette corpus | wrote data/processed/gazette_dev.parquet (13355 rows)
+2026-09-21 19:46:59 | INFO    | step  2 gazette corpus | Gazette train: 270083 rows
+2026-09-21 19:46:59 | INFO    | step  2 gazette corpus | Gazette dev  : 13355 rows
+2026-09-21 19:46:59 | INFO    | step  2 gazette corpus | Gazette test : 10174 rows
+2026-09-21 19:46:59 | INFO    | step  2 gazette corpus | ===== done in 0h00m07s
+2026-09-21 19:46:59 | INFO    | step  3 external test sets | ===== start
+2026-09-21 19:46:59 | INFO    | step  3 external test sets | FLORES+ mkd_Cyrl: devtest/mkd_Cyrl.jsonl
+2026-09-21 19:47:00 | INFO    | step  3 external test sets | FLORES+ als_Latn: devtest/als_Latn.jsonl
+2026-09-21 19:47:00 | INFO    | step  3 external test sets | wrote data/processed/flores_devtest.parquet (1012 rows)
+2026-09-21 19:47:00 | INFO    | step  3 external test sets | downloaded https://raw.githubusercontent.com/MicrosoftTranslator/NTREX/main/NTREX-128/newstest2019-ref.mkd.txt -> data/raw/ntrex/newstest2019-ref.mkd.txt (491500 bytes)
+2026-09-21 19:47:00 | INFO    | step  3 external test sets | downloaded https://raw.githubusercontent.com/MicrosoftTranslator/NTREX/main/NTREX-128/newstest2019-ref.sqi.txt -> data/raw/ntrex/newstest2019-ref.sqi.txt (310123 bytes)
+2026-09-21 19:47:00 | INFO    | step  3 external test sets | wrote data/processed/ntrex.parquet (1997 rows)
+2026-09-21 19:47:00 | INFO    | step  3 external test sets | FLORES+ devtest: 1012 sentences | NTREX-128: 1997 sentences
+2026-09-21 19:47:00 | INFO    | step  3 external test sets | ===== done in 0h00m01s
+2026-09-21 19:47:00 | INFO    | step  4 verbis | ===== start
+2026-09-21 19:47:00 | INFO    | step  4 verbis | downloaded EdonFetaji/mk-sq-nllb600m-gazette-verbis/data/verbis/verbis_mk_sq.parquet -> /home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR/data/verbis_mk_sq.parquet
+2026-09-21 19:47:00 | INFO    | step  4 verbis | Verbis: 15925 entries
+2026-09-21 19:47:00 | INFO    | step  4 verbis | wrote data/processed/verbis_terms.parquet (15093 rows)
+2026-09-21 19:47:00 | INFO    | step  4 verbis | scoring 15822 definition pairs with sentence-transformers/LaBSE
+2026-09-21 19:47:46 | INFO    | step  4 verbis | LaBSE freed; GPU memory allocated now 0.13 GB
+2026-09-21 19:47:46 | INFO    | step  4 verbis | wrote data/processed/verbis_defs_scored.parquet (15822 rows)
+2026-09-21 19:47:46 | INFO    | step  4 verbis | wrote data/processed/verbis_defs.parquet (15305 rows)
+2026-09-21 19:47:46 | INFO    | step  4 verbis | Verbis term pairs kept: 15093
+2026-09-21 19:47:46 | INFO    | step  4 verbis | Verbis definition pairs: 15822 scored, 15305 kept with LaBSE >= 0.70 (96.7%), median score 0.939
+2026-09-21 19:47:51 | INFO    | step  4 verbis | uploaded: data/verbis/verbis_terms.parquet, data/verbis/verbis_defs_scored.parquet, data/verbis/verbis_defs.parquet
+2026-09-21 19:47:51 | INFO    | step  4 verbis | ===== done in 0h00m50s
+2026-09-21 19:47:51 | INFO    | step  5 leakage removal | ===== start
+2026-09-21 19:47:51 | INFO    | step  5 leakage removal | held-out texts: 24011 unique mk, 25783 unique sq
+2026-09-21 19:47:52 | INFO    | step  5 leakage removal | wrote data/processed/train_clean.parquet (270299 rows)
+2026-09-21 19:47:52 | INFO    | step  5 leakage removal | leakage gazette     : removed 30157 of 270083 rows (mk matches 26346, sq matches 7895) -> 239926
+2026-09-21 19:47:52 | INFO    | step  5 leakage removal | leakage verbis_terms: removed 25 of 15093 rows (mk matches 20, sq matches 9) -> 15068
+2026-09-21 19:47:52 | INFO    | step  5 leakage removal | leakage verbis_defs : removed 0 of 15305 rows (mk matches 0, sq matches 0) -> 15305
+2026-09-21 19:47:52 | INFO    | step  5 leakage removal | ===== done in 0h00m00s
+2026-09-21 19:47:52 | INFO    | step  6 bidirectional training set | ===== start
+2026-09-21 19:47:52 | INFO    | step  6 bidirectional training set | wrote data/processed/train_bidirectional.parquet (540598 rows)
+2026-09-21 19:47:52 | INFO    | step  6 bidirectional training set | final training composition (540598 examples, both directions):
+2026-09-21 19:47:52 | INFO    | step  6 bidirectional training set |   gazette          479852 examples ( 88.8%)
+2026-09-21 19:47:52 | INFO    | step  6 bidirectional training set |   verbis_defs       30610 examples (  5.7%)
+2026-09-21 19:47:52 | INFO    | step  6 bidirectional training set |   verbis_terms      30136 examples (  5.6%)
+2026-09-21 19:47:52 | INFO    | step  6 bidirectional training set |   directions: mk->sq 270299, sq->mk 270299
+2026-09-21 19:47:52 | INFO    | step  6 bidirectional training set | ===== done in 0h00m00s
+2026-09-21 19:47:52 | INFO    | step  7 tokenisation | ===== start
+2026-09-21 19:47:54 | INFO    | step  7 tokenisation | mkd_Cyrl->als_Latn: input_ids start ['mkd_Cyrl', '▁О', 'П'], labels start ['als_Latn', '▁GEN', 'ER'] -- OK
+2026-09-21 19:47:54 | INFO    | step  7 tokenisation | als_Latn->mkd_Cyrl: input_ids start ['als_Latn', '▁GEN', 'ER'], labels start ['mkd_Cyrl', '▁О', 'П'] -- OK
+2026-09-21 19:48:33 | INFO    | step  7 tokenisation | train: 540598 -> 526704 examples (13894 dropped for > 192 tokens, 2.57%)
+2026-09-21 19:48:33 | INFO    | step  7 tokenisation | wrote data/tokenized/train (526704 rows)
+2026-09-21 19:49:02 | INFO    | step  7 tokenisation | wrote data/tokenized/dev (26710 rows)
+2026-09-21 19:49:02 | INFO    | step  7 tokenisation | train: language tokens verified on 2000 examples (both directions present)
+2026-09-21 19:49:02 | INFO    | step  7 tokenisation | dev: language tokens verified on 2000 examples (both directions present)
+2026-09-21 19:49:02 | INFO    | step  7 tokenisation | tokenised train: 526704 examples, length mean 58.0 / p95 138 / max 192 tokens | dev: 26710 examples
+2026-09-21 19:49:03 | INFO    | step  7 tokenisation | uploaded: eval/run_info.json
+2026-09-21 19:49:03 | INFO    | step  7 tokenisation | ===== done in 0h01m10s
+2026-09-21 19:49:03 | INFO    | step  8 training | ===== start
+2026-09-21 19:49:05 | INFO    | step  8 training | wrote eval/dev_eval_ids.parquet (1000 rows)
+2026-09-21 19:49:05 | INFO    | step  8 training | dev eval set mk_sq: 500 sentences
+2026-09-21 19:49:05 | INFO    | step  8 training | dev eval set sq_mk: 500 sentences
+2026-09-21 19:49:06 | WARNING | step  8 training | memory probe: batch 16 (gradient checkpointing False) ran out of memory
+2026-09-21 19:49:07 | INFO    | step  8 training | memory probe: batch 8 x accumulation 16 (gradient checkpointing False) OK, peak 10.97 GB
+2026-09-21 19:49:07 | ERROR   | step  8 training | FAILED after 0h00m04s: Fatal: this transformers version (5.17.0) lacks training arguments ['group_by_length', 'save_safetensors']
+2026-09-21 19:49:07 | ERROR   | step  8 training | traceback:
+Traceback (most recent call last):
+  File "/home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR/scripts/train_nllb_gazette_verbis_ct2.py", line 233, in run_step
+    out = fn(*args)
+          ^^^^^^^^^
+  File "/home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR/scripts/train_nllb_gazette_verbis_ct2.py", line 1660, in step8_train
+    args = make_training_args(probe)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR/scripts/train_nllb_gazette_verbis_ct2.py", line 1385, in make_training_args
+    raise Fatal(f"this transformers version ({transformers.__version__}) lacks training arguments {dropped}")
+Fatal: this transformers version (5.17.0) lacks training arguments ['group_by_length', 'save_safetensors']
+
+2026-09-21 19:49:08 | INFO    | step  8 training | uploaded: progress.log
+2026-09-21 22:22:26 | INFO    | start | QUICK PREFLIGHT
+2026-09-21 22:22:26 | INFO    | quick preflight: HF token, GPU, >= 14 GB free VRAM, private repo, test upload | repo root: /home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR | work dir: /home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR/work
+2026-09-21 22:22:26 | INFO    | quick preflight: HF token, GPU, >= 14 GB free VRAM, private repo, test upload | Hugging Face token: found (environment variable HF_TOKEN), user EdonFetaji
+2026-09-21 22:22:27 | INFO    | quick preflight: HF token, GPU, >= 14 GB free VRAM, private repo, test upload | GPU: NVIDIA GeForce RTX 5080 | compute capability 12.0 | driver 595.84 | torch 2.14.0+cu130 (CUDA 13.0)
+2026-09-21 22:22:27 | INFO    | quick preflight: HF token, GPU, >= 14 GB free VRAM, private repo, test upload | VRAM: 16.21 GB free of 16.61 GB
+2026-09-21 22:22:27 | INFO    | quick preflight: HF token, GPU, >= 14 GB free VRAM, private repo, test upload | TF32 enabled; bf16 supported
+2026-09-21 22:22:27 | INFO    | quick preflight: HF token, GPU, >= 14 GB free VRAM, private repo, test upload | run info:
+{
+  "script": "train_nllb_gazette_verbis_ct2.py",
+  "git": {
+    "commit": "540e36cf359e550afb39bd5bddab35d2ccec9376",
+    "dirty": false
+  },
+  "versions": {
+    "python": "3.12.3",
+    "torch": "2.14.0+cu130",
+    "transformers": "5.17.0",
+    "datasets": "5.0.1",
+    "ctranslate2": "4.8.2",
+    "sacrebleu": "2.6.0",
+    "huggingface_hub": "1.32.0",
+    "accelerate": "1.15.0",
+    "sentence_transformers": "6.1.0",
+    "polars": "1.44.2"
+  },
+  "gpu": {
+    "gpu_name": "NVIDIA GeForce RTX 5080",
+    "compute_capability": "12.0",
+    "driver": "595.84",
+    "cuda_torch": "13.0",
+    "torch": "2.14.0+cu130",
+    "torch_arch_list": [
+      "sm_75",
+      "sm_80",
+      "sm_86",
+      "sm_90",
+      "sm_100",
+      "sm_120"
+    ],
+    "vram_free_gb": 16.21,
+    "vram_total_gb": 16.61
+  },
+  "constants": {
+    "HF_GAZETTE_REPO": "EdonFetaji/slvesnik-mk-sq",
+    "HF_RESULTS_REPO": "EdonFetaji/mk-sq-nllb600m-gazette-verbis",
+    "VERBIS_PATH": "data/verbis_mk_sq.parquet",
+    "VERBIS_HF_PATH": "data/verbis/verbis_mk_sq.parquet",
+    "WORK_DIR": "work",
+    "BASE_MODEL": "facebook/nllb-200-distilled-600M",
+    "SEED": 42,
+    "MK": "mkd_Cyrl",
+    "SQ": "als_Latn",
+    "MAX_TOKENS": 192,
+    "LABSE_MIN_SCORE": 0.7,
+    "DEV_EVAL_SIZE": 500,
+    "EVAL_STEPS": 1000,
+    "FINAL_BEAMS": 4,
+    "MAX_NEW_TOKENS": 256
+  },
+  "results_repo": "https://huggingface.co/EdonFetaji/mk-sq-nllb600m-gazette-verbis",
+  "invocations": [
+    "2026-09-21T19:43:49+00:00",
+    "2026-09-21T19:46:50+00:00",
+    "2026-09-21T22:22:27+00:00"
+  ],
+  "updated_at": "2026-09-21T22:22:27+00:00",
+  "dataset_sizes": {
+    "gazette_train": 270083,
+    "gazette_dev": 13355,
+    "gazette_test": 10174,
+    "flores_devtest": 1012,
+    "ntrex": 1997,
+    "verbis_terms": 15093,
+    "verbis_defs_scored": 15822,
+    "verbis_defs": 15305,
+    "leakage_removed": {
+      "gazette": 30157,
+      "verbis_terms": 25,
+      "verbis_defs": 0
+    },
+    "train_clean_pairs": 270299,
+    "train_bidirectional": 540598,
+    "train_composition": {
+      "gazette": 479852,
+      "verbis_defs": 30610,
+      "verbis_terms": 30136
+    },
+    "train_tokenized": 526704,
+    "dev_tokenized": 26710,
+    "train_dropped_over_max_tokens": 13894
+  }
+}
+
+2026-09-21 22:22:27 | INFO    | quick preflight: HF token, GPU, >= 14 GB free VRAM, private repo, test upload | results repo: https://huggingface.co/EdonFetaji/mk-sq-nllb600m-gazette-verbis
+2026-09-21 22:22:27 | INFO    | quick preflight: HF token, GPU, >= 14 GB free VRAM, private repo, test upload | results repo verified PRIVATE: https://huggingface.co/EdonFetaji/mk-sq-nllb600m-gazette-verbis
+2026-09-21 22:22:28 | INFO    | quick preflight: HF token, GPU, >= 14 GB free VRAM, private repo, test upload | uploaded: eval/run_info.json
+2026-09-21 22:22:28 | INFO    | quick preflight: HF token, GPU, >= 14 GB free VRAM, private repo, test upload | preflight test upload OK
+2026-09-21 22:22:28 | INFO    | quick FLORES+ devtest (gated) downloadable | FLORES+ mkd_Cyrl: devtest/mkd_Cyrl.jsonl
+2026-09-21 22:22:33 | WARNING | quick GPU: memory probe (worst-case 192+192-token batches) | memory probe: batch 16 (gradient checkpointing False) ran out of memory
+2026-09-21 22:22:34 | INFO    | quick GPU: memory probe (worst-case 192+192-token batches) | memory probe: batch 8 x accumulation 16 (gradient checkpointing False) OK, peak 10.95 GB
+2026-09-21 22:22:38 | WARNING | quick GPU: Trainer + one real training step | training arguments not supported by transformers 5.17.0, ignored: ['save_safetensors']
+2026-09-21 22:22:45 | WARNING | quick CTranslate2: base conversion + GPU run | CTranslate2 cannot use this GPU (Traceback (most recent call last):
+  File "<string>", line 6, in <module>
+RuntimeError: Library libcublas.so.12 is not found or cannot be loaded) -- falling back to CPU, compute_type int8, 16 threads
+2026-09-21 22:25:10 | INFO    | start | ==============================================================================
+2026-09-21 22:25:10 | INFO    | start | run started (pid 3617210): scripts/train_nllb_gazette_verbis_ct2.py
+2026-09-21 22:25:10 | INFO    | step  1 preflight | ===== start
+2026-09-21 22:25:10 | INFO    | step  1 preflight | repo root: /home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR | work dir: /home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR/work
+2026-09-21 22:25:10 | INFO    | step  1 preflight | Hugging Face token: found (environment variable HF_TOKEN), user EdonFetaji
+2026-09-21 22:25:10 | INFO    | step  1 preflight | GPU: NVIDIA GeForce RTX 5080 | compute capability 12.0 | driver 595.84 | torch 2.14.0+cu130 (CUDA 13.0)
+2026-09-21 22:25:10 | INFO    | step  1 preflight | VRAM: 16.21 GB free of 16.61 GB
+2026-09-21 22:25:10 | INFO    | step  1 preflight | TF32 enabled; bf16 supported
+2026-09-21 22:25:10 | INFO    | step  1 preflight | run info:
+{
+  "script": "train_nllb_gazette_verbis_ct2.py",
+  "git": {
+    "commit": "540e36cf359e550afb39bd5bddab35d2ccec9376",
+    "dirty": false
+  },
+  "versions": {
+    "python": "3.12.3",
+    "torch": "2.14.0+cu130",
+    "transformers": "5.17.0",
+    "datasets": "5.0.1",
+    "ctranslate2": "4.8.2",
+    "sacrebleu": "2.6.0",
+    "huggingface_hub": "1.32.0",
+    "accelerate": "1.15.0",
+    "sentence_transformers": "6.1.0",
+    "polars": "1.44.2"
+  },
+  "gpu": {
+    "gpu_name": "NVIDIA GeForce RTX 5080",
+    "compute_capability": "12.0",
+    "driver": "595.84",
+    "cuda_torch": "13.0",
+    "torch": "2.14.0+cu130",
+    "torch_arch_list": [
+      "sm_75",
+      "sm_80",
+      "sm_86",
+      "sm_90",
+      "sm_100",
+      "sm_120"
+    ],
+    "vram_free_gb": 16.21,
+    "vram_total_gb": 16.61
+  },
+  "constants": {
+    "HF_GAZETTE_REPO": "EdonFetaji/slvesnik-mk-sq",
+    "HF_RESULTS_REPO": "EdonFetaji/mk-sq-nllb600m-gazette-verbis",
+    "VERBIS_PATH": "data/verbis_mk_sq.parquet",
+    "VERBIS_HF_PATH": "data/verbis/verbis_mk_sq.parquet",
+    "WORK_DIR": "work",
+    "BASE_MODEL": "facebook/nllb-200-distilled-600M",
+    "SEED": 42,
+    "MK": "mkd_Cyrl",
+    "SQ": "als_Latn",
+    "MAX_TOKENS": 192,
+    "LABSE_MIN_SCORE": 0.7,
+    "DEV_EVAL_SIZE": 500,
+    "EVAL_STEPS": 1000,
+    "FINAL_BEAMS": 4,
+    "MAX_NEW_TOKENS": 256
+  },
+  "results_repo": "https://huggingface.co/EdonFetaji/mk-sq-nllb600m-gazette-verbis",
+  "invocations": [
+    "2026-09-21T19:43:49+00:00",
+    "2026-09-21T19:46:50+00:00",
+    "2026-09-21T22:22:27+00:00",
+    "2026-09-21T22:25:10+00:00"
+  ],
+  "updated_at": "2026-09-21T22:25:10+00:00",
+  "dataset_sizes": {
+    "gazette_train": 270083,
+    "gazette_dev": 13355,
+    "gazette_test": 10174,
+    "flores_devtest": 1012,
+    "ntrex": 1997,
+    "verbis_terms": 15093,
+    "verbis_defs_scored": 15822,
+    "verbis_defs": 15305,
+    "leakage_removed": {
+      "gazette": 30157,
+      "verbis_terms": 25,
+      "verbis_defs": 0
+    },
+    "train_clean_pairs": 270299,
+    "train_bidirectional": 540598,
+    "train_composition": {
+      "gazette": 479852,
+      "verbis_defs": 30610,
+      "verbis_terms": 30136
+    },
+    "train_tokenized": 526704,
+    "dev_tokenized": 26710,
+    "train_dropped_over_max_tokens": 13894
+  }
+}
+
+2026-09-21 22:25:10 | INFO    | step  1 preflight | results repo: https://huggingface.co/EdonFetaji/mk-sq-nllb600m-gazette-verbis
+2026-09-21 22:25:10 | INFO    | step  1 preflight | results repo verified PRIVATE: https://huggingface.co/EdonFetaji/mk-sq-nllb600m-gazette-verbis
+2026-09-21 22:25:11 | INFO    | step  1 preflight | uploaded: eval/run_info.json
+2026-09-21 22:25:11 | INFO    | step  1 preflight | preflight test upload OK
+2026-09-21 22:25:11 | INFO    | step  1 preflight | ===== done in 0h00m01s
+2026-09-21 22:25:11 | INFO    | step  2 gazette corpus | ===== start
+2026-09-21 22:25:11 | INFO    | step  2 gazette corpus | loaded from disk: data/processed/gazette_train.parquet
+2026-09-21 22:25:11 | INFO    | step  2 gazette corpus | loaded from disk: data/processed/gazette_dev.parquet
+2026-09-21 22:25:11 | INFO    | step  2 gazette corpus | loaded from disk: data/processed/gazette_test.parquet
+2026-09-21 22:25:11 | INFO    | step  2 gazette corpus | Gazette train: 270083 rows
+2026-09-21 22:25:11 | INFO    | step  2 gazette corpus | Gazette dev  : 13355 rows
+2026-09-21 22:25:11 | INFO    | step  2 gazette corpus | Gazette test : 10174 rows
+2026-09-21 22:25:11 | INFO    | step  2 gazette corpus | ===== done in 0h00m00s
+2026-09-21 22:25:11 | INFO    | step  3 external test sets | ===== start
+2026-09-21 22:25:11 | INFO    | step  3 external test sets | loaded from disk: data/processed/flores_devtest.parquet
+2026-09-21 22:25:11 | INFO    | step  3 external test sets | loaded from disk: data/processed/ntrex.parquet
+2026-09-21 22:25:11 | INFO    | step  3 external test sets | FLORES+ devtest: 1012 sentences | NTREX-128: 1997 sentences
+2026-09-21 22:25:11 | INFO    | step  3 external test sets | ===== done in 0h00m00s
+2026-09-21 22:25:11 | INFO    | step  4 verbis | ===== start
+2026-09-21 22:25:11 | INFO    | step  4 verbis | loaded from disk: /home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR/data/verbis_mk_sq.parquet
+2026-09-21 22:25:11 | INFO    | step  4 verbis | loaded from disk: data/processed/verbis_terms.parquet
+2026-09-21 22:25:11 | INFO    | step  4 verbis | loaded from disk: data/processed/verbis_defs_scored.parquet
+2026-09-21 22:25:11 | INFO    | step  4 verbis | loaded from disk: data/processed/verbis_defs.parquet
+2026-09-21 22:25:11 | INFO    | step  4 verbis | Verbis term pairs kept: 15093
+2026-09-21 22:25:11 | INFO    | step  4 verbis | Verbis definition pairs: 15822 scored, 15305 kept with LaBSE >= 0.70 (96.7%), median score 0.939
+2026-09-21 22:25:13 | INFO    | step  4 verbis | uploaded: data/verbis/verbis_terms.parquet, data/verbis/verbis_defs_scored.parquet, data/verbis/verbis_defs.parquet
+2026-09-21 22:25:13 | INFO    | step  4 verbis | ===== done in 0h00m01s
+2026-09-21 22:25:13 | INFO    | step  5 leakage removal | ===== start
+2026-09-21 22:25:13 | INFO    | step  5 leakage removal | loaded from disk: data/processed/train_clean.parquet
+2026-09-21 22:25:13 | INFO    | step  5 leakage removal | loaded from disk: data/processed/leakage_report.json
+2026-09-21 22:25:13 | INFO    | step  5 leakage removal | leakage gazette     : removed 30157 of 270083 rows (mk matches 26346, sq matches 7895) -> 239926
+2026-09-21 22:25:13 | INFO    | step  5 leakage removal | leakage verbis_terms: removed 25 of 15093 rows (mk matches 20, sq matches 9) -> 15068
+2026-09-21 22:25:13 | INFO    | step  5 leakage removal | leakage verbis_defs : removed 0 of 15305 rows (mk matches 0, sq matches 0) -> 15305
+2026-09-21 22:25:13 | INFO    | step  5 leakage removal | ===== done in 0h00m00s
+2026-09-21 22:25:13 | INFO    | step  6 bidirectional training set | ===== start
+2026-09-21 22:25:13 | INFO    | step  6 bidirectional training set | loaded from disk: data/processed/train_bidirectional.parquet
+2026-09-21 22:25:13 | INFO    | step  6 bidirectional training set | final training composition (540598 examples, both directions):
+2026-09-21 22:25:13 | INFO    | step  6 bidirectional training set |   gazette          479852 examples ( 88.8%)
+2026-09-21 22:25:13 | INFO    | step  6 bidirectional training set |   verbis_defs       30610 examples (  5.7%)
+2026-09-21 22:25:13 | INFO    | step  6 bidirectional training set |   verbis_terms      30136 examples (  5.6%)
+2026-09-21 22:25:13 | INFO    | step  6 bidirectional training set |   directions: mk->sq 270299, sq->mk 270299
+2026-09-21 22:25:13 | INFO    | step  6 bidirectional training set | ===== done in 0h00m00s
+2026-09-21 22:25:13 | INFO    | step  7 tokenisation | ===== start
+2026-09-21 22:25:15 | INFO    | step  7 tokenisation | mkd_Cyrl->als_Latn: input_ids start ['mkd_Cyrl', '▁О', 'П'], labels start ['als_Latn', '▁GEN', 'ER'] -- OK
+2026-09-21 22:25:15 | INFO    | step  7 tokenisation | als_Latn->mkd_Cyrl: input_ids start ['als_Latn', '▁GEN', 'ER'], labels start ['mkd_Cyrl', '▁О', 'П'] -- OK
+2026-09-21 22:25:15 | INFO    | step  7 tokenisation | loaded from disk: data/tokenized/train
+2026-09-21 22:25:15 | INFO    | step  7 tokenisation | loaded from disk: data/tokenized/dev
+2026-09-21 22:25:15 | INFO    | step  7 tokenisation | train: language tokens verified on 2000 examples (both directions present)
+2026-09-21 22:25:15 | INFO    | step  7 tokenisation | dev: language tokens verified on 2000 examples (both directions present)
+2026-09-21 22:25:15 | INFO    | step  7 tokenisation | tokenised train: 526704 examples, length mean 58.0 / p95 138 / max 192 tokens | dev: 26710 examples
+2026-09-21 22:25:17 | INFO    | step  7 tokenisation | uploaded: eval/run_info.json
+2026-09-21 22:25:17 | INFO    | step  7 tokenisation | ===== done in 0h00m03s
+2026-09-21 22:25:17 | INFO    | step  8 training | ===== start
+2026-09-21 22:25:19 | INFO    | step  8 training | loaded from disk: eval/dev_eval_ids.parquet
+2026-09-21 22:25:19 | INFO    | step  8 training | dev eval set mk_sq: 500 sentences
+2026-09-21 22:25:19 | INFO    | step  8 training | dev eval set sq_mk: 500 sentences
+2026-09-21 22:25:19 | INFO    | step  8 training | loaded from disk: models/memory_probe.json
+2026-09-21 22:25:19 | INFO    | step  8 training | memory probe (from disk): batch 8 x accumulation 16, gradient checkpointing False, peak 10.97 GB
+2026-09-21 22:25:19 | WARNING | step  8 training | training arguments not supported by transformers 5.17.0, ignored: ['save_safetensors']
+2026-09-21 22:25:19 | INFO    | step  8 training | training settings: batch 8 x accumulation 16 = effective 128 | gradient checkpointing False | adafactor lr 1e-04, warmup 1000, linear decay, 1 epoch | label smoothing 0.1 | bf16 + tf32 | length-grouped batches | transformers 5.17.0
+2026-09-21 22:25:20 | INFO    | step  8 training | uploaded: eval/run_info.json
+2026-09-21 22:25:21 | INFO    | step  8 training | training starts at step 0 of 4115 (41.1 optimizer steps per 1%)
+2026-09-21 22:29:12 | INFO    | step  8 training | projection after 200 steps: 1.16 s/step -> full epoch (4115 steps) ~ 1h19m17s, remaining ~ 1h15m26s (plus ~1-2 min per dev evaluation)
+2026-09-21 22:34:59 | INFO    | step  8 training | step 500/4115 (12.2%) | loss 2.7515 | lr 4.99e-05 | 110.9 samples/s | peak GPU mem 12.64 GB | ETA 1h09m40s
+2026-09-21 22:44:39 | INFO    | step  8 training | step 1000/4115 (24.3%) | loss 2.5403 | lr 9.99e-05 | 110.6 samples/s | peak GPU mem 12.64 GB | ETA 1h00m06s
+2026-09-21 22:45:12 | INFO    | step  8 training | dev @ step 1000: mk→sq BLEU 42.52 chrF++ 62.38 | sq→mk BLEU 57.46 chrF++ 72.53 | mean chrF++ 67.46 (best 67.46 @ step 1000) | 34s
+2026-09-21 22:45:15 | INFO    | step  8 training | checkpoint upload queued in the background: checkpoint-1000
+2026-09-21 22:54:55 | INFO    | step  8 training | step 1500/4115 (36.5%) | loss 2.4275 | lr 8.40e-05 | 110.4 samples/s | peak GPU mem 12.64 GB | ETA 0h51m32s
+2026-09-21 23:04:36 | INFO    | step  8 training | step 2000/4115 (48.6%) | loss 2.3581 | lr 6.79e-05 | 109.8 samples/s | peak GPU mem 12.64 GB | ETA 0h41m30s
+2026-09-21 23:05:05 | INFO    | step  8 training | dev @ step 2000: mk→sq BLEU 48.57 chrF++ 67.18 | sq→mk BLEU 64.64 chrF++ 78.24 | mean chrF++ 72.71 (best 72.71 @ step 2000) | 29s
+2026-09-21 23:05:06 | INFO    | step  8 training | uploaded: progress.log, eval/train_log.csv, eval/dev_curve.csv, eval/training_curves.png, eval/run_info.json
+2026-09-21 23:05:09 | INFO    | step  8 training | checkpoint checkpoint-1000 uploaded to https://huggingface.co/EdonFetaji/mk-sq-nllb600m-gazette-verbis/checkpoints/checkpoint-1000
+2026-09-21 23:05:09 | INFO    | step  8 training | checkpoint upload queued in the background: checkpoint-2000
+2026-09-21 23:14:50 | INFO    | step  8 training | step 2500/4115 (60.8%) | loss 2.3376 | lr 5.19e-05 | 110.0 samples/s | peak GPU mem 12.64 GB | ETA 0h31m58s
+2026-09-21 23:24:33 | INFO    | step  8 training | step 3000/4115 (72.9%) | loss 2.3213 | lr 3.58e-05 | 110.1 samples/s | peak GPU mem 12.64 GB | ETA 0h22m00s
+2026-09-21 23:25:01 | INFO    | step  8 training | dev @ step 3000: mk→sq BLEU 49.85 chrF++ 68.07 | sq→mk BLEU 64.66 chrF++ 78.96 | mean chrF++ 73.52 (best 73.52 @ step 3000) | 28s
+2026-09-21 23:25:04 | INFO    | step  8 training | checkpoint checkpoint-2000 uploaded to https://huggingface.co/EdonFetaji/mk-sq-nllb600m-gazette-verbis/checkpoints/checkpoint-2000
+2026-09-21 23:25:04 | INFO    | step  8 training | checkpoint upload queued in the background: checkpoint-3000
+2026-09-21 23:34:49 | INFO    | step  8 training | step 3500/4115 (85.1%) | loss 2.3128 | lr 1.98e-05 | 110.6 samples/s | peak GPU mem 12.64 GB | ETA 0h12m12s
+2026-09-21 23:44:27 | INFO    | step  8 training | step 4000/4115 (97.2%) | loss 2.2914 | lr 3.72e-06 | 110.4 samples/s | peak GPU mem 12.64 GB | ETA 0h02m16s
+2026-09-21 23:45:00 | INFO    | step  8 training | dev @ step 4000: mk→sq BLEU 46.48 chrF++ 67.59 | sq→mk BLEU 62.12 chrF++ 78.87 | mean chrF++ 73.23 (best 73.52 @ step 3000) | 33s
+2026-09-21 23:45:02 | INFO    | step  8 training | uploaded: progress.log, eval/train_log.csv, eval/dev_curve.csv, eval/training_curves.png, eval/run_info.json
+2026-09-21 23:45:04 | INFO    | step  8 training | checkpoint checkpoint-3000 uploaded to https://huggingface.co/EdonFetaji/mk-sq-nllb600m-gazette-verbis/checkpoints/checkpoint-3000
+2026-09-21 23:45:05 | INFO    | step  8 training | checkpoint upload queued in the background: checkpoint-4000
+2026-09-21 23:46:03 | INFO    | step  8 training | removed from the repo: checkpoint-1000 (kept checkpoint-2000, checkpoint-3000, checkpoint-4000)
+2026-09-21 23:47:51 | INFO    | step  8 training | dev @ step 4115: mk→sq BLEU 46.51 chrF++ 67.62 | sq→mk BLEU 63.35 chrF++ 79.57 | mean chrF++ 73.60 (best 73.60 @ step 4115) | 33s
+2026-09-21 23:47:54 | INFO    | step  8 training | checkpoint checkpoint-4000 uploaded to https://huggingface.co/EdonFetaji/mk-sq-nllb600m-gazette-verbis/checkpoints/checkpoint-4000
+2026-09-21 23:47:54 | INFO    | step  8 training | checkpoint upload queued in the background: checkpoint-4115
+2026-09-21 23:47:54 | INFO    | step  8 training | training finished: total training time 1h21m39s | best dev step 4115 | best dev chrF++ (mean) 73.60
+2026-09-21 23:47:56 | INFO    | step  8 training | uploaded: eval/run_info.json
+2026-09-21 23:47:56 | INFO    | step  8 training | ===== done in 1h22m38s
+2026-09-21 23:47:56 | INFO    | step  9 save best model | ===== start
+2026-09-21 23:47:56 | INFO    | step  9 save best model | best checkpoint (loaded by load_best_model_at_end): /home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR/work/models/checkpoints/checkpoint-4115
+2026-09-21 23:48:01 | INFO    | step  9 save best model | saved models/final: ['config.json', 'generation_config.json', 'model.safetensors', 'tokenizer.json', 'tokenizer_config.json', 'training_args.bin']
+2026-09-21 23:48:01 | INFO    | step  9 save best model | ===== done in 0h00m05s
+2026-09-21 23:48:02 | INFO    | step 10 ctranslate2 conversion | ===== start
+2026-09-21 23:48:02 | INFO    | step 10 ctranslate2 conversion | converting /home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR/work/models/final -> ct2/finetuned_int8 (int8)
+2026-09-21 23:48:11 | INFO    | step 10 ctranslate2 conversion | wrote ct2/finetuned_int8: ['config.json', 'model.bin', 'shared_vocabulary.json', 'tokenizer.json', 'tokenizer_config.json']
+2026-09-21 23:48:11 | INFO    | step 10 ctranslate2 conversion | loaded from disk: ct2/base_int8
+2026-09-21 23:49:24 | INFO    | step 10 ctranslate2 conversion | removed from the repo: checkpoint-2000 (kept checkpoint-3000, checkpoint-4000, checkpoint-4115)
+2026-09-21 23:49:37 | INFO    | step 10 ctranslate2 conversion | uploaded folder models/final -> https://huggingface.co/EdonFetaji/mk-sq-nllb600m-gazette-verbis/
+2026-09-21 23:50:28 | INFO    | step 10 ctranslate2 conversion | uploaded folder ct2/finetuned_int8 -> https://huggingface.co/EdonFetaji/mk-sq-nllb600m-gazette-verbis/ct2/finetuned_int8
+2026-09-21 23:50:38 | INFO    | step 10 ctranslate2 conversion | uploaded folder ct2/base_int8 -> https://huggingface.co/EdonFetaji/mk-sq-nllb600m-gazette-verbis/ct2/base_int8
+2026-09-21 23:50:38 | INFO    | step 10 ctranslate2 conversion | ===== done in 0h02m36s
+2026-09-21 23:50:38 | INFO    | step 11 ctranslate2 smoke test | ===== start
+2026-09-21 23:50:38 | WARNING | step 11 ctranslate2 smoke test | CTranslate2 cannot use this GPU (Traceback (most recent call last):
+  File "<string>", line 6, in <module>
+RuntimeError: Library libcublas.so.12 is not found or cannot be loaded) -- falling back to CPU, compute_type int8, 16 threads
+2026-09-21 23:50:41 | INFO    | step 11 ctranslate2 smoke test | uploaded: eval/run_info.json
+2026-09-21 23:50:41 | INFO    | step 11 ctranslate2 smoke test | CTranslate2 device: cpu (int8) -- also used in step 12
+2026-09-21 23:50:49 | INFO    | step 11 ctranslate2 smoke test | smoke test mk_sq (Gazette dev): HF and CT2 identical on 2/5
+2026-09-21 23:50:49 | INFO    | step 11 ctranslate2 smoke test | [example translations removed from this copy]
+2026-09-21 23:50:49 | INFO    | step 11 ctranslate2 smoke test | [example translations removed from this copy]
+2026-09-21 23:50:49 | INFO    | step 11 ctranslate2 smoke test | [example translations removed from this copy]
+2026-09-21 23:50:49 | INFO    | step 11 ctranslate2 smoke test | [example translations removed from this copy]
+2026-09-21 23:50:49 | INFO    | step 11 ctranslate2 smoke test | [example translations removed from this copy]
+2026-09-21 23:50:55 | INFO    | step 11 ctranslate2 smoke test | smoke test sq_mk (Gazette dev): HF and CT2 identical on 3/5
+2026-09-21 23:50:55 | INFO    | step 11 ctranslate2 smoke test | [example translations removed from this copy]
+2026-09-21 23:50:55 | INFO    | step 11 ctranslate2 smoke test | [example translations removed from this copy]
+2026-09-21 23:50:55 | INFO    | step 11 ctranslate2 smoke test | [example translations removed from this copy]
+2026-09-21 23:50:55 | INFO    | step 11 ctranslate2 smoke test | [example translations removed from this copy]
+2026-09-21 23:50:55 | INFO    | step 11 ctranslate2 smoke test | [example translations removed from this copy]
+2026-09-21 23:50:56 | INFO    | step 11 ctranslate2 smoke test | ===== done in 0h00m17s
+2026-09-21 23:50:56 | INFO    | step 12 FINAL EVALUATION | ===== start
+2026-09-21 23:50:56 | INFO    | step 12 FINAL EVALUATION | models: base NLLB-600M (HF, GPU) | fine-tuned (HF, GPU) | fine-tuned (CTranslate2 int8, cpu)
+2026-09-21 23:50:56 | INFO    | step 12 FINAL EVALUATION | ---- test set gazette_test ----
+2026-09-21 23:50:56 | INFO    | step 12 FINAL EVALUATION | wrote eval/translations_gazette_test.parquet (20348 rows)
+2026-09-21 23:50:58 | INFO    | step 12 FINAL EVALUATION | loaded base (HF, GPU bf16)
+2026-09-21 23:53:52 | INFO    | step 12 FINAL EVALUATION | gazette_test / base / mk_sq: 2000 / 10174 sentences (11.5 sent/s, ETA 0h11m51s)
+2026-09-21 23:55:57 | INFO    | step 12 FINAL EVALUATION | gazette_test / base / mk_sq: 4000 / 10174 sentences (13.4 sent/s, ETA 0h07m40s)
+2026-09-21 23:57:22 | INFO    | step 12 FINAL EVALUATION | gazette_test / base / mk_sq: 6000 / 10174 sentences (15.6 sent/s, ETA 0h04m27s)
+2026-09-21 23:59:05 | INFO    | step 12 FINAL EVALUATION | gazette_test / base / mk_sq: 8000 / 10174 sentences (16.4 sent/s, ETA 0h02m12s)
+2026-09-21 23:59:24 | INFO    | step 12 FINAL EVALUATION | gazette_test / base / mk_sq: 10000 / 10174 sentences (19.8 sent/s, ETA 0h00m08s)
+2026-09-21 23:59:25 | INFO    | step 12 FINAL EVALUATION | gazette_test / base / mk_sq: 10174 / 10174 sentences (20.1 sent/s, ETA 0h00m00s)
+2026-09-22 00:02:42 | INFO    | step 12 FINAL EVALUATION | gazette_test / base / sq_mk: 2000 / 10174 sentences (10.2 sent/s, ETA 0h13m24s)
+2026-09-22 00:04:59 | INFO    | step 12 FINAL EVALUATION | gazette_test / base / sq_mk: 4000 / 10174 sentences (12.0 sent/s, ETA 0h08m36s)
+2026-09-22 00:07:28 | INFO    | step 12 FINAL EVALUATION | gazette_test / base / sq_mk: 6000 / 10174 sentences (12.4 sent/s, ETA 0h05m36s)
+2026-09-22 00:09:56 | INFO    | step 12 FINAL EVALUATION | gazette_test / base / sq_mk: 8000 / 10174 sentences (12.7 sent/s, ETA 0h02m51s)
+2026-09-22 00:12:02 | INFO    | step 12 FINAL EVALUATION | gazette_test / base / sq_mk: 10000 / 10174 sentences (13.2 sent/s, ETA 0h00m13s)
+2026-09-22 00:12:14 | INFO    | step 12 FINAL EVALUATION | gazette_test / base / sq_mk: 10174 / 10174 sentences (13.2 sent/s, ETA 0h00m00s)
+2026-09-22 00:12:15 | INFO    | step 12 FINAL EVALUATION | loaded finetuned_hf (HF, GPU bf16)
+2026-09-22 00:15:01 | INFO    | step 12 FINAL EVALUATION | gazette_test / finetuned_hf / mk_sq: 2000 / 10174 sentences (12.1 sent/s, ETA 0h11m15s)
+2026-09-22 00:16:29 | INFO    | step 12 FINAL EVALUATION | gazette_test / finetuned_hf / mk_sq: 4000 / 10174 sentences (15.8 sent/s, ETA 0h06m31s)
+2026-09-22 00:17:22 | INFO    | step 12 FINAL EVALUATION | gazette_test / finetuned_hf / mk_sq: 6000 / 10174 sentences (19.5 sent/s, ETA 0h03m33s)
+2026-09-22 00:17:55 | INFO    | step 12 FINAL EVALUATION | gazette_test / finetuned_hf / mk_sq: 8000 / 10174 sentences (23.6 sent/s, ETA 0h01m32s)
+2026-09-22 00:18:08 | INFO    | step 12 FINAL EVALUATION | gazette_test / finetuned_hf / mk_sq: 10000 / 10174 sentences (28.3 sent/s, ETA 0h00m06s)
+2026-09-22 00:18:09 | INFO    | step 12 FINAL EVALUATION | gazette_test / finetuned_hf / mk_sq: 10174 / 10174 sentences (28.8 sent/s, ETA 0h00m00s)
+2026-09-22 00:20:59 | INFO    | step 12 FINAL EVALUATION | gazette_test / finetuned_hf / sq_mk: 2000 / 10174 sentences (11.7 sent/s, ETA 0h11m37s)
+2026-09-22 00:22:36 | INFO    | step 12 FINAL EVALUATION | gazette_test / finetuned_hf / sq_mk: 4000 / 10174 sentences (15.0 sent/s, ETA 0h06m52s)
+2026-09-22 00:23:42 | INFO    | step 12 FINAL EVALUATION | gazette_test / finetuned_hf / sq_mk: 6000 / 10174 sentences (18.0 sent/s, ETA 0h03m52s)
+2026-09-22 00:24:24 | INFO    | step 12 FINAL EVALUATION | gazette_test / finetuned_hf / sq_mk: 8000 / 10174 sentences (21.3 sent/s, ETA 0h01m41s)
+2026-09-22 00:24:39 | INFO    | step 12 FINAL EVALUATION | gazette_test / finetuned_hf / sq_mk: 10000 / 10174 sentences (25.6 sent/s, ETA 0h00m06s)
+2026-09-22 00:24:40 | INFO    | step 12 FINAL EVALUATION | gazette_test / finetuned_hf / sq_mk: 10174 / 10174 sentences (26.0 sent/s, ETA 0h00m00s)
+2026-09-22 00:24:42 | INFO    | step 12 FINAL EVALUATION | loaded finetuned_ct2 (CTranslate2 cpu)
+2026-09-22 01:09:04 | INFO    | step 12 FINAL EVALUATION | gazette_test / finetuned_ct2 / mk_sq: 2000 / 10174 sentences (0.8 sent/s, ETA 3h01m21s)
+2026-09-22 01:21:13 | INFO    | step 12 FINAL EVALUATION | gazette_test / finetuned_ct2 / mk_sq: 4000 / 10174 sentences (1.2 sent/s, ETA 1h27m14s)
+2026-09-22 01:28:14 | INFO    | step 12 FINAL EVALUATION | gazette_test / finetuned_ct2 / mk_sq: 6000 / 10174 sentences (1.6 sent/s, ETA 0h44m12s)
+2026-09-22 01:32:21 | INFO    | step 12 FINAL EVALUATION | gazette_test / finetuned_ct2 / mk_sq: 8000 / 10174 sentences (2.0 sent/s, ETA 0h18m23s)
+2026-09-22 01:33:59 | INFO    | step 12 FINAL EVALUATION | gazette_test / finetuned_ct2 / mk_sq: 10000 / 10174 sentences (2.4 sent/s, ETA 0h01m12s)
+2026-09-22 01:34:02 | INFO    | step 12 FINAL EVALUATION | gazette_test / finetuned_ct2 / mk_sq: 10174 / 10174 sentences (2.4 sent/s, ETA 0h00m00s)
+2026-09-22 02:05:58 | INFO    | step 12 FINAL EVALUATION | gazette_test / finetuned_ct2 / sq_mk: 2000 / 10174 sentences (1.0 sent/s, ETA 2h10m33s)
+2026-09-22 02:16:14 | INFO    | step 12 FINAL EVALUATION | gazette_test / finetuned_ct2 / sq_mk: 4000 / 10174 sentences (1.6 sent/s, ETA 1h05m08s)
+2026-09-22 02:22:42 | INFO    | step 12 FINAL EVALUATION | gazette_test / finetuned_ct2 / sq_mk: 6000 / 10174 sentences (2.1 sent/s, ETA 0h33m51s)
+2026-09-22 02:26:31 | INFO    | step 12 FINAL EVALUATION | gazette_test / finetuned_ct2 / sq_mk: 8000 / 10174 sentences (2.5 sent/s, ETA 0h14m15s)
+2026-09-22 02:28:06 | INFO    | step 12 FINAL EVALUATION | gazette_test / finetuned_ct2 / sq_mk: 10000 / 10174 sentences (3.1 sent/s, ETA 0h00m56s)
+2026-09-22 02:28:09 | INFO    | step 12 FINAL EVALUATION | gazette_test / finetuned_ct2 / sq_mk: 10174 / 10174 sentences (3.1 sent/s, ETA 0h00m00s)
+2026-09-22 02:28:38 | INFO    | step 12 FINAL EVALUATION | results
+gazette_test
+┌───────────────┬───────────┬─────────────┬───────┬───────┬────────────────────┬────────────────────┐
+│ model         ┆ direction ┆ n_sentences ┆ bleu  ┆ chrf  ┆ bleu_delta_vs_base ┆ chrf_delta_vs_base │
+╞═══════════════╪═══════════╪═════════════╪═══════╪═══════╪════════════════════╪════════════════════╡
+│ base          ┆ mk_sq     ┆ 10174       ┆ 27.74 ┆ 50.3  ┆ 0.0                ┆ 0.0                │
+│ base          ┆ sq_mk     ┆ 10174       ┆ 29.63 ┆ 52.46 ┆ 0.0                ┆ 0.0                │
+│ finetuned_hf  ┆ mk_sq     ┆ 10174       ┆ 54.02 ┆ 72.28 ┆ 26.27              ┆ 21.98              │
+│ finetuned_hf  ┆ sq_mk     ┆ 10174       ┆ 63.64 ┆ 78.55 ┆ 34.01              ┆ 26.09              │
+│ finetuned_ct2 ┆ mk_sq     ┆ 10174       ┆ 54.08 ┆ 72.35 ┆ 26.33              ┆ 22.05              │
+│ finetuned_ct2 ┆ sq_mk     ┆ 10174       ┆ 63.45 ┆ 78.49 ┆ 33.82              ┆ 26.03              │
+└───────────────┴───────────┴─────────────┴───────┴───────┴────────────────────┴────────────────────┘
+BLEU signature: nrefs:1|case:mixed|eff:no|tok:13a|smooth:exp|version:2.6.0
+chrF signature: nrefs:1|case:mixed|eff:yes|nc:6|nw:2|space:no|version:2.6.0
+2026-09-22 02:28:38 | INFO    | step 12 FINAL EVALUATION | gazette_test: 5 random examples
+2026-09-22 02:28:38 | INFO    | step 12 FINAL EVALUATION | [example translations removed from this copy]
+2026-09-22 02:28:38 | INFO    | step 12 FINAL EVALUATION | [example translations removed from this copy]
+2026-09-22 02:28:38 | INFO    | step 12 FINAL EVALUATION | [example translations removed from this copy]
+2026-09-22 02:28:38 | INFO    | step 12 FINAL EVALUATION | [example translations removed from this copy]
+2026-09-22 02:28:38 | INFO    | step 12 FINAL EVALUATION | [example translations removed from this copy]
+2026-09-22 02:28:47 | INFO    | step 12 FINAL EVALUATION | uploaded: eval/gazette_test_results.csv, eval/translations_gazette_test.parquet, progress.log
+2026-09-22 02:28:47 | INFO    | step 12 FINAL EVALUATION | ---- test set flores ----
+2026-09-22 02:28:47 | INFO    | step 12 FINAL EVALUATION | wrote eval/translations_flores.parquet (2024 rows)
+2026-09-22 02:28:49 | INFO    | step 12 FINAL EVALUATION | loaded base (HF, GPU bf16)
+2026-09-22 02:29:08 | INFO    | step 12 FINAL EVALUATION | flores / base / mk_sq: 1012 / 1012 sentences (53.5 sent/s, ETA 0h00m00s)
+2026-09-22 02:29:24 | INFO    | step 12 FINAL EVALUATION | flores / base / sq_mk: 1012 / 1012 sentences (64.6 sent/s, ETA 0h00m00s)
+2026-09-22 02:29:27 | INFO    | step 12 FINAL EVALUATION | loaded finetuned_hf (HF, GPU bf16)
+2026-09-22 02:29:46 | INFO    | step 12 FINAL EVALUATION | flores / finetuned_hf / mk_sq: 1012 / 1012 sentences (53.4 sent/s, ETA 0h00m00s)
+2026-09-22 02:30:12 | INFO    | step 12 FINAL EVALUATION | flores / finetuned_hf / sq_mk: 1012 / 1012 sentences (37.7 sent/s, ETA 0h00m00s)
+2026-09-22 02:30:14 | INFO    | step 12 FINAL EVALUATION | loaded finetuned_ct2 (CTranslate2 cpu)
+2026-09-22 02:33:03 | INFO    | step 12 FINAL EVALUATION | flores / finetuned_ct2 / mk_sq: 1012 / 1012 sentences (6.0 sent/s, ETA 0h00m00s)
+2026-09-22 02:35:51 | INFO    | step 12 FINAL EVALUATION | flores / finetuned_ct2 / sq_mk: 1012 / 1012 sentences (6.0 sent/s, ETA 0h00m00s)
+2026-09-22 02:35:53 | INFO    | step 12 FINAL EVALUATION | results
+flores
+┌───────────────┬───────────┬─────────────┬───────┬───────┬────────────────────┬────────────────────┐
+│ model         ┆ direction ┆ n_sentences ┆ bleu  ┆ chrf  ┆ bleu_delta_vs_base ┆ chrf_delta_vs_base │
+╞═══════════════╪═══════════╪═════════════╪═══════╪═══════╪════════════════════╪════════════════════╡
+│ base          ┆ mk_sq     ┆ 1012        ┆ 22.08 ┆ 48.58 ┆ 0.0                ┆ 0.0                │
+│ base          ┆ sq_mk     ┆ 1012        ┆ 21.39 ┆ 49.5  ┆ 0.0                ┆ 0.0                │
+│ finetuned_hf  ┆ mk_sq     ┆ 1012        ┆ 19.45 ┆ 46.61 ┆ -2.63              ┆ -1.98              │
+│ finetuned_hf  ┆ sq_mk     ┆ 1012        ┆ 18.89 ┆ 49.07 ┆ -2.5               ┆ -0.43              │
+│ finetuned_ct2 ┆ mk_sq     ┆ 1012        ┆ 19.22 ┆ 46.57 ┆ -2.86              ┆ -2.01              │
+│ finetuned_ct2 ┆ sq_mk     ┆ 1012        ┆ 18.83 ┆ 48.97 ┆ -2.56              ┆ -0.53              │
+└───────────────┴───────────┴─────────────┴───────┴───────┴────────────────────┴────────────────────┘
+BLEU signature: nrefs:1|case:mixed|eff:no|tok:13a|smooth:exp|version:2.6.0
+chrF signature: nrefs:1|case:mixed|eff:yes|nc:6|nw:2|space:no|version:2.6.0
+2026-09-22 02:35:53 | INFO    | step 12 FINAL EVALUATION | flores: 5 random examples
+2026-09-22 02:35:53 | INFO    | step 12 FINAL EVALUATION | [example translations removed from this copy]
+2026-09-22 02:35:53 | INFO    | step 12 FINAL EVALUATION | [example translations removed from this copy]
+2026-09-22 02:35:53 | INFO    | step 12 FINAL EVALUATION | [example translations removed from this copy]
+2026-09-22 02:35:53 | INFO    | step 12 FINAL EVALUATION | [example translations removed from this copy]
+2026-09-22 02:35:53 | INFO    | step 12 FINAL EVALUATION | [example translations removed from this copy]
+2026-09-22 02:35:59 | INFO    | step 12 FINAL EVALUATION | uploaded: eval/flores_results.csv, eval/translations_flores.parquet, progress.log
+2026-09-22 02:35:59 | INFO    | step 12 FINAL EVALUATION | ---- test set ntrex ----
+2026-09-22 02:35:59 | INFO    | step 12 FINAL EVALUATION | wrote eval/translations_ntrex.parquet (3994 rows)
+2026-09-22 02:36:01 | INFO    | step 12 FINAL EVALUATION | loaded base (HF, GPU bf16)
+2026-09-22 02:36:35 | INFO    | step 12 FINAL EVALUATION | ntrex / base / mk_sq: 1997 / 1997 sentences (59.3 sent/s, ETA 0h00m00s)
+2026-09-22 02:37:08 | INFO    | step 12 FINAL EVALUATION | ntrex / base / sq_mk: 1997 / 1997 sentences (61.3 sent/s, ETA 0h00m00s)
+2026-09-22 02:37:09 | INFO    | step 12 FINAL EVALUATION | loaded finetuned_hf (HF, GPU bf16)
+2026-09-22 02:37:55 | INFO    | step 12 FINAL EVALUATION | ntrex / finetuned_hf / mk_sq: 1997 / 1997 sentences (44.1 sent/s, ETA 0h00m00s)
+2026-09-22 02:38:43 | INFO    | step 12 FINAL EVALUATION | ntrex / finetuned_hf / sq_mk: 1997 / 1997 sentences (41.0 sent/s, ETA 0h00m00s)
+2026-09-22 02:38:45 | INFO    | step 12 FINAL EVALUATION | loaded finetuned_ct2 (CTranslate2 cpu)
+2026-09-22 02:44:47 | INFO    | step 12 FINAL EVALUATION | ntrex / finetuned_ct2 / mk_sq: 1997 / 1997 sentences (5.5 sent/s, ETA 0h00m00s)
+2026-09-22 02:50:48 | INFO    | step 12 FINAL EVALUATION | ntrex / finetuned_ct2 / sq_mk: 1997 / 1997 sentences (5.5 sent/s, ETA 0h00m00s)
+2026-09-22 02:50:53 | INFO    | step 12 FINAL EVALUATION | results
+ntrex
+┌───────────────┬───────────┬─────────────┬───────┬───────┬────────────────────┬────────────────────┐
+│ model         ┆ direction ┆ n_sentences ┆ bleu  ┆ chrf  ┆ bleu_delta_vs_base ┆ chrf_delta_vs_base │
+╞═══════════════╪═══════════╪═════════════╪═══════╪═══════╪════════════════════╪════════════════════╡
+│ base          ┆ mk_sq     ┆ 1997        ┆ 23.14 ┆ 48.91 ┆ 0.0                ┆ 0.0                │
+│ base          ┆ sq_mk     ┆ 1997        ┆ 21.25 ┆ 49.54 ┆ 0.0                ┆ 0.0                │
+│ finetuned_hf  ┆ mk_sq     ┆ 1997        ┆ 18.13 ┆ 44.49 ┆ -5.0               ┆ -4.41              │
+│ finetuned_hf  ┆ sq_mk     ┆ 1997        ┆ 17.98 ┆ 47.05 ┆ -3.26              ┆ -2.49              │
+│ finetuned_ct2 ┆ mk_sq     ┆ 1997        ┆ 18.22 ┆ 44.54 ┆ -4.91              ┆ -4.37              │
+│ finetuned_ct2 ┆ sq_mk     ┆ 1997        ┆ 17.95 ┆ 47.06 ┆ -3.3               ┆ -2.48              │
+└───────────────┴───────────┴─────────────┴───────┴───────┴────────────────────┴────────────────────┘
+BLEU signature: nrefs:1|case:mixed|eff:no|tok:13a|smooth:exp|version:2.6.0
+chrF signature: nrefs:1|case:mixed|eff:yes|nc:6|nw:2|space:no|version:2.6.0
+2026-09-22 02:50:53 | INFO    | step 12 FINAL EVALUATION | ntrex: 5 random examples
+2026-09-22 02:50:53 | INFO    | step 12 FINAL EVALUATION | [example translations removed from this copy]
+2026-09-22 02:50:53 | INFO    | step 12 FINAL EVALUATION | [example translations removed from this copy]
+2026-09-22 02:50:53 | INFO    | step 12 FINAL EVALUATION | [example translations removed from this copy]
+2026-09-22 02:50:53 | INFO    | step 12 FINAL EVALUATION | [example translations removed from this copy]
+2026-09-22 02:50:53 | INFO    | step 12 FINAL EVALUATION | [example translations removed from this copy]
+2026-09-22 02:50:59 | INFO    | step 12 FINAL EVALUATION | uploaded: eval/ntrex_results.csv, eval/translations_ntrex.parquet, progress.log
+2026-09-22 02:50:59 | INFO    | step 12 FINAL EVALUATION | ===== done in 3h00m03s
+2026-09-22 02:50:59 | INFO    | step 13 finish | ===== start
+2026-09-22 02:50:59 | INFO    | step 13 finish | summary:
+DONE 2026-09-22T02:50:59+00:00
+private results repo: https://huggingface.co/EdonFetaji/mk-sq-nllb600m-gazette-verbis
+runtime of this invocation: 4h25m49s
+total training time: 1h21m39s
+best dev step: 4115 | best dev chrF++ (mean): 73.59623634687065
+CTranslate2 device: cpu (int8)
+
+gazette_test
+┌───────────────┬───────────┬─────────────┬───────┬───────┬────────────────────┬────────────────────┐
+│ model         ┆ direction ┆ n_sentences ┆ bleu  ┆ chrf  ┆ bleu_delta_vs_base ┆ chrf_delta_vs_base │
+╞═══════════════╪═══════════╪═════════════╪═══════╪═══════╪════════════════════╪════════════════════╡
+│ base          ┆ mk_sq     ┆ 10174       ┆ 27.74 ┆ 50.3  ┆ 0.0                ┆ 0.0                │
+│ base          ┆ sq_mk     ┆ 10174       ┆ 29.63 ┆ 52.46 ┆ 0.0                ┆ 0.0                │
+│ finetuned_hf  ┆ mk_sq     ┆ 10174       ┆ 54.02 ┆ 72.28 ┆ 26.27              ┆ 21.98              │
+│ finetuned_hf  ┆ sq_mk     ┆ 10174       ┆ 63.64 ┆ 78.55 ┆ 34.01              ┆ 26.09              │
+│ finetuned_ct2 ┆ mk_sq     ┆ 10174       ┆ 54.08 ┆ 72.35 ┆ 26.33              ┆ 22.05              │
+│ finetuned_ct2 ┆ sq_mk     ┆ 10174       ┆ 63.45 ┆ 78.49 ┆ 33.82              ┆ 26.03              │
+└───────────────┴───────────┴─────────────┴───────┴───────┴────────────────────┴────────────────────┘
+BLEU signature: nrefs:1|case:mixed|eff:no|tok:13a|smooth:exp|version:2.6.0
+chrF signature: nrefs:1|case:mixed|eff:yes|nc:6|nw:2|space:no|version:2.6.0
+
+flores
+┌───────────────┬───────────┬─────────────┬───────┬───────┬────────────────────┬────────────────────┐
+│ model         ┆ direction ┆ n_sentences ┆ bleu  ┆ chrf  ┆ bleu_delta_vs_base ┆ chrf_delta_vs_base │
+╞═══════════════╪═══════════╪═════════════╪═══════╪═══════╪════════════════════╪════════════════════╡
+│ base          ┆ mk_sq     ┆ 1012        ┆ 22.08 ┆ 48.58 ┆ 0.0                ┆ 0.0                │
+│ base          ┆ sq_mk     ┆ 1012        ┆ 21.39 ┆ 49.5  ┆ 0.0                ┆ 0.0                │
+│ finetuned_hf  ┆ mk_sq     ┆ 1012        ┆ 19.45 ┆ 46.61 ┆ -2.63              ┆ -1.98              │
+│ finetuned_hf  ┆ sq_mk     ┆ 1012        ┆ 18.89 ┆ 49.07 ┆ -2.5               ┆ -0.43              │
+│ finetuned_ct2 ┆ mk_sq     ┆ 1012        ┆ 19.22 ┆ 46.57 ┆ -2.86              ┆ -2.01              │
+│ finetuned_ct2 ┆ sq_mk     ┆ 1012        ┆ 18.83 ┆ 48.97 ┆ -2.56              ┆ -0.53              │
+└───────────────┴───────────┴─────────────┴───────┴───────┴────────────────────┴────────────────────┘
+BLEU signature: nrefs:1|case:mixed|eff:no|tok:13a|smooth:exp|version:2.6.0
+chrF signature: nrefs:1|case:mixed|eff:yes|nc:6|nw:2|space:no|version:2.6.0
+
+ntrex
+┌───────────────┬───────────┬─────────────┬───────┬───────┬────────────────────┬────────────────────┐
+│ model         ┆ direction ┆ n_sentences ┆ bleu  ┆ chrf  ┆ bleu_delta_vs_base ┆ chrf_delta_vs_base │
+╞═══════════════╪═══════════╪═════════════╪═══════╪═══════╪════════════════════╪════════════════════╡
+│ base          ┆ mk_sq     ┆ 1997        ┆ 23.14 ┆ 48.91 ┆ 0.0                ┆ 0.0                │
+│ base          ┆ sq_mk     ┆ 1997        ┆ 21.25 ┆ 49.54 ┆ 0.0                ┆ 0.0                │
+│ finetuned_hf  ┆ mk_sq     ┆ 1997        ┆ 18.13 ┆ 44.49 ┆ -5.0               ┆ -4.41              │
+│ finetuned_hf  ┆ sq_mk     ┆ 1997        ┆ 17.98 ┆ 47.05 ┆ -3.26              ┆ -2.49              │
+│ finetuned_ct2 ┆ mk_sq     ┆ 1997        ┆ 18.22 ┆ 44.54 ┆ -4.91              ┆ -4.37              │
+│ finetuned_ct2 ┆ sq_mk     ┆ 1997        ┆ 17.95 ┆ 47.06 ┆ -3.3               ┆ -2.48              │
+└───────────────┴───────────┴─────────────┴───────┴───────┴────────────────────┴────────────────────┘
+BLEU signature: nrefs:1|case:mixed|eff:no|tok:13a|smooth:exp|version:2.6.0
+chrF signature: nrefs:1|case:mixed|eff:yes|nc:6|nw:2|space:no|version:2.6.0
+
+2026-09-22 02:50:59 | INFO    | step 13 finish | checkpoint checkpoint-4115 uploaded to https://huggingface.co/EdonFetaji/mk-sq-nllb600m-gazette-verbis/checkpoints/checkpoint-4115
+2026-09-22 02:51:02 | INFO    | step 13 finish | uploaded folder models/final -> https://huggingface.co/EdonFetaji/mk-sq-nllb600m-gazette-verbis/
+2026-09-22 02:51:04 | INFO    | step 13 finish | uploaded folder ct2/finetuned_int8 -> https://huggingface.co/EdonFetaji/mk-sq-nllb600m-gazette-verbis/ct2/finetuned_int8
+2026-09-22 02:51:06 | INFO    | step 13 finish | uploaded folder ct2/base_int8 -> https://huggingface.co/EdonFetaji/mk-sq-nllb600m-gazette-verbis/ct2/base_int8
+2026-09-22 02:51:08 | INFO    | step 13 finish | uploaded: data/verbis/verbis_terms.parquet, data/verbis/verbis_defs_scored.parquet, data/verbis/verbis_defs.parquet
+2026-09-22 02:51:12 | INFO    | step 13 finish | uploaded folder eval -> https://huggingface.co/EdonFetaji/mk-sq-nllb600m-gazette-verbis/eval

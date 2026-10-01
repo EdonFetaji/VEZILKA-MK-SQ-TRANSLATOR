@@ -1,10 +1,13 @@
 #!/usr/bin/env python
-"""Smoke test for scripts/train_nllb_gazette_verbis_ct2.py -- run it on the
+"""Smoke test for scripts/train/train_nllb_gazette_verbis_ct2.py -- run it on the
 training machine BEFORE starting the 8-hour run:
 
     cd ~/VEZILKA-MK-SQ-TRANSLATOR
-    .venv/bin/python scripts/smoke_test_nllb_run.py --quick   # ~5 min
-    .venv/bin/python scripts/smoke_test_nllb_run.py           # full, 30-60 min
+    python3 scripts/train/smoke_test_nllb_run.py E02_gazette_only --quick   # ~5 min
+    python3 scripts/train/smoke_test_nllb_run.py E02_gazette_only           # full, 30-60 min
+
+The first argument is the experiment ID; its config (configs/<ID>.yaml) is loaded
+exactly as the training script loads it, and all outputs go under runs/<ID>/.
 
 Exit code 0 means every check passed.
 
@@ -66,9 +69,10 @@ import time
 from concurrent.futures import Future
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-MAIN = ROOT / "scripts" / "train_nllb_gazette_verbis_ct2.py"
+ROOT = Path(__file__).resolve().parents[2]
+MAIN = ROOT / "scripts" / "train" / "train_nllb_gazette_verbis_ct2.py"
 ROLE = os.environ.get("SMOKE_ROLE")
+EXP = os.environ.get("SMOKE_EXP")
 MARKER = "##### SMOKE CHILD START"
 
 SMOKE_STEPS = 80  # optimizer steps of the sandbox training run (4 checkpoints, so repo pruning is exercised)
@@ -81,26 +85,19 @@ MIN_RAM_AVAILABLE_GB = 4
 MIN_VRAM_HEADROOM_GB = 0.75
 
 
-def load_main():
+def load_main(exp_id: str | None = None):
     spec = importlib.util.spec_from_file_location("nllb_main", MAIN)
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
+    exp_id = exp_id or EXP
+    if exp_id:  # same settings as the real run; the smoke test itself may run on an uncommitted tree
+        mod.configure(exp_id, for_run=False)
     return mod
 
 
 def point_to(m, root: Path) -> None:
-    """Redirect every WORK_DIR path of the main script to `root` (same layout)."""
-    m.W = root
-    m.RAW, m.PROC, m.TOKD = root / "data" / "raw", root / "data" / "processed", root / "data" / "tokenized"
-    m.MODELS = root / "models"
-    m.CKPT, m.FINAL = m.MODELS / "checkpoints", m.MODELS / "final"
-    m.CT2 = root / "ct2"
-    m.CT2_FT, m.CT2_BASE = m.CT2 / "finetuned_int8", m.CT2 / "base_int8"
-    m.EVAL = root / "eval"
-    m.PROGRESS, m.DONE = root / "progress.log", root / "DONE"
-    m.RUN_INFO, m.TRAIN_LOG, m.DEV_CURVE = m.EVAL / "run_info.json", m.EVAL / "train_log.csv", m.EVAL / "dev_curve.csv"
-    m.CURVES_PNG, m.DEV_IDS = m.EVAL / "training_curves.png", m.EVAL / "dev_eval_ids.parquet"
-    m.PROBE_JSON = m.MODELS / "memory_probe.json"
+    """Redirect every output path of the main script to `root` (same layout)."""
+    m._set_paths(root)
 
 
 # ============================================================================
@@ -205,7 +202,7 @@ def role_probe(m) -> None:
 
     def probe():
         m._gpu_preflight()
-        tok = AutoTokenizer.from_pretrained(m.BASE_MODEL)
+        tok = AutoTokenizer.from_pretrained(m.BASE_MODEL, revision=m.BASE_REVISION)
         m.memory_probe(load_from_disk(str(m.TOKD / "train")), tok)
 
     m.run_step(8, "memory probe (smoke test)", probe)
@@ -337,7 +334,7 @@ def role_quick(m) -> None:
                      ("background upload + checkpoints in the repo", background_upload)):
         stage(name, fn)
 
-    tok = AutoTokenizer.from_pretrained(m.BASE_MODEL, token=m.TOKEN)
+    tok = AutoTokenizer.from_pretrained(m.BASE_MODEL, token=m.TOKEN, revision=m.BASE_REVISION)
     mk_id, sq_id, eos = tok.convert_tokens_to_ids(m.MK), tok.convert_tokens_to_ids(m.SQ), tok.eos_token_id
     g = torch.Generator().manual_seed(0)
 
@@ -361,7 +358,7 @@ def role_quick(m) -> None:
                 f"gradient checkpointing {probe['gradient_checkpointing']}, peak {probe['peak_gb']} GB of {total_gb():.1f}")
 
     def dev_generation_on_top_of_training():
-        model = AutoModelForSeq2SeqLM.from_pretrained(m.BASE_MODEL, token=m.TOKEN).cuda()
+        model = AutoModelForSeq2SeqLM.from_pretrained(m.BASE_MODEL, token=m.TOKEN, revision=m.BASE_REVISION).cuda()
         model.train()
         if probe["gradient_checkpointing"]:
             model.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})
@@ -389,7 +386,7 @@ def role_quick(m) -> None:
         return f"batch {m.GEN_BATCH} x {m.MAX_NEW_TOKENS} new tokens with the training state loaded: peak {peak:.2f} GB"
 
     def final_eval_generation():
-        model = m.load_hf_model(m.BASE_MODEL)
+        model = m.load_hf_model(m.BASE_MODEL, m.BASE_REVISION)
         torch.cuda.reset_peak_memory_stats()
         enc = torch.tensor([rand_ids(L, mk_id) for _ in range(m.GEN_BATCH)], device="cuda")
         try:
@@ -413,7 +410,7 @@ def role_quick(m) -> None:
             args = m.make_training_args(probe)
         finally:
             m.CKPT = real_ckpt
-        model = AutoModelForSeq2SeqLM.from_pretrained(m.BASE_MODEL, token=m.TOKEN)
+        model = AutoModelForSeq2SeqLM.from_pretrained(m.BASE_MODEL, token=m.TOKEN, revision=m.BASE_REVISION)
         params = m.inspect.signature(m.Seq2SeqTrainer.__init__).parameters
         tok_kw = {"processing_class": tok} if "processing_class" in params else {"tokenizer": tok}
         trainer = m.BidirectionalTrainer(model=model, args=args, train_dataset=worst, eval_dataset=worst,
@@ -432,7 +429,7 @@ def role_quick(m) -> None:
     def ctranslate2():
         # Converting the base model is step 10's work anyway: written to the real work/ct2/base_int8/.
         if not (m.CT2_BASE / "model.bin").exists():
-            base = snapshot_download(m.BASE_MODEL, token=m.TOKEN,
+            base = snapshot_download(m.BASE_MODEL, token=m.TOKEN, revision=m.BASE_REVISION,
                                      allow_patterns=["*.json", "*.bin", "*.safetensors", "*.model"])
             m._ct2_convert(Path(base), m.CT2_BASE)
         real_ft = m.CT2_FT
@@ -519,7 +516,7 @@ class Smoke:
             log.write(f"\n{MARKER} {time.strftime('%Y-%m-%d %H:%M:%S')} {role}\n")
             log.flush()
             p = subprocess.Popen([sys.executable, str(Path(__file__).resolve())], cwd=ROOT, stdout=log,
-                                 stderr=subprocess.STDOUT, env={**os.environ, "SMOKE_ROLE": role},
+                                 stderr=subprocess.STDOUT, env={**os.environ, "SMOKE_ROLE": role, "SMOKE_EXP": self.m.EXP_ID},
                                  start_new_session=True)
             t0, last_sample = time.time(), 0.0
             min_avail, max_gpu = math.inf, 0.0
@@ -624,7 +621,7 @@ class Smoke:
                          bi.height == 2 * train.height and by_dir.get(m.MK) == by_dir.get(m.SQ) == train.height,
                          f"{bi.height} examples {by_dir}")
 
-        tok = AutoTokenizer.from_pretrained(m.BASE_MODEL)
+        tok = AutoTokenizer.from_pretrained(m.BASE_MODEL, revision=m.BASE_REVISION)
         for split in ("train", "dev"):
             ds = load_from_disk(str(m.TOKD / split))
             max_in = pc.max(pc.list_value_length(ds.data.column("input_ids"))).as_py()
@@ -879,7 +876,8 @@ class Smoke:
                 self.say("and kill/resume (the full smoke test).")
             self.say(f"ALL {len(self.checks)} CHECKS PASSED in {report['minutes']} min. Sandbox removed.")
             self.say("Start the real run:" if self.quick else "Start the real run (steps 1-7 will load from disk):")
-            self.say("  nohup .venv/bin/python scripts/train_nllb_gazette_verbis_ct2.py > work/nohup.out 2>&1 &")
+            self.say(f"  mkdir -p {self.m.WORK_DIR} && nohup python3 scripts/train/train_nllb_gazette_verbis_ct2.py "
+                     f"{self.m.EXP_ID} > {self.m.WORK_DIR}/nohup.out 2>&1 &")
         else:
             self.say(f"SMOKE TEST FAILED ({len(failed)} failed checks{'' if completed else ', stopped early'}):")
             for c in failed:
@@ -916,12 +914,17 @@ class Smoke:
 
 
 def main() -> None:
+    args = [a for a in sys.argv[1:] if a != "--quick"]
+    if len(args) != 1:
+        sys.exit("usage: python scripts/train/smoke_test_nllb_run.py <EXPERIMENT_ID> [--quick]")
     try:
-        m = load_main()
+        m = load_main(args[0])
     except ImportError as e:
-        print(f"ERROR: {e}\nInstall the dependencies with:\n  uv pip install -r scripts/requirements-train.txt",
+        print(f"ERROR: {e}\nInstall the dependencies with:\n  uv pip install -r scripts/train/requirements-train.txt",
               flush=True)
         sys.exit(1)
+    except Exception as e:  # noqa: BLE001 -- unknown ID, missing config, ...
+        sys.exit(f"ERROR: {e}")
     if sys.platform != "linux":
         print("ERROR: run this on the Linux training machine (it needs the GPU and /proc).", flush=True)
         sys.exit(1)

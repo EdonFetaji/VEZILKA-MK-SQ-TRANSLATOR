@@ -1,0 +1,7 @@
+model,direction,n_sentences,bleu,chrf,bleu_delta_vs_base,chrf_delta_vs_base,bleu_signature,chrf_signature,timestamp
+base,mk_sq,1012,22.08,48.58,0.0,0.0,nrefs:1|case:mixed|eff:no|tok:13a|smooth:exp|version:2.6.0,nrefs:1|case:mixed|eff:yes|nc:6|nw:2|space:no|version:2.6.0,2026-09-22T02:35:52+00:00
+base,sq_mk,1012,21.39,49.5,0.0,0.0,nrefs:1|case:mixed|eff:no|tok:13a|smooth:exp|version:2.6.0,nrefs:1|case:mixed|eff:yes|nc:6|nw:2|space:no|version:2.6.0,2026-09-22T02:35:52+00:00
+finetuned_hf,mk_sq,1012,19.45,46.61,-2.63,-1.98,nrefs:1|case:mixed|eff:no|tok:13a|smooth:exp|version:2.6.0,nrefs:1|case:mixed|eff:yes|nc:6|nw:2|space:no|version:2.6.0,2026-09-22T02:35:53+00:00
+finetuned_hf,sq_mk,1012,18.89,49.07,-2.5,-0.43,nrefs:1|case:mixed|eff:no|tok:13a|smooth:exp|version:2.6.0,nrefs:1|case:mixed|eff:yes|nc:6|nw:2|space:no|version:2.6.0,2026-09-22T02:35:53+00:00
+finetuned_ct2,mk_sq,1012,19.22,46.57,-2.86,-2.01,nrefs:1|case:mixed|eff:no|tok:13a|smooth:exp|version:2.6.0,nrefs:1|case:mixed|eff:yes|nc:6|nw:2|space:no|version:2.6.0,2026-09-22T02:35:53+00:00
+finetuned_ct2,sq_mk,1012,18.83,48.97,-2.56,-0.53,nrefs:1|case:mixed|eff:no|tok:13a|smooth:exp|version:2.6.0,nrefs:1|case:mixed|eff:yes|nc:6|nw:2|space:no|version:2.6.0,2026-09-22T02:35:53+00:00

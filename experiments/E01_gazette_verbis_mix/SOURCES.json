@@ -1,0 +1,75 @@
+{
+  "exp_id": "E01_gazette_verbis_mix",
+  "copied_from": "hf://EdonFetaji/mk-sq-nllb600m-gazette-verbis@3fad45be925bbdc88e6b07672628ba8e1b180178",
+  "originals_unchanged": true,
+  "verbis_content_scan": "58296 Verbis strings checked, none present",
+  "files": [
+    {
+      "path": "config.yaml",
+      "source": "configs/E01_gazette_verbis_mix.yaml",
+      "sha256": "71072934c81117c49088ba06fc8a9c53fdb057078fa4edd67ae2e50eb1d0fbb9"
+    },
+    {
+      "path": "run_info.json",
+      "source": "hf://EdonFetaji/mk-sq-nllb600m-gazette-verbis/eval/run_info.json",
+      "hf_revision": "3fad45be925bbdc88e6b07672628ba8e1b180178",
+      "sha256": "328a382475f2cdce64e34e8fa54e6b4b72b3fdec170182c2103be1745561acb8"
+    },
+    {
+      "path": "train_log.csv",
+      "source": "hf://EdonFetaji/mk-sq-nllb600m-gazette-verbis/eval/train_log.csv",
+      "hf_revision": "3fad45be925bbdc88e6b07672628ba8e1b180178",
+      "sha256": "838616955dabeaf69b4ebc21bc635e310f21cadd05fd0d14e75e0dc95a85f09e"
+    },
+    {
+      "path": "dev_curve.csv",
+      "source": "hf://EdonFetaji/mk-sq-nllb600m-gazette-verbis/eval/dev_curve.csv",
+      "hf_revision": "3fad45be925bbdc88e6b07672628ba8e1b180178",
+      "sha256": "bd7bba64754225b067b302ff1f66774f5695fb9b3a4667e9b3c78def0a938f70"
+    },
+    {
+      "path": "progress.log",
+      "source": "hf://EdonFetaji/mk-sq-nllb600m-gazette-verbis/progress.log",
+      "hf_revision": "3fad45be925bbdc88e6b07672628ba8e1b180178",
+      "source_sha256": "d15cc73652c1e5d23b79e2758a1f5464ec34a0d6c93e1327aa5e0563e9b3dba6",
+      "redacted": "25 example-translation records removed (mksq.experiment.redact_log_examples); all other lines verbatim",
+      "sha256": "18debc004ecdb8aacc9e2d7f73b1198c5fd240773704856dcd70d985f1b039b1"
+    },
+    {
+      "path": "results/gazette_test_results.csv",
+      "source": "hf://EdonFetaji/mk-sq-nllb600m-gazette-verbis/eval/gazette_test_results.csv",
+      "hf_revision": "3fad45be925bbdc88e6b07672628ba8e1b180178",
+      "sha256": "ac5ebb869231b67984029c3b40f9f3700310664bf011704a1df81a2ffaad977e"
+    },
+    {
+      "path": "results/flores_results.csv",
+      "source": "hf://EdonFetaji/mk-sq-nllb600m-gazette-verbis/eval/flores_results.csv",
+      "hf_revision": "3fad45be925bbdc88e6b07672628ba8e1b180178",
+      "sha256": "852f8b56618255974a7185c5be2efde814478ebbedc24746bcc4361e319e917d"
+    },
+    {
+      "path": "results/ntrex_results.csv",
+      "source": "hf://EdonFetaji/mk-sq-nllb600m-gazette-verbis/eval/ntrex_results.csv",
+      "hf_revision": "3fad45be925bbdc88e6b07672628ba8e1b180178",
+      "sha256": "25e784fa9d7a89e4a0ecf8ebcb9a7e87dc67141fbb9a671e6f9f1aba20f97dd8"
+    },
+    {
+      "path": "analysis/gazette_test_overlap_results.csv",
+      "source": "hf://EdonFetaji/mk-sq-nllb600m-gazette-verbis/eval/gazette_test_overlap_results.csv",
+      "hf_revision": "3fad45be925bbdc88e6b07672628ba8e1b180178",
+      "sha256": "3a35994a439cbad90b82b4fe7feabebe4f87819f766ceec5f763f30d1ebc73dc"
+    },
+    {
+      "path": "analysis/terminology_results.csv",
+      "source": "hf://EdonFetaji/mk-sq-nllb600m-gazette-verbis/eval/terminology_results.csv",
+      "hf_revision": "3fad45be925bbdc88e6b07672628ba8e1b180178",
+      "sha256": "86879bb8d58c23e008b5090ac8d3e8bf809ae7fd153ea13d1f5995d53e98e141"
+    },
+    {
+      "path": "analysis/number_fidelity_results.csv",
+      "source": "hf://EdonFetaji/mk-sq-nllb600m-gazette-verbis/eval/number_fidelity_results.csv",
+      "hf_revision": "3fad45be925bbdc88e6b07672628ba8e1b180178",
+      "sha256": "6c78e3c599941a20fdf29cdb4f774f074fc1c72a9af10076a966eab7585c051a"
+    }
+  ]
+}

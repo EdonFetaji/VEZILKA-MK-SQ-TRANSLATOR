@@ -1,13 +1,23 @@
 #!/usr/bin/env python
 """Fine-tune NLLB-200-distilled-600M for Macedonian <-> Albanian on the Gazette
-corpus and the Verbis dictionary, export it to CTranslate2 int8, and evaluate it
-on the Gazette test split, FLORES+ devtest and NTREX-128.
+corpus (and, if the experiment's config says so, the Verbis dictionary), export it
+to CTranslate2 int8, and evaluate it on the Gazette test split, FLORES+ devtest and
+NTREX-128.
 
     cd ~/VEZILKA-MK-SQ-TRANSLATOR
-    mkdir -p work
-    nohup .venv/bin/python scripts/train_nllb_gazette_verbis_ct2.py > work/nohup.out 2>&1 &
+    mkdir -p runs/E02_gazette_only
+    nohup python3 scripts/train/train_nllb_gazette_verbis_ct2.py E02_gazette_only \
+        > runs/E02_gazette_only/nohup.out 2>&1 &
 
-One command, no arguments, no interactive input. Every step writes its output
+Exactly ONE argument, the experiment ID. Every setting comes from configs/<ID>.yaml;
+there are no other flags and no interactive input. The script refuses to start if
+scripts/, configs/, data/manifests/ or src/ have uncommitted changes (every run maps to
+a commit), or if the experiment is already "done" in experiments/registry.csv. Every
+output file carries the experiment ID, git commit, config sha256 and dataset-manifest
+sha256s. Large outputs go to runs/<ID>/ (gitignored); at the end the small artifacts
+are copied to experiments/<ID>/ for the user to commit.
+
+Every step writes its output
 under WORK_DIR and is skipped on the next run when that output exists, so
 re-running after a crash, reboot or Ctrl-C continues where it stopped (training
 resumes from the last checkpoint). To rebuild a stage, delete its output file.
@@ -22,8 +32,9 @@ repo HF_RESULTS_REPO, whose privacy is re-checked before every upload batch:
     eval/                      logs, curves, results, translations
     progress.log, DONE
 
-Training uses only Gazette train and Verbis; Gazette dev is used only for
-checkpoint selection; the test sets are touched only in step 12.
+Training uses only Gazette train (plus Verbis when data.verbis.use_for_training is
+true); Gazette dev is used only for checkpoint selection; the test sets are touched
+only in step 12.
 """
 
 from __future__ import annotations
@@ -52,15 +63,28 @@ from datetime import datetime
 from pathlib import Path
 
 # ----------------------------------------------------------------------------
-# Constants
+# Settings. The values below are placeholders: configure(<experiment ID>) replaces
+# every one of them from configs/<ID>.yaml before anything runs.
 # ----------------------------------------------------------------------------
+EXP_ID = None
+CFG: dict = {}
+PROV: dict = {}
+PROV_COLS: dict = {}
 HF_GAZETTE_REPO = "EdonFetaji/slvesnik-mk-sq"
-HF_RESULTS_REPO = "EdonFetaji/mk-sq-nllb600m-gazette-verbis"  # PRIVATE
+GAZETTE_REVISION = None
+HF_RESULTS_REPO = None  # PRIVATE, from outputs.hf_results_repo
+VERBIS_REPO = None  # private repo holding the raw Verbis parquet
 VERBIS_PATH = "data/verbis_mk_sq.parquet"  # local cache of VERBIS_HF_PATH
-VERBIS_HF_PATH = "data/verbis/verbis_mk_sq.parquet"  # in the PRIVATE HF_RESULTS_REPO
-WORK_DIR = "work"  # relative to repo root
+VERBIS_HF_PATH = "data/verbis/verbis_mk_sq.parquet"
+VERBIS_TRAIN = True  # data.verbis.use_for_training
+WORK_DIR = "runs/_unconfigured"  # relative to repo root
 BASE_MODEL = "facebook/nllb-200-distilled-600M"
+BASE_REVISION = None
 SEED = 42
+TRAIN: dict = {}
+EXPECTED: dict = {}
+FLORES_REVISION = None
+NTREX_COMMIT = None
 
 MK, SQ = "mkd_Cyrl", "als_Latn"  # NLLB language codes
 MAX_TOKENS = 192  # longer examples are dropped, never truncated
@@ -77,7 +101,7 @@ MAX_NEW_TOKENS = 256
 FINAL_BEAMS = 4
 EVAL_CHUNK = 2000  # final evaluation: save + log progress every N sentences
 FLORES_REPO = "openlanguagedata/flores_plus"
-NTREX_URL = "https://raw.githubusercontent.com/MicrosoftTranslator/NTREX/main/NTREX-128/newstest2019-ref.{code}.txt"
+NTREX_URL = "https://raw.githubusercontent.com/MicrosoftTranslator/NTREX/{commit}/NTREX-128/newstest2019-ref.{code}.txt"
 TOKENIZER_FILES = ("tokenizer.json", "tokenizer_config.json", "special_tokens_map.json", "sentencepiece.bpe.model")
 
 os.environ.setdefault("TOKENIZERS_PARALLELISM", "false")
@@ -85,7 +109,7 @@ os.environ.setdefault("HF_HUB_DISABLE_PROGRESS_BARS", "1")
 os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
 
 _REQUIRED = ("transformers", "datasets", "accelerate", "sentencepiece", "sacrebleu", "ctranslate2",
-             "sentence_transformers", "polars", "pyarrow", "huggingface_hub", "matplotlib")
+             "sentence_transformers", "polars", "pyarrow", "huggingface_hub", "matplotlib", "yaml")
 
 
 def _check_imports() -> None:
@@ -94,7 +118,7 @@ def _check_imports() -> None:
     except Exception as e:  # noqa: BLE001
         print(f"ERROR: torch is not importable ({type(e).__name__}: {e}).\n"
               "torch is installed separately with a CUDA build that supports the RTX 5080 (Blackwell);\n"
-              "it is intentionally not in scripts/requirements-train.txt.", flush=True)
+              "it is intentionally not in scripts/train/requirements-train.txt.", flush=True)
         sys.exit(1)
     missing = []
     for name in _REQUIRED:
@@ -104,7 +128,7 @@ def _check_imports() -> None:
             missing.append(f"{name} ({type(e).__name__}: {e})")
     if missing:
         print("ERROR: missing Python packages:\n  " + "\n  ".join(missing)
-              + "\nInstall them with:\n  uv pip install -r scripts/requirements-train.txt", flush=True)
+              + "\nInstall them with:\n  uv pip install -r scripts/train/requirements-train.txt", flush=True)
         sys.exit(1)
 
 
@@ -157,26 +181,29 @@ transformers.utils.logging.disable_progress_bar()
 # ----------------------------------------------------------------------------
 # Paths
 # ----------------------------------------------------------------------------
-ROOT = Path(__file__).resolve().parents[1]
-W = ROOT / WORK_DIR
-RAW = W / "data" / "raw"
-PROC = W / "data" / "processed"
-TOKD = W / "data" / "tokenized"
-MODELS = W / "models"
-CKPT = MODELS / "checkpoints"
-FINAL = MODELS / "final"
-CT2 = W / "ct2"
-CT2_FT = CT2 / "finetuned_int8"
-CT2_BASE = CT2 / "base_int8"
-EVAL = W / "eval"
-PROGRESS = W / "progress.log"
-DONE = W / "DONE"
-RUN_INFO = EVAL / "run_info.json"
-TRAIN_LOG = EVAL / "train_log.csv"
-DEV_CURVE = EVAL / "dev_curve.csv"
-CURVES_PNG = EVAL / "training_curves.png"
-DEV_IDS = EVAL / "dev_eval_ids.parquet"
-PROBE_JSON = MODELS / "memory_probe.json"
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "src"))
+from mksq import experiment as X  # noqa: E402
+
+
+def _set_paths(root: Path) -> None:
+    """Point every output path at `root` (runs/<ID>/ for a real run)."""
+    global W, RAW, PROC, TOKD, MODELS, CKPT, FINAL, CT2, CT2_FT, CT2_BASE, EVAL, PROGRESS, DONE
+    global RUN_INFO, TRAIN_LOG, DEV_CURVE, CURVES_PNG, DEV_IDS, PROBE_JSON
+    W = root
+    RAW, PROC, TOKD = W / "data" / "raw", W / "data" / "processed", W / "data" / "tokenized"
+    MODELS = W / "models"
+    CKPT, FINAL = MODELS / "checkpoints", MODELS / "final"
+    CT2 = W / "ct2"
+    CT2_FT, CT2_BASE = CT2 / "finetuned_int8", CT2 / "base_int8"
+    EVAL = W / "eval"
+    PROGRESS, DONE = W / "progress.log", W / "DONE"
+    RUN_INFO, TRAIN_LOG, DEV_CURVE = EVAL / "run_info.json", EVAL / "train_log.csv", EVAL / "dev_curve.csv"
+    CURVES_PNG, DEV_IDS = EVAL / "training_curves.png", EVAL / "dev_eval_ids.parquet"
+    PROBE_JSON = MODELS / "memory_probe.json"
+
+
+_set_paths(ROOT / WORK_DIR)
 
 TRAIN_LOG_FIELDS = ("timestamp", "step", "epoch", "loss", "learning_rate", "grad_norm", "samples_per_sec",
                     "tokens_per_sec", "gpu_mem_allocated_gb", "gpu_mem_peak_gb", "gpu_util_pct", "gpu_temp_c",
@@ -203,6 +230,93 @@ _CTX = {"step": "start"}
 
 class Fatal(Exception):
     """A condition the run cannot continue from; the message says what to do."""
+
+
+def configure(exp_id: str, for_run: bool = True) -> None:
+    """Load configs/<exp_id>.yaml into the module settings and compute the provenance.
+
+    for_run=True (a real training run) also refuses experiments that are already done and
+    working trees with uncommitted changes to scripts/, configs/, data/manifests/ or src/.
+    """
+    global EXP_ID, CFG, PROV, PROV_COLS, HF_GAZETTE_REPO, GAZETTE_REVISION, HF_RESULTS_REPO, VERBIS_REPO
+    global VERBIS_PATH, VERBIS_HF_PATH, VERBIS_TRAIN, WORK_DIR, BASE_MODEL, BASE_REVISION, SEED, TRAIN, EXPECTED
+    global MAX_TOKENS, MIN_FREE_VRAM_GB, LABSE_MODEL, LABSE_MIN_SCORE, DEV_EVAL_SIZE, EVAL_STEPS, LOG_STEPS
+    global GEN_BATCH, MAX_NEW_TOKENS, FINAL_BEAMS, EVAL_CHUNK, FLORES_REPO, FLORES_REVISION, NTREX_COMMIT
+    try:
+        cfg = X.load_config(exp_id)
+        row = X.registry_row(exp_id)
+    except (ValueError, FileNotFoundError, KeyError) as e:
+        raise Fatal(str(e)) from e
+    if for_run:
+        if "done" in (row["status"], cfg.get("status")):
+            raise Fatal(f"{exp_id} is already done (experiments/registry.csv); a new run would overwrite its "
+                        "results. Register a new experiment ID instead.")
+        dirty = X.uncommitted()
+        if dirty:
+            raise Fatal("uncommitted changes under " + ", ".join(X.TRACKED_FOR_RUNS) + " -- commit them first so "
+                        "this run maps to a commit:\n  " + "\n  ".join(dirty))
+    out, d, t = cfg["outputs"], cfg["data"], cfg["training"]
+    if not out.get("legacy_repo_name") and out["hf_results_repo"] != X.hf_repo_for(exp_id):
+        raise Fatal(f"outputs.hf_results_repo must be {X.hf_repo_for(exp_id)} for {exp_id}")
+    EXP_ID, CFG = exp_id, cfg
+    HF_RESULTS_REPO, WORK_DIR = out["hf_results_repo"], out["work_dir"]
+    HF_GAZETTE_REPO, GAZETTE_REVISION = d["gazette"]["repo"], X.recorded(d["gazette"]["revision"])
+    v = d["verbis"]
+    VERBIS_REPO, VERBIS_HF_PATH, VERBIS_PATH = v["storage_repo"], v["raw_path"], v["local_cache"]
+    VERBIS_TRAIN, LABSE_MODEL, LABSE_MIN_SCORE = bool(v["use_for_training"]), v["labse_model"], float(v["labse_min_score"])
+    FLORES_REPO, FLORES_REVISION = d["flores_plus"]["repo"], X.recorded(d["flores_plus"]["revision"])
+    NTREX_COMMIT = X.recorded(d["ntrex"]["commit"]) or "main"
+    MAX_TOKENS, EXPECTED = int(d["max_tokens"]), d.get("expected", {})
+    BASE_MODEL, BASE_REVISION = cfg["base_model"]["name"], X.recorded(cfg["base_model"]["revision"])
+    TRAIN, SEED, LOG_STEPS = t, int(t["seed"]), int(t["logging_steps"])
+    cs, fe = cfg["checkpoint_selection"], cfg["final_evaluation"]
+    DEV_EVAL_SIZE, EVAL_STEPS, GEN_BATCH = int(cs["size_per_direction"]), int(cs["every_steps"]), int(cs["batch"])
+    MAX_NEW_TOKENS, FINAL_BEAMS, EVAL_CHUNK = int(fe["max_new_tokens"]), int(fe["beams"]), int(fe["save_every_sentences"])
+    MIN_FREE_VRAM_GB = float(cfg["hardware"]["min_free_vram_gb"])
+    PROV = X.provenance(exp_id)
+    PROV_COLS = X.provenance_columns(PROV)
+    _set_paths(ROOT / WORK_DIR)
+
+
+def verify_hf_manifest(name: str, repo: str, repo_type: str, revision: str | None, paths: list[str] | None = None) -> None:
+    """Check dataset files against data/manifests/<name>.json before using them.
+
+    Compares the LFS sha256 Hugging Face reports for each file (at `revision`) with the manifest.
+    Entries whose sha256 is UNTRACKED or NOT RECORDED are skipped; if the manifest pins a
+    revision, the config must use the same one.
+    """
+    man = X.load_manifest(name)
+    pinned = man.get("revision")
+    if pinned and revision != pinned:
+        raise Fatal(f"{name}: config revision {revision} differs from data/manifests/{name}.json ({pinned})")
+    want = {f["path"]: f["sha256"] for f in man["files"]
+            if (paths is None or f["path"] in paths) and f["sha256"] not in ("UNTRACKED", X.NOT_RECORDED)}
+    if not want:
+        LOG.info("%s: file hashes not tracked in the manifest -- pinned by revision %s", name, revision)
+        return
+    info = {p.path: p for p in HfApi(token=TOKEN).get_paths_info(repo, list(want), repo_type=repo_type,
+                                                                 revision=revision, expand=True)}
+    for path, sha in want.items():
+        got = getattr(getattr(info.get(path), "lfs", None), "sha256", None)
+        if got != sha:
+            raise Fatal(f"{name}: {path} (revision {revision or 'HEAD'}) has sha256 {got}, manifest says {sha}")
+    LOG.info("%s: %d file(s) verified against data/manifests/%s.json", name, len(want), name)
+
+
+def expect(key: str, value) -> None:
+    """Assert a value recorded in the config's data.expected (E01's recorded counts / fingerprints)."""
+    want = EXPECTED.get("row_counts", {}).get(key, EXPECTED.get("content_sha256", {}).get(key))
+    if want is None:
+        return
+    if want != value:
+        raise Fatal(f"data check failed: {key} = {value}, config data.expected says {want}. The data differ from "
+                    "the reference experiment, so the comparison would not be valid.")
+    LOG.info("data check: %s matches the reference experiment", key)
+
+
+def write_provenance(folder: Path) -> None:
+    folder.mkdir(parents=True, exist_ok=True)
+    (folder / "provenance.json").write_text(json.dumps(PROV, indent=2) + "\n", encoding="utf-8")
 
 
 # ----------------------------------------------------------------------------
@@ -274,8 +388,11 @@ def have(path: Path) -> bool:
 
 
 def write_parquet(df: pl.DataFrame, path: Path, quiet: bool = False) -> None:
+    import pyarrow.parquet as pq
     tmp = _tmp(path)
-    df.write_parquet(tmp, compression="zstd")
+    table = df.to_arrow()
+    table = table.replace_schema_metadata({**(table.schema.metadata or {}), b"provenance": json.dumps(PROV).encode()})
+    pq.write_table(table, tmp, compression="zstd")
     os.replace(tmp, path)
     if not quiet:
         LOG.info("wrote %s (%d rows)", rel(path), df.height)
@@ -288,10 +405,14 @@ def write_text(path: Path, text: str) -> None:
 
 
 def write_json(path: Path, obj) -> None:
+    if isinstance(obj, dict):
+        obj = {**obj, "provenance": PROV}
     write_text(path, json.dumps(obj, indent=2, ensure_ascii=False, default=str) + "\n")
 
 
 def write_csv(df: pl.DataFrame, path: Path) -> None:
+    """CSV with the provenance as constant trailing columns."""
+    df = df.with_columns([pl.lit(v).alias(k) for k, v in PROV_COLS.items() if k not in df.columns])
     tmp = _tmp(path)
     df.write_csv(tmp)
     os.replace(tmp, path)
@@ -302,6 +423,7 @@ def save_dataset(ds: Dataset, path: Path) -> None:
     if tmp.exists():
         shutil.rmtree(tmp)
     ds.save_to_disk(str(tmp))
+    write_provenance(tmp)
     os.replace(tmp, path)
     LOG.info("wrote %s (%d rows)", rel(path), len(ds))
 
@@ -724,8 +846,8 @@ def ct2_translate(translator, tok, texts: list[str], src_lang: str, tgt_lang: st
     return out
 
 
-def load_hf_model(path_or_name: str | Path):
-    model = AutoModelForSeq2SeqLM.from_pretrained(str(path_or_name), token=TOKEN)
+def load_hf_model(path_or_name: str | Path, revision: str | None = None):
+    model = AutoModelForSeq2SeqLM.from_pretrained(str(path_or_name), token=TOKEN, revision=revision)
     return model.to("cuda", dtype=torch.bfloat16).eval()
 
 
@@ -824,12 +946,8 @@ def step1_preflight() -> None:
 
     info = read_run_info()
     invocations = info.get("invocations", []) + [now_iso()]
-    constants = {"HF_GAZETTE_REPO": HF_GAZETTE_REPO, "HF_RESULTS_REPO": HF_RESULTS_REPO, "VERBIS_PATH": VERBIS_PATH,
-                 "VERBIS_HF_PATH": VERBIS_HF_PATH, "WORK_DIR": WORK_DIR, "BASE_MODEL": BASE_MODEL, "SEED": SEED, "MK": MK, "SQ": SQ,
-                 "MAX_TOKENS": MAX_TOKENS, "LABSE_MIN_SCORE": LABSE_MIN_SCORE, "DEV_EVAL_SIZE": DEV_EVAL_SIZE,
-                 "EVAL_STEPS": EVAL_STEPS, "FINAL_BEAMS": FINAL_BEAMS, "MAX_NEW_TOKENS": MAX_NEW_TOKENS}
-    update_run_info(upload=False, script=Path(__file__).name, git=_git_commit(), versions=_versions(), gpu=gpu,
-                    constants=constants, results_repo=f"https://huggingface.co/{HF_RESULTS_REPO}",
+    update_run_info(upload=False, exp_id=EXP_ID, script=str(Path(__file__).relative_to(ROOT)), git=_git_commit(),
+                    versions=_versions(), gpu=gpu, config=CFG, results_repo=f"https://huggingface.co/{HF_RESULTS_REPO}",
                     invocations=invocations)
     LOG.info("run info:\n%s", RUN_INFO.read_text(encoding="utf-8"))
 
@@ -884,7 +1002,8 @@ def step2_gazette() -> None:
         for p in outs.values():
             have(p)
     else:
-        dd = load_dataset(HF_GAZETTE_REPO, token=TOKEN)
+        verify_hf_manifest("gazette", HF_GAZETTE_REPO, "dataset", GAZETTE_REVISION)
+        dd = load_dataset(HF_GAZETTE_REPO, revision=GAZETTE_REVISION, token=TOKEN)
         for split, ds in dd.items():
             LOG.info("Gazette split %r: %d rows | schema: %s", split, ds.num_rows,
                      {k: getattr(v, "dtype", type(v).__name__) for k, v in ds.features.items()})
@@ -919,6 +1038,10 @@ def step2_gazette() -> None:
     for name, p in outs.items():
         sizes[f"gazette_{name}"] = pl.scan_parquet(p).select(pl.len()).collect().item()
         LOG.info("Gazette %-5s: %d rows", name, sizes[f"gazette_{name}"])
+    for name in ("train", "dev", "test"):
+        expect(f"gazette_{name}", sizes[f"gazette_{name}"])
+    test = pl.read_parquet(outs["test"], columns=["mk", "sq"])
+    expect("gazette_test", X.content_sha256(zip(test["mk"], test["sq"])))
     update_dataset_sizes(**sizes)
 
 
@@ -928,12 +1051,12 @@ def step2_gazette() -> None:
 def _flores_side(lang: str) -> pl.DataFrame:
     api = HfApi(token=TOKEN)
     try:
-        files = api.list_repo_files(FLORES_REPO, repo_type="dataset")
+        files = api.list_repo_files(FLORES_REPO, repo_type="dataset", revision=FLORES_REVISION)
         cands = [f for f in files if f.split("/")[0] == "devtest" and Path(f).name.split(".")[0] == lang]
         if not cands:
             raise Fatal(f"no devtest file for {lang} in {FLORES_REPO}")
         fname = sorted(cands, key=lambda f: (not f.endswith(".parquet"), f))[0]
-        local = hf_hub_download(FLORES_REPO, fname, repo_type="dataset", token=TOKEN)
+        local = hf_hub_download(FLORES_REPO, fname, repo_type="dataset", revision=FLORES_REVISION, token=TOKEN)
     except GatedRepoError as e:
         raise Fatal(f"{FLORES_REPO} is gated: accept its terms at https://huggingface.co/datasets/{FLORES_REPO} "
                     "with the account that owns the token, then re-run.") from e
@@ -987,13 +1110,16 @@ def step3_external() -> None:
         for key, code in (("mk", "mkd"), ("sq", "sqi")):
             path = ntrex_dir / f"newstest2019-ref.{code}.txt"
             if not have(path):
-                _download(NTREX_URL.format(code=code), path)
+                _download(NTREX_URL.format(commit=NTREX_COMMIT, code=code), path)
             sides[key] = _read_lines(path)
         if len(sides["mk"]) != len(sides["sq"]):
             raise Fatal(f"NTREX-128 sides differ: mkd={len(sides['mk'])} lines, sqi={len(sides['sq'])} lines")
+        write_provenance(ntrex_dir)
         write_parquet(pl.DataFrame(sides), ntrex_p)
     sizes = {"flores_devtest": pl.read_parquet(flores_p).height, "ntrex": pl.read_parquet(ntrex_p).height}
     LOG.info("FLORES+ devtest: %d sentences | NTREX-128: %d sentences", sizes["flores_devtest"], sizes["ntrex"])
+    expect("flores_devtest", sizes["flores_devtest"])
+    expect("ntrex", sizes["ntrex"])
     update_dataset_sizes(**sizes)
 
 
@@ -1039,14 +1165,15 @@ def step4_verbis() -> None:
     src = ROOT / VERBIS_PATH
     if not have(src):
         try:
-            cached = hf_hub_download(HF_RESULTS_REPO, VERBIS_HF_PATH, repo_type="model", token=TOKEN)
+            verify_hf_manifest("verbis", VERBIS_REPO, "model", None, paths=[VERBIS_HF_PATH])
+            cached = hf_hub_download(VERBIS_REPO, VERBIS_HF_PATH, repo_type="model", token=TOKEN)
         except Exception as e:  # noqa: BLE001
             raise Fatal(f"Verbis is not at {src} and could not be downloaded from "
-                        f"{HF_RESULTS_REPO}/{VERBIS_HF_PATH}: {type(e).__name__}: {e}") from e
+                        f"{VERBIS_REPO}/{VERBIS_HF_PATH}: {type(e).__name__}: {e}") from e
         src.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(cached, _tmp(src))
         os.replace(_tmp(src), src)
-        LOG.info("downloaded %s/%s -> %s", HF_RESULTS_REPO, VERBIS_HF_PATH, src)
+        LOG.info("downloaded %s/%s -> %s", VERBIS_REPO, VERBIS_HF_PATH, src)
     terms_p, scored_p, defs_p = PROC / "verbis_terms.parquet", PROC / "verbis_defs_scored.parquet", PROC / "verbis_defs.parquet"
     need = {"mk", "mk_description", "sq", "sq_description"}
     if not have(terms_p):
@@ -1073,7 +1200,9 @@ def step4_verbis() -> None:
     LOG.info("Verbis definition pairs: %d scored, %d kept with LaBSE >= %.2f (%.1f%%), median score %.3f",
              scored.height, defs.height, LABSE_MIN_SCORE, 100 * defs.height / max(scored.height, 1),
              float(scored["labse_score"].median() or 0))
+    expect("verbis_entries", pl.scan_parquet(src).select(pl.len()).collect().item())
     update_dataset_sizes(verbis_terms=terms.height, verbis_defs_scored=scored.height, verbis_defs=defs.height)
+    LOG.info("Verbis used for training: %s (always used to measure terminology)", VERBIS_TRAIN)
     UPLOADER.upload_verbis_outputs()
 
 
@@ -1093,9 +1222,12 @@ def step5_leakage() -> None:
         sq_keys = pl.concat([f.select(k_sq=_norm("sq")) for f in frames]).unique().with_columns(hit_sq=pl.lit(True))
         LOG.info("held-out texts: %d unique mk, %d unique sq", mk_keys.height, sq_keys.height)
         parts, report = [], {}
-        for source, path in (("gazette", PROC / "gazette_train.parquet"),
-                             ("verbis_terms", PROC / "verbis_terms.parquet"),
-                             ("verbis_defs", PROC / "verbis_defs.parquet")):
+        sources = [("gazette", PROC / "gazette_train.parquet")]
+        if VERBIS_TRAIN:
+            sources += [("verbis_terms", PROC / "verbis_terms.parquet"), ("verbis_defs", PROC / "verbis_defs.parquet")]
+        else:
+            LOG.info("data.verbis.use_for_training is false -- training on Gazette only")
+        for source, path in sources:
             df = pl.read_parquet(path, columns=["mk", "sq"])
             flagged = (df.with_columns(k_mk=_norm("mk"), k_sq=_norm("sq"))
                        .join(mk_keys, on="k_mk", how="left").join(sq_keys, on="k_sq", how="left")
@@ -1106,7 +1238,7 @@ def step5_leakage() -> None:
                               "matched_on_sq": int(flagged["hit_sq"].sum()), "rows_after": clean.height}
             parts.append(clean.with_columns(source=pl.lit(source)))
         write_parquet(pl.concat(parts), out_p)
-        write_json(rep_p, {"removed_per_source": report, "held_out_sets": list(held_out),
+        write_json(rep_p, {"removed_per_source": report, "held_out_sets": list(held_out), "verbis_used": VERBIS_TRAIN,
                            "normalisation": "lowercase, whitespace collapsed, stripped",
                            "rule": "a train pair is removed if its mk OR its sq text appears in any held-out set"})
     report = json.loads(rep_p.read_text(encoding="utf-8"))["removed_per_source"]
@@ -1182,7 +1314,7 @@ def _check_lang_tokens(ds: Dataset, tok, what: str) -> None:
 
 def step7_tokenize() -> None:
     train_dir, dev_dir = TOKD / "train", TOKD / "dev"
-    tok = AutoTokenizer.from_pretrained(BASE_MODEL, token=TOKEN)
+    tok = AutoTokenizer.from_pretrained(BASE_MODEL, token=TOKEN, revision=BASE_REVISION)
     mk_id, sq_id = tok.convert_tokens_to_ids(MK), tok.convert_tokens_to_ids(SQ)
     dev_df = pl.read_parquet(PROC / "gazette_dev.parquet", columns=["mk", "sq"])
 
@@ -1238,6 +1370,7 @@ def build_dev_eval_sets() -> dict:
                          for d, *_ in DIRECTIONS])
         write_parquet(ids, DEV_IDS)
     ids = pl.read_parquet(DEV_IDS)
+    expect("dev_eval_ids", X.content_sha256(zip(ids["direction"], ids["row_idx"].cast(pl.Utf8))))
     sets = {}
     for d, s_col, t_col, sl, tl in DIRECTIONS:
         rows = dev.select(pl.all().gather(ids.filter(pl.col("direction") == d)["row_idx"].to_list()))
@@ -1306,10 +1439,13 @@ def memory_probe(train_ds: Dataset, tok) -> dict:
         return probe
     lengths = train_ds.data.column("length").to_numpy()
     order = np.argsort(-lengths, kind="stable")
-    model = AutoModelForSeq2SeqLM.from_pretrained(BASE_MODEL, token=TOKEN).cuda()
+    model = AutoModelForSeq2SeqLM.from_pretrained(BASE_MODEL, token=TOKEN, revision=BASE_REVISION).cuda()
     model.train()
     smoother = LabelSmoother(epsilon=0.1)
-    attempts = [(16, 8, False), (8, 16, False), (4, 32, False), (16, 8, True), (8, 16, True), (4, 32, True)]
+    if TRAIN.get("per_device_batch"):  # the config fixes the batch: verify that exact setting only
+        attempts = [(int(TRAIN["per_device_batch"]), int(TRAIN["grad_accumulation"]), bool(TRAIN["gradient_checkpointing"]))]
+    else:
+        attempts = [(16, 8, False), (8, 16, False), (4, 32, False), (16, 8, True), (8, 16, True), (4, 32, True)]
     chosen = None
     tried = []
     for bs, ga, gc_on in attempts:
@@ -1355,22 +1491,24 @@ def memory_probe(train_ds: Dataset, tok) -> dict:
     del model
     free_gpu()
     if chosen is None:
-        raise Fatal(f"memory probe failed at every setting, including batch 4 with gradient checkpointing: {tried}")
+        raise Fatal(f"memory probe failed at every allowed setting: {tried}")
     write_json(PROBE_JSON, chosen)
     return chosen
 
 
 def make_training_args(probe: dict) -> Seq2SeqTrainingArguments:
     wanted = dict(
-        output_dir=str(CKPT), optim="adafactor", learning_rate=1e-4, warmup_steps=1000, lr_scheduler_type="linear",
-        num_train_epochs=1, label_smoothing_factor=0.1, weight_decay=0.01, max_grad_norm=1.0,
-        bf16=True, tf32=True, group_by_length=True,
+        output_dir=str(CKPT), optim=TRAIN["optim"], learning_rate=float(TRAIN["learning_rate"]),
+        warmup_steps=int(TRAIN["warmup_steps"]), lr_scheduler_type=TRAIN["lr_scheduler"],
+        num_train_epochs=TRAIN["epochs"], label_smoothing_factor=float(TRAIN["label_smoothing"]),
+        weight_decay=float(TRAIN["weight_decay"]), max_grad_norm=float(TRAIN["max_grad_norm"]),
+        bf16=bool(TRAIN["bf16"]), tf32=bool(TRAIN["tf32"]), group_by_length=TRAIN["sampling"] == "group_by_length",
         per_device_train_batch_size=probe["per_device_train_batch_size"],
         gradient_accumulation_steps=probe["gradient_accumulation_steps"],
         gradient_checkpointing=probe["gradient_checkpointing"], per_device_eval_batch_size=GEN_BATCH,
-        dataloader_num_workers=8, save_total_limit=3,
+        dataloader_num_workers=int(TRAIN["dataloader_num_workers"]), save_total_limit=int(TRAIN["save_total_limit"]),
         eval_strategy="steps", eval_steps=EVAL_STEPS, save_strategy="steps", save_steps=EVAL_STEPS,
-        load_best_model_at_end=True, metric_for_best_model="eval_chrf", greater_is_better=True,
+        load_best_model_at_end=True, metric_for_best_model=CFG["checkpoint_selection"]["metric"], greater_is_better=True,
         logging_strategy="steps", logging_steps=LOG_STEPS, report_to="none", seed=SEED, data_seed=SEED,
         disable_tqdm=True, save_safetensors=True, predict_with_generate=False, remove_unused_columns=True,
         length_column_name="length", gradient_checkpointing_kwargs={"use_reentrant": False},
@@ -1381,8 +1519,8 @@ def make_training_args(probe: dict) -> Seq2SeqTrainingArguments:
     if "eval_strategy" not in fields:
         wanted["evaluation_strategy"] = wanted.pop("eval_strategy")
     if "group_by_length" not in fields and "train_sampling_strategy" in fields:  # transformers 5
-        del wanted["group_by_length"]
-        wanted["train_sampling_strategy"] = "group_by_length"
+        if wanted.pop("group_by_length"):
+            wanted["train_sampling_strategy"] = "group_by_length"
     dropped = sorted(k for k in wanted if k not in fields)
     if set(dropped) - optional:
         raise Fatal(f"this transformers version ({transformers.__version__}) lacks training arguments {dropped}")
@@ -1413,10 +1551,10 @@ def _truncate_csv(path: Path, max_step: int) -> None:
 def _append_train_log(row: dict) -> None:
     new = not TRAIN_LOG.exists()
     with open(TRAIN_LOG, "a", newline="", encoding="utf-8") as f:
-        w = csv.DictWriter(f, fieldnames=TRAIN_LOG_FIELDS)
+        w = csv.DictWriter(f, fieldnames=(*TRAIN_LOG_FIELDS, *PROV_COLS))
         if new:
             w.writeheader()
-        w.writerow({k: ("" if row.get(k) is None else row[k]) for k in TRAIN_LOG_FIELDS})
+        w.writerow({**{k: ("" if row.get(k) is None else row[k]) for k in TRAIN_LOG_FIELDS}, **PROV_COLS})
 
 
 def _append_dev_curve(row: dict) -> pl.DataFrame:
@@ -1447,7 +1585,7 @@ def plot_curves() -> None:
         ax2.grid(alpha=0.3)
         fig.tight_layout()
         tmp = _tmp(CURVES_PNG)
-        fig.savefig(tmp, format="png", dpi=120)
+        fig.savefig(tmp, format="png", dpi=120, metadata={"Description": json.dumps(PROV)})
         os.replace(tmp, CURVES_PNG)
     except Exception as e:  # noqa: BLE001
         LOG.warning("could not draw %s: %s", rel(CURVES_PNG), e)
@@ -1492,6 +1630,7 @@ class TrainingMonitor(TrainerCallback):
                      fmt_dur(per_step * state.max_steps), fmt_dur(per_step * (state.max_steps - step)))
 
     def on_save(self, args, state, control, **kwargs):
+        write_provenance(Path(args.output_dir) / f"checkpoint-{state.global_step}")
         if UPLOADER is not None:
             best = Path(state.best_model_checkpoint).name if state.best_model_checkpoint else None
             UPLOADER.upload_checkpoint(Path(args.output_dir) / f"checkpoint-{state.global_step}", best)
@@ -1654,7 +1793,7 @@ def step8_train():
     if (FINAL / "model.safetensors").exists():
         LOG.info("loaded from disk: %s -- training already finished, skipped", rel(FINAL))
         return None
-    tok = AutoTokenizer.from_pretrained(BASE_MODEL, token=TOKEN)
+    tok = AutoTokenizer.from_pretrained(BASE_MODEL, token=TOKEN, revision=BASE_REVISION)
     train_ds = load_from_disk(str(TOKD / "train"))
     dev_ds = load_from_disk(str(TOKD / "dev"))
     dev_sets = build_dev_eval_sets()
@@ -1673,7 +1812,7 @@ def step8_train():
              transformers.__version__)
     update_run_info(memory_probe=probe, training_args=args.to_dict())
 
-    model = AutoModelForSeq2SeqLM.from_pretrained(BASE_MODEL, token=TOKEN)
+    model = AutoModelForSeq2SeqLM.from_pretrained(BASE_MODEL, token=TOKEN, revision=BASE_REVISION)
     if probe["gradient_checkpointing"]:
         model.config.use_cache = False
     collator = NllbCollator(tok, model.config.decoder_start_token_id)
@@ -1730,7 +1869,8 @@ def step9_save_final(trainer) -> None:
         shutil.rmtree(tmp)
     trainer.model.config.use_cache = True
     trainer.save_model(str(tmp))
-    AutoTokenizer.from_pretrained(BASE_MODEL, token=TOKEN).save_pretrained(str(tmp))
+    AutoTokenizer.from_pretrained(BASE_MODEL, token=TOKEN, revision=BASE_REVISION).save_pretrained(str(tmp))
+    write_provenance(tmp)
     os.replace(tmp, FINAL)
     AutoTokenizer.from_pretrained(str(FINAL))  # reload check
     LOG.info("saved %s: %s", rel(FINAL), sorted(p.name for p in FINAL.iterdir()))
@@ -1762,6 +1902,7 @@ def _ct2_convert(src: Path, out: Path) -> None:
     r = subprocess.run(cmd, capture_output=True, text=True)
     if r.returncode != 0:
         raise Fatal(f"ct2-transformers-converter failed (exit {r.returncode}):\n{r.stderr[-3000:]}")
+    write_provenance(tmp)
     if out.exists():
         shutil.rmtree(out)
     os.replace(tmp, out)
@@ -1772,7 +1913,7 @@ def step10_ct2() -> None:
     _ct2_convert(FINAL, CT2_FT)
     if not (CT2_BASE / "model.bin").exists():
         base_local = Path(BASE_MODEL) if Path(BASE_MODEL).is_dir() else Path(snapshot_download(
-            BASE_MODEL, token=TOKEN, allow_patterns=["*.json", "*.bin", "*.safetensors", "*.model"]))
+            BASE_MODEL, token=TOKEN, revision=BASE_REVISION, allow_patterns=["*.json", "*.bin", "*.safetensors", "*.model"]))
         _ct2_convert(base_local, CT2_BASE)
     else:
         LOG.info("loaded from disk: %s", rel(CT2_BASE))
@@ -1854,8 +1995,8 @@ class Engine:
     def __init__(self, col: str, device: str, ctype: str):
         self.col = col
         if col == "base":
-            self.tok = AutoTokenizer.from_pretrained(BASE_MODEL, token=TOKEN)
-            self.model = load_hf_model(BASE_MODEL)
+            self.tok = AutoTokenizer.from_pretrained(BASE_MODEL, token=TOKEN, revision=BASE_REVISION)
+            self.model = load_hf_model(BASE_MODEL, BASE_REVISION)
         elif col == "finetuned_hf":
             self.tok = AutoTokenizer.from_pretrained(str(FINAL))
             self.model = load_hf_model(FINAL)
@@ -1971,6 +2112,59 @@ def step12_final_eval() -> None:
 # ============================================================================
 # STEP 13 -- finish
 # ============================================================================
+def step12b_analysis() -> None:
+    """Overlap audit, Term Success Rate and number fidelity (scripts/eval/analyze_gazette_results.py)."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("analyze_gazette_results",
+                                                  ROOT / "scripts" / "eval" / "analyze_gazette_results.py")
+    A = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(A)
+    outputs = A.run(EXP_ID, work_dir=W, provenance=PROV)
+    UPLOADER.upload_files([(p, f"eval/{p.name}") for p in outputs], "analysis: overlap, terminology, numbers")
+
+
+SMALL_ARTIFACTS = {  # experiments/<ID>/<path> <- runs/<ID>/<path>
+    "run_info.json": "eval/run_info.json", "train_log.csv": "eval/train_log.csv", "dev_curve.csv": "eval/dev_curve.csv",
+    "progress.log": "progress.log", "figures/training_curves.png": "eval/training_curves.png",
+    "results/gazette_test_results.csv": "eval/gazette_test_results.csv", "results/flores_results.csv": "eval/flores_results.csv",
+    "results/ntrex_results.csv": "eval/ntrex_results.csv",
+    "analysis/gazette_test_overlap_results.csv": "eval/gazette_test_overlap_results.csv",
+    "analysis/terminology_results.csv": "eval/terminology_results.csv",
+    "analysis/number_fidelity_results.csv": "eval/number_fidelity_results.csv",
+}
+
+
+def export_small_artifacts() -> Path:
+    """Copy the small artifacts into experiments/<ID>/ (for the user to commit), with sha256 in SOURCES.json."""
+    dest = ROOT / "experiments" / EXP_ID
+    dest.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(X.config_path(EXP_ID), dest / "config.yaml")
+    files = []
+    files.append({"path": "config.yaml", "source": PROV["config_path"], "sha256": X.sha256_file(dest / "config.yaml")})
+    for rel_dest, rel_src in SMALL_ARTIFACTS.items():
+        src_p = W / rel_src
+        if not src_p.exists():
+            LOG.warning("export: %s missing -- not copied", rel(src_p))
+            continue
+        out_p = dest / rel_dest
+        out_p.parent.mkdir(parents=True, exist_ok=True)
+        entry = {"path": rel_dest, "source": f"{WORK_DIR}/{rel_src}", "hf_location": f"hf://{HF_RESULTS_REPO}/{rel_src}"}
+        if rel_dest == "progress.log":  # example translations quote corpus sentences (they contain Verbis terms)
+            redacted, n = X.redact_log_examples(src_p.read_text(encoding="utf-8"))
+            out_p.write_text(redacted, encoding="utf-8")
+            entry.update(source_sha256=X.sha256_file(src_p), redacted=f"{n} example-translation records removed")
+        else:
+            shutil.copy2(src_p, out_p)
+            assert X.sha256_file(out_p) == X.sha256_file(src_p), f"copy of {src_p} differs"
+        entry["sha256"] = X.sha256_file(out_p)
+        files.append(entry)
+    (dest / "SOURCES.json").write_text(json.dumps({"exp_id": EXP_ID, "provenance": PROV, "files": files}, indent=2) + "\n",
+                                       encoding="utf-8")
+    LOG.info("copied %d small artifacts to %s -- commit them together with experiments/registry.csv", len(files),
+             dest.relative_to(ROOT))
+    return dest
+
+
 def step13_finish(t_start: float) -> bool:
     info = read_run_info()
     tables = [format_results(name, pl.read_csv(EVAL / res)) for name, _, res in TESTSETS]
@@ -1984,10 +2178,12 @@ def step13_finish(t_start: float) -> bool:
         f"best dev step: {summary.get('best_dev_step')} | best dev chrF++ (mean): {summary.get('best_dev_chrf_mean')}",
         f"CTranslate2 device: {info.get('ct2_device')} ({info.get('ct2_compute_type')})",
         "", *[t + "\n" for t in tables],
+        "provenance: " + json.dumps(PROV),
     ])
     write_text(DONE, text + "\n")
     update_run_info(upload=False, finished_at=now_iso(), last_invocation_runtime_s=round(runtime))
     LOG.info("summary:\n%s", text)
+    export_small_artifacts()
     for attempt in range(1, 4):
         try:
             UPLOADER.upload_everything()
@@ -2004,11 +2200,27 @@ def step13_finish(t_start: float) -> bool:
     return False
 
 
+USAGE = ("usage: python scripts/train/train_nllb_gazette_verbis_ct2.py <EXPERIMENT_ID>\n"
+         "       e.g. python scripts/train/train_nllb_gazette_verbis_ct2.py E02_gazette_only\n"
+         "All settings come from configs/<EXPERIMENT_ID>.yaml; there are no other arguments.")
+
+
 def main() -> None:
     t_start = time.time()
+    if len(sys.argv) != 2 or sys.argv[1].startswith("-"):
+        print(USAGE, flush=True)
+        sys.exit(2)
+    try:
+        configure(sys.argv[1], for_run=True)
+    except Fatal as e:
+        print(f"ERROR: {e}", flush=True)
+        sys.exit(1)
     setup_logging()
     LOG.info("=" * 78)
     LOG.info("run started (pid %d): %s", os.getpid(), " ".join(sys.argv))
+    LOG.info("experiment %s | config %s (sha256 %s) | commit %s | results repo %s", EXP_ID, PROV["config_path"],
+             PROV["config_sha256"][:12], PROV["git_commit"][:12], HF_RESULTS_REPO)
+    LOG.info("provenance: %s", json.dumps(PROV))
     run_step(1, "preflight", step1_preflight)
     run_step(2, "gazette corpus", step2_gazette)
     run_step(3, "external test sets", step3_external)
@@ -2023,6 +2235,7 @@ def main() -> None:
     run_step(10, "ctranslate2 conversion", step10_ct2)
     run_step(11, "ctranslate2 smoke test", step11_smoke)
     run_step(12, "FINAL EVALUATION", step12_final_eval)
+    run_step(12, "analysis (overlap, terminology, numbers)", step12b_analysis)
     ok = run_step(13, "finish", step13_finish, t_start)
     LOG.info("results repo: %s", UPLOADER.url)
     sys.exit(0 if ok else 1)

@@ -1,0 +1,9 @@
+model,direction,n_sentences,match_rate_all,n_with_numbers,match_rate_with_numbers
+reference,mk_sq,10174,70.33,8130,66.51
+base,mk_sq,10174,78.16,8130,72.74
+finetuned_hf,mk_sq,10174,83.87,8130,79.91
+finetuned_ct2,mk_sq,10174,83.58,8130,79.56
+reference,sq_mk,10174,70.33,8320,64.99
+base,sq_mk,10174,71.21,8320,64.89
+finetuned_hf,sq_mk,10174,83.7,8320,80.41
+finetuned_ct2,sq_mk,10174,82.97,8320,79.4

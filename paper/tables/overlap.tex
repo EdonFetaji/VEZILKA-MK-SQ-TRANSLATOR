@@ -1,0 +1,20 @@
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{llrrrr}
+\toprule
+Class & Dir. & \% pairs & E00\_base Base (E00) & E01\_gazette\_verbis\_mix FT HF & E01\_gazette\_verbis\_mix FT CT2 int8 \\
+\midrule
+exact template & MK$\rightarrow$SQ & 18.24 & 51.88 & 81.65 & 81.64 \\
+exact template & SQ$\rightarrow$MK & 18.24 & 50.45 & 86.66 & 86.44 \\
+near duplicate & MK$\rightarrow$SQ & 30.34 & 50.59 & 75.25 & 75.27 \\
+near duplicate & SQ$\rightarrow$MK & 30.34 & 53.09 & 81.78 & 81.73 \\
+novel & MK$\rightarrow$SQ & 51.42 & 49.88 & 69.07 & 69.17 \\
+novel & SQ$\rightarrow$MK & 51.42 & 52.45 & 75.38 & 75.34 \\
+all & MK$\rightarrow$SQ & 100.00 & 50.30 & 72.28 & 72.35 \\
+all & SQ$\rightarrow$MK & 100.00 & 52.46 & 78.55 & 78.49 \\
+\bottomrule
+\end{tabular}
+\caption{Gazette test chrF++ by overlap with the training sentences. Generated from \texttt{paper/results\_registry.csv}.}
+\label{tab:overlap}
+\end{table}

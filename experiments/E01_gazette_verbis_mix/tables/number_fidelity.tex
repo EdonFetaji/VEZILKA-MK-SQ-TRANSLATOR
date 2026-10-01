@@ -1,0 +1,20 @@
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{llrrrr}
+\toprule
+System & Dir. & Sentences & Match (all) & Sentences with numbers & Match (with numbers) \\
+\midrule
+Human reference & MK$\rightarrow$SQ & 10174 & 70.33 & 8130 & 66.51 \\
+Base (E00) & MK$\rightarrow$SQ & 10174 & 78.16 & 8130 & 72.74 \\
+Fine-tuned HF (E01) & MK$\rightarrow$SQ & 10174 & 83.87 & 8130 & 79.91 \\
+Fine-tuned CT2 int8 (E01) & MK$\rightarrow$SQ & 10174 & 83.58 & 8130 & 79.56 \\
+Human reference & SQ$\rightarrow$MK & 10174 & 70.33 & 8320 & 64.99 \\
+Base (E00) & SQ$\rightarrow$MK & 10174 & 71.21 & 8320 & 64.89 \\
+Fine-tuned HF (E01) & SQ$\rightarrow$MK & 10174 & 83.70 & 8320 & 80.41 \\
+Fine-tuned CT2 int8 (E01) & SQ$\rightarrow$MK & 10174 & 82.97 & 8320 & 79.40 \\
+\bottomrule
+\end{tabular}
+\caption{Number fidelity: share of sentences whose multiset of digit sequences in the output equals that of the source (\%). Source: \texttt{eval/number\_fidelity\_results.csv}.}
+\label{tab:e01-number_fidelity}
+\end{table}

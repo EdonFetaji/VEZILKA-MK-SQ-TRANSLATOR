@@ -216,7 +216,7 @@ def preflight() -> tuple[str, str]:
     if missing:
         print("missing dependencies:", ", ".join(missing), file=sys.stderr)
         print("\ninstall them with:\n", file=sys.stderr)
-        print(f"    {sys.executable} -m pip install -r scripts/requirements-opus.txt\n", file=sys.stderr)
+        print(f"    {sys.executable} -m pip install -r scripts/data/requirements-opus.txt\n", file=sys.stderr)
         raise SystemExit(1)
 
     WORK_DIR.mkdir(parents=True, exist_ok=True)

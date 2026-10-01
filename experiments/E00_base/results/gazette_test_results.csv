@@ -1,0 +1,3 @@
+model,direction,n_sentences,bleu,chrf,bleu_signature,chrf_signature,timestamp
+base,mk_sq,10174,27.74,50.3,nrefs:1|case:mixed|eff:no|tok:13a|smooth:exp|version:2.6.0,nrefs:1|case:mixed|eff:yes|nc:6|nw:2|space:no|version:2.6.0,2026-09-22T02:28:14+00:00
+base,sq_mk,10174,29.63,52.46,nrefs:1|case:mixed|eff:no|tok:13a|smooth:exp|version:2.6.0,nrefs:1|case:mixed|eff:yes|nc:6|nw:2|space:no|version:2.6.0,2026-09-22T02:28:18+00:00

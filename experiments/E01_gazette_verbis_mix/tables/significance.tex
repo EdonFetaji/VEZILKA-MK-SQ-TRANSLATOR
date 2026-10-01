@@ -1,0 +1,24 @@
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lllrrrrrr}
+\toprule
+Test set & Dir. & Metric & Base & Base 95\% CI & FT & FT 95\% CI & $\Delta$ & p \\
+\midrule
+Gazette test & MK$\rightarrow$SQ & BLEU & 27.74 & [27.21, 28.29] & 54.02 & [53.36, 54.69] & 26.27 & 0.001 \\
+Gazette test & MK$\rightarrow$SQ & chrF++ & 50.30 & [49.86, 50.74] & 72.28 & [71.78, 72.80] & 21.98 & 0.001 \\
+Gazette test & SQ$\rightarrow$MK & BLEU & 29.63 & [28.95, 30.35] & 63.64 & [62.90, 64.37] & 34.01 & 0.001 \\
+Gazette test & SQ$\rightarrow$MK & chrF++ & 52.46 & [52.00, 52.94] & 78.55 & [77.96, 79.13] & 26.09 & 0.001 \\
+FLORES+ devtest & MK$\rightarrow$SQ & BLEU & 22.08 & [21.21, 22.92] & 19.45 & [18.64, 20.24] & -2.63 & 0.001 \\
+FLORES+ devtest & MK$\rightarrow$SQ & chrF++ & 48.58 & [47.84, 49.29] & 46.61 & [45.94, 47.25] & -1.98 & 0.001 \\
+FLORES+ devtest & SQ$\rightarrow$MK & BLEU & 21.39 & [20.48, 22.21] & 18.89 & [17.88, 19.89] & -2.50 & 0.001 \\
+FLORES+ devtest & SQ$\rightarrow$MK & chrF++ & 49.50 & [48.76, 50.22] & 49.07 & [48.28, 49.84] & -0.43 & 0.089 \\
+NTREX-128 & MK$\rightarrow$SQ & BLEU & 23.14 & [22.53, 23.74] & 18.13 & [17.48, 18.71] & -5.00 & 0.001 \\
+NTREX-128 & MK$\rightarrow$SQ & chrF++ & 48.91 & [48.42, 49.40] & 44.49 & [44.01, 45.00] & -4.41 & 0.001 \\
+NTREX-128 & SQ$\rightarrow$MK & BLEU & 21.25 & [20.54, 21.96] & 17.98 & [17.28, 18.67] & -3.26 & 0.001 \\
+NTREX-128 & SQ$\rightarrow$MK & chrF++ & 49.54 & [48.98, 50.11] & 47.05 & [46.49, 47.61] & -2.49 & 0.001 \\
+\bottomrule
+\end{tabular}
+\caption{Paired bootstrap, base vs fine-tuned HF: scores with 95\% confidence intervals of the bootstrap mean. Source: \texttt{eval/translations\_{gazette\_test,flores,ntrex}.parquet (recomputed); results.json\#significance}.}
+\label{tab:e01-significance}
+\end{table}

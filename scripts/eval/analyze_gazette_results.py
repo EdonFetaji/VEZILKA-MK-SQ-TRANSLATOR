@@ -2,11 +2,18 @@
 """Error analysis of the Gazette test results -- no retraining, no GPU.
 
     cd ~/VEZILKA-MK-SQ-TRANSLATOR
-    python3 scripts/analyze_gazette_results.py
+    python3 scripts/eval/analyze_gazette_results.py E02_gazette_only
 
-Reads the cached translations (work/eval/translations_gazette_test.parquet,
-written by step 12 of train_nllb_gazette_verbis_ct2.py) and the processed data
-in work/data/processed/, and writes:
+Exactly one argument, the experiment ID; the experiment's work directory comes from
+configs/<ID>.yaml (outputs.work_dir). The training script runs this analysis itself
+(step 12b); run it by hand only to redo the analysis of an unfinished experiment --
+experiments marked "done" in experiments/registry.csv are refused (their results are
+frozen; E01's were produced by the pre-registry version of this script at commit 1fec5bb).
+
+Reads the cached translations (<work_dir>/eval/translations_gazette_test.parquet,
+written by step 12 of scripts/train/train_nllb_gazette_verbis_ct2.py) and the processed
+data in <work_dir>/data/processed/, and writes (every CSV carries the provenance columns
+exp_id, git_commit, config_sha256, manifest_*_sha256):
 
   1. work/eval/gazette_test_overlap_results.csv
      Overlap audit, Gazette test vs the Gazette training sentences the model
@@ -37,6 +44,7 @@ not private nothing is uploaded and the script exits non-zero.
 
 from __future__ import annotations
 
+import json
 import os
 import random
 import re
@@ -50,18 +58,28 @@ import numpy as np
 import polars as pl
 from sacrebleu.metrics import BLEU, CHRF
 
-HF_RESULTS_REPO = "EdonFetaji/mk-sq-nllb600m-gazette-verbis"  # PRIVATE
+HF_RESULTS_REPO = None  # PRIVATE, from the experiment config
 SEED = 42
 
-ROOT = Path(__file__).resolve().parents[1]
-WORK = ROOT / "work"
-PROC = WORK / "data" / "processed"
-EVAL = WORK / "eval"
-TRANSLATIONS = EVAL / "translations_gazette_test.parquet"
-OUT_OVERLAP = EVAL / "gazette_test_overlap_results.csv"
-OUT_TERMS = EVAL / "terminology_results.csv"
-OUT_NUMBERS = EVAL / "number_fidelity_results.csv"
-OUT_PAIRS = EVAL / "gazette_test_overlap_pairs.parquet"  # per-pair classes, local only
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "src"))
+from mksq import experiment as X  # noqa: E402
+
+PROV: dict = {}
+PROV_COLS: dict = {}
+
+
+def configure(exp_id: str, work_dir: Path, provenance: dict) -> None:
+    global WORK, PROC, EVAL, TRANSLATIONS, OUT_OVERLAP, OUT_TERMS, OUT_NUMBERS, OUT_PAIRS, HF_RESULTS_REPO, PROV, PROV_COLS
+    WORK = Path(work_dir)
+    PROC, EVAL = WORK / "data" / "processed", WORK / "eval"
+    TRANSLATIONS = EVAL / "translations_gazette_test.parquet"
+    OUT_OVERLAP = EVAL / "gazette_test_overlap_results.csv"
+    OUT_TERMS = EVAL / "terminology_results.csv"
+    OUT_NUMBERS = EVAL / "number_fidelity_results.csv"
+    OUT_PAIRS = EVAL / "gazette_test_overlap_pairs.parquet"  # per-pair classes, local only
+    HF_RESULTS_REPO = X.load_config(exp_id)["outputs"]["hf_results_repo"]
+    PROV, PROV_COLS = provenance, X.provenance_columns(provenance)
 
 MODELS = ("base", "finetuned_hf", "finetuned_ct2")
 DIRECTIONS = (("mk_sq", "mk", "sq"), ("sq_mk", "sq", "mk"))  # (name, source side, target side)
@@ -90,10 +108,11 @@ def table(df: pl.DataFrame) -> str:
 
 
 def write_csv(df: pl.DataFrame, path: Path) -> None:
+    df = df.with_columns([pl.lit(v).alias(k) for k, v in PROV_COLS.items() if k not in df.columns])
     tmp = path.with_name(path.name + ".tmp")
     df.write_csv(tmp)
     os.replace(tmp, path)
-    say(f"wrote {path.relative_to(ROOT)}")
+    say(f"wrote {path}")
 
 
 def scores(hyps: list[str], refs: list[str]) -> tuple[float | None, float | None]:
@@ -208,8 +227,10 @@ def overlap_audit(test: pl.DataFrame, blocks: dict, models: list[str]) -> pl.Dat
                 classes[i] = "near_duplicate"
     pairs = test.select([c for c in ("pair_id", "issue_key", "mk", "sq") if c in test.columns]).with_columns(
         overlap_class=pl.Series(classes), best_train_jaccard=pl.Series(best_j.round(4)))
+    import pyarrow.parquet as pq
     tmp = OUT_PAIRS.with_name(OUT_PAIRS.name + ".tmp")
-    pairs.write_parquet(tmp, compression="zstd")
+    table = pairs.to_arrow()
+    pq.write_table(table.replace_schema_metadata({b"provenance": json.dumps(PROV).encode()}), tmp, compression="zstd")
     os.replace(tmp, OUT_PAIRS)
 
     rows = []
@@ -369,15 +390,31 @@ def upload(paths: list[Path]) -> bool:
     return True
 
 
-def main() -> None:
+def run(exp_id: str, work_dir: Path, provenance: dict) -> list[Path]:
+    """The three analyses for one experiment; returns the CSVs written (also called by the training script)."""
+    configure(exp_id, work_dir, provenance)
     random.seed(SEED)
-    say(f"Gazette test error analysis -- {datetime.now().astimezone().isoformat(timespec='seconds')}")
+    say(f"Gazette test error analysis for {exp_id} -- {datetime.now().astimezone().isoformat(timespec='seconds')}")
     test, blocks, models = load_inputs()
     overlap_audit(test, blocks, models)
     terminology(blocks, models)
     number_fidelity(blocks, models)
+    return [OUT_OVERLAP, OUT_TERMS, OUT_NUMBERS]
+
+
+def main() -> None:
+    if len(sys.argv) != 2 or sys.argv[1].startswith("-"):
+        sys.exit("usage: python scripts/eval/analyze_gazette_results.py <EXPERIMENT_ID>")
+    exp_id = sys.argv[1]
+    cfg = X.load_config(exp_id)
+    if "done" in (X.registry_row(exp_id)["status"], cfg.get("status")):
+        sys.exit(f"ERROR: {exp_id} is done; its analysis results are frozen and are not overwritten.")
+    dirty = X.uncommitted()
+    if dirty:
+        sys.exit("ERROR: uncommitted changes -- commit first so the outputs map to a commit:\n  " + "\n  ".join(dirty))
+    outputs = run(exp_id, ROOT / cfg["outputs"]["work_dir"], X.provenance(exp_id))
     say()
-    sys.exit(0 if upload([OUT_OVERLAP, OUT_TERMS, OUT_NUMBERS]) else 1)
+    sys.exit(0 if upload(outputs) else 1)
 
 
 if __name__ == "__main__":

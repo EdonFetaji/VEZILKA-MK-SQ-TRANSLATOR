@@ -1,0 +1,30 @@
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lllrrrrrrr}
+\toprule
+Test set & Dir. & System & n & BLEU & chrF++ & $\Delta$BLEU & $\Delta$chrF++ & p (BLEU) & p (chrF++) \\
+\midrule
+Gazette test & MK$\rightarrow$SQ & Base (E00) & 10174 & 27.74 & 50.30 & -- & -- & -- & -- \\
+Gazette test & MK$\rightarrow$SQ & Fine-tuned HF (E01) & 10174 & 54.02 & 72.28 & 26.27 & 21.98 & 0.001 & 0.001 \\
+Gazette test & MK$\rightarrow$SQ & Fine-tuned CT2 int8 (E01) & 10174 & 54.08 & 72.35 & 26.33 & 22.05 & -- & -- \\
+Gazette test & SQ$\rightarrow$MK & Base (E00) & 10174 & 29.63 & 52.46 & -- & -- & -- & -- \\
+Gazette test & SQ$\rightarrow$MK & Fine-tuned HF (E01) & 10174 & 63.64 & 78.55 & 34.01 & 26.09 & 0.001 & 0.001 \\
+Gazette test & SQ$\rightarrow$MK & Fine-tuned CT2 int8 (E01) & 10174 & 63.45 & 78.49 & 33.82 & 26.03 & -- & -- \\
+FLORES+ devtest & MK$\rightarrow$SQ & Base (E00) & 1012 & 22.08 & 48.58 & -- & -- & -- & -- \\
+FLORES+ devtest & MK$\rightarrow$SQ & Fine-tuned HF (E01) & 1012 & 19.45 & 46.61 & -2.63 & -1.98 & 0.001 & 0.001 \\
+FLORES+ devtest & MK$\rightarrow$SQ & Fine-tuned CT2 int8 (E01) & 1012 & 19.22 & 46.57 & -2.86 & -2.01 & -- & -- \\
+FLORES+ devtest & SQ$\rightarrow$MK & Base (E00) & 1012 & 21.39 & 49.50 & -- & -- & -- & -- \\
+FLORES+ devtest & SQ$\rightarrow$MK & Fine-tuned HF (E01) & 1012 & 18.89 & 49.07 & -2.50 & -0.43 & 0.001 & 0.089 \\
+FLORES+ devtest & SQ$\rightarrow$MK & Fine-tuned CT2 int8 (E01) & 1012 & 18.83 & 48.97 & -2.56 & -0.53 & -- & -- \\
+NTREX-128 & MK$\rightarrow$SQ & Base (E00) & 1997 & 23.14 & 48.91 & -- & -- & -- & -- \\
+NTREX-128 & MK$\rightarrow$SQ & Fine-tuned HF (E01) & 1997 & 18.13 & 44.49 & -5.00 & -4.41 & 0.001 & 0.001 \\
+NTREX-128 & MK$\rightarrow$SQ & Fine-tuned CT2 int8 (E01) & 1997 & 18.22 & 44.54 & -4.91 & -4.37 & -- & -- \\
+NTREX-128 & SQ$\rightarrow$MK & Base (E00) & 1997 & 21.25 & 49.54 & -- & -- & -- & -- \\
+NTREX-128 & SQ$\rightarrow$MK & Fine-tuned HF (E01) & 1997 & 17.98 & 47.05 & -3.26 & -2.49 & 0.001 & 0.001 \\
+NTREX-128 & SQ$\rightarrow$MK & Fine-tuned CT2 int8 (E01) & 1997 & 17.95 & 47.06 & -3.30 & -2.48 & -- & -- \\
+\bottomrule
+\end{tabular}
+\caption{Main results: BLEU and chrF++ (beam 4). Deltas are against the base model; p-values from a paired bootstrap (1,000 resamples, seed 42), base vs fine-tuned HF. Source: \texttt{eval/gazette\_test\_results.csv, eval/flores\_results.csv, eval/ntrex\_results.csv; significance: results.json}.}
+\label{tab:e01-main_results}
+\end{table}

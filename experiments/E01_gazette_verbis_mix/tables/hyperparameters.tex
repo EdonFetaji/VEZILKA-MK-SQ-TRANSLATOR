@@ -1,0 +1,33 @@
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{ll}
+\toprule
+Setting & Value \\
+\midrule
+Base model & facebook/nllb-200-distilled-600M \\
+Base model snapshot & f8d333a098d19b4fd9a8b18f94170487ad3f821d \\
+Method & full-parameter SFT, bidirectional \\
+Optimizer & adafactor \\
+Learning rate & 0.0001 \\
+Schedule & linear, warmup 1000 steps \\
+Epochs & 1 \\
+Label smoothing & 0.1 \\
+Weight decay & 0.01 \\
+Max grad norm & 1.0 \\
+Precision & bf16 mixed precision, TF32 matmul \\
+Batch (per device × accumulation) & 8 × 16 = 128 \\
+Gradient checkpointing & False \\
+Batch sampling & group\_by\_length \\
+Max length (tokens, drop not truncate) & 192 \\
+Seed / data seed & 42 / 42 \\
+Total optimizer steps & 4,115 \\
+Evaluation / checkpoint interval & 1000 steps \\
+Checkpoint selection & eval\_chrf (mean dev chrF++ of both directions) \\
+Best step / dev chrF++ mean & 4115 / 73.6 \\
+Training time (h) & 1.361 \\
+\bottomrule
+\end{tabular}
+\caption{Training configuration as recorded. Source: \texttt{eval/run\_info.json, checkpoints/checkpoint-4115/trainer\_state.json}.}
+\label{tab:e01-hyperparameters}
+\end{table}

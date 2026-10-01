@@ -1,0 +1,56 @@
+{
+  "exp_id": "E00_base",
+  "derived_from": "E01_gazette_verbis_mix",
+  "note": "E00 was evaluated inside E01's final evaluation (same test sets, same decoding).",
+  "ci_source": "experiments/E01_gazette_verbis_mix/results.json (significance.base_vs_finetuned_hf.*.baseline)",
+  "files": [
+    {
+      "path": "results/gazette_test_results.csv",
+      "source": "experiments/E01_gazette_verbis_mix/results/gazette_test_results.csv",
+      "source_sha256": "ac5ebb869231b67984029c3b40f9f3700310664bf011704a1df81a2ffaad977e",
+      "filter": "model == 'base' (delta columns dropped)",
+      "rows": 2,
+      "sha256": "85bc96c507d5577253944a7ad7d913ff5f5a5be9b6d5d10803cd7ceccde217c2"
+    },
+    {
+      "path": "results/flores_results.csv",
+      "source": "experiments/E01_gazette_verbis_mix/results/flores_results.csv",
+      "source_sha256": "852f8b56618255974a7185c5be2efde814478ebbedc24746bcc4361e319e917d",
+      "filter": "model == 'base' (delta columns dropped)",
+      "rows": 2,
+      "sha256": "a7a925c30667b7cf3bedd77f0479631ef6070acfad7df3350bbe2d0b194dbf2f"
+    },
+    {
+      "path": "results/ntrex_results.csv",
+      "source": "experiments/E01_gazette_verbis_mix/results/ntrex_results.csv",
+      "source_sha256": "25e784fa9d7a89e4a0ecf8ebcb9a7e87dc67141fbb9a671e6f9f1aba20f97dd8",
+      "filter": "model == 'base' (delta columns dropped)",
+      "rows": 2,
+      "sha256": "ea035aa4c5ee25f71652c4c66470ed3add70999000be275446023f97518fa0e8"
+    },
+    {
+      "path": "analysis/gazette_test_overlap_results.csv",
+      "source": "experiments/E01_gazette_verbis_mix/analysis/gazette_test_overlap_results.csv",
+      "source_sha256": "3a35994a439cbad90b82b4fe7feabebe4f87819f766ceec5f763f30d1ebc73dc",
+      "filter": "model == 'base'",
+      "rows": 8,
+      "sha256": "5e4414fd4c5815bd0129a9b37743306754e5674d3c5e0c336378cef50b0a42ec"
+    },
+    {
+      "path": "analysis/terminology_results.csv",
+      "source": "experiments/E01_gazette_verbis_mix/analysis/terminology_results.csv",
+      "source_sha256": "86879bb8d58c23e008b5090ac8d3e8bf809ae7fd153ea13d1f5995d53e98e141",
+      "filter": "model == 'base'",
+      "rows": 2,
+      "sha256": "033fb11ec3f5091e0c2ec262a34d5da62bb958c4a745f81d1591d9a926d8a86c"
+    },
+    {
+      "path": "analysis/number_fidelity_results.csv",
+      "source": "experiments/E01_gazette_verbis_mix/analysis/number_fidelity_results.csv",
+      "source_sha256": "6c78e3c599941a20fdf29cdb4f774f074fc1c72a9af10076a966eab7585c051a",
+      "filter": "model == 'base'",
+      "rows": 2,
+      "sha256": "842ad61fd4c397267b68ec1873e4ae853eaf8eab3418a0da9ac531fa05f681f4"
+    }
+  ]
+}

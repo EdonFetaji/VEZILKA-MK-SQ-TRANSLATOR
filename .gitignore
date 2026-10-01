@@ -24,3 +24,14 @@ work/
 __pycache__/
 *.pyc
 .env
+
+/demo
+# ── Experiment run outputs (small artifacts are copied to experiments/<ID>/) ──
+runs/
+checkpoints/
+tokenized/
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.ckpt

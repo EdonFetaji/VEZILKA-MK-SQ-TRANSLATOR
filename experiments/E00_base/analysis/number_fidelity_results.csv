@@ -1,0 +1,3 @@
+model,direction,n_sentences,match_rate_all,n_with_numbers,match_rate_with_numbers
+base,mk_sq,10174,78.16,8130,72.74
+base,sq_mk,10174,71.21,8320,64.89

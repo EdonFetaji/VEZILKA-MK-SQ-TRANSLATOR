@@ -1,0 +1,67 @@
+{
+  "dataset": "verbis",
+  "name": "Verbis MK-SQ terminology dictionary (APJ)",
+  "source": "https://api.verbis.gov.mk/api/words",
+  "publisher": "APJ (Agjencia e Zbatimit të Gjuhës)",
+  "access": "private (stored only in hf://EdonFetaji/mk-sq-nllb600m-gazette-verbis/data/verbis/, a private repo)",
+  "licence": "Redistribution not granted: requires the Agency's permission (scripts/data/verbis_harvest.py). Never commit Verbis data or example entries.",
+  "crawl_date": "NOT RECORDED",
+  "categories_crawled": "NOT RECORDED",
+  "storage_repo": "EdonFetaji/mk-sq-nllb600m-gazette-verbis",
+  "storage_revision": "3fad45be925bbdc88e6b07672628ba8e1b180178",
+  "row_counts": {
+    "entries": 15925,
+    "term_pairs": 15093,
+    "definition_pairs_scored": 15822,
+    "definition_pairs_kept": 15305
+  },
+  "filters": {
+    "labse_model": "sentence-transformers/LaBSE",
+    "labse_min_score": 0.7
+  },
+  "files": [
+    {
+      "path": "data/verbis/verbis_mk_sq.parquet",
+      "size_bytes": 2895908,
+      "sha256": "02206c4578c7f4c904b84cfe13e961d3c6ddd3d71fd3b4e081f0525be268eebc",
+      "git_blob_id": "42552e0ccc52eb52cf5f15ada1488d68903395db",
+      "last_commit": "3bb69c2dd0102865fc10178655e94aa3ef4b2e33"
+    },
+    {
+      "path": "data/verbis/verbis_terms.parquet",
+      "size_bytes": 303824,
+      "sha256": "58a4dc530ab52fc4468c4237463d91be48d3ac0100d078d0697e52cc53124fcd",
+      "git_blob_id": "ac8a87df6e565402e0503add45f838808d261038",
+      "last_commit": "563d6522096f745fbd81ac9fe8d2105a0f9fb966"
+    },
+    {
+      "path": "data/verbis/verbis_defs_scored.parquet",
+      "size_bytes": 2543863,
+      "sha256": "9b334db12dd13cb249e31c04a12b69c34f785601298e4867136402a3da6823b6",
+      "git_blob_id": "0a78278acaff93c0cbbe807f8f4543595b79f833",
+      "last_commit": "563d6522096f745fbd81ac9fe8d2105a0f9fb966"
+    },
+    {
+      "path": "data/verbis/verbis_defs.parquet",
+      "size_bytes": 2464376,
+      "sha256": "4964a9d4aa281e270debbae0dc53174e3b38fecb593535da653d3c5977db9a95",
+      "git_blob_id": "7c96592770743c70c35d79aafa4ce32df19fd12d",
+      "last_commit": "563d6522096f745fbd81ac9fe8d2105a0f9fb966"
+    }
+  ],
+  "local_cache": {
+    "path": "data/verbis_mk_sq.parquet",
+    "note": "downloaded from storage_repo by the training script"
+  },
+  "produced_by": [
+    "scripts/data/verbis_harvest.py (raw entries; its docstring names it verbis_dataset.py)",
+    "scripts/train/train_nllb_gazette_verbis_ct2.py step 4 (term/definition pairs, LaBSE scores)"
+  ],
+  "known_issues": [
+    "Redistribution not granted; stored privately.",
+    "Homoglyph repair applied at harvest: each field forced into a single script (Cyrillic/Latin).",
+    "Crawl date and categories were not recorded; the local harvest cache (scripts/verbis_cache/, 3610 entries) does not match the 15925 entries used, so it cannot establish them.",
+    "verbis_harvest.py's docstring states an entry total that differs from the dataset used.",
+    "No standalone audit script exists; cleaning and LaBSE scoring happen in the training script's step 4."
+  ]
+}

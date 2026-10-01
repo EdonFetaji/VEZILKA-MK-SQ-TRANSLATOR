@@ -27,7 +27,7 @@ import pyarrow as pa
 import pyarrow.compute as pc
 import pyarrow.parquet as pq
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
 from mksq.release import PUBLISHED_COLUMNS  # noqa: E402
 
@@ -222,7 +222,7 @@ def main() -> None:
     redaction = json.loads(sidecar.read_text()) if sidecar.exists() else {}
     if not redaction:
         print(f"  note: no {sidecar.name} beside the input -- the card's personal-data")
-        print("        section will show zeros. Run scripts/redact_corpus.py first.")
+        print("        section will show zeros. Run scripts/data/redact_corpus.py first.")
 
     data_dir = args.out / "data"
     data_dir.mkdir(parents=True, exist_ok=True)

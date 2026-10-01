@@ -1,0 +1,21 @@
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{ll}
+\toprule
+Quantity & Value \\
+\midrule
+Gazette train / dev / test (pairs) & 270,083 / 13,355 / 10,174 \\
+Removed as leakage: Gazette / Verbis terms / Verbis definitions & 30,157 / 25 / 0 \\
+Clean training pairs & 270,299 \\
+Bidirectional examples & 540,598 \\
+Dropped by length filter (> 192 tokens) & 13,894 (2.57\%) \\
+Tokenised training examples & 526,704 \\
+Composition: gazette & 479,852 (88.8\%) \\
+Composition: verbis defs & 30,610 (5.7\%) \\
+Composition: verbis terms & 30,136 (5.6\%) \\
+\bottomrule
+\end{tabular}
+\caption{Training data after leakage removal, bidirectional expansion and length filtering. Source: \texttt{eval/run\_info.json (dataset\_sizes), progress.log}.}
+\label{tab:e01-data}
+\end{table}

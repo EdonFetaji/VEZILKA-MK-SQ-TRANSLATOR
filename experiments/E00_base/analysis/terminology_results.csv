@@ -1,0 +1,3 @@
+model,direction,n_sentences_with_terms,n_term_occurrences,n_success,tsr,n_rare_occurrences,n_rare_success,rare_tsr
+base,mk_sq,6845,20049,11284,56.28,220,68,30.91
+base,sq_mk,5276,9863,5448,55.24,128,46,35.94

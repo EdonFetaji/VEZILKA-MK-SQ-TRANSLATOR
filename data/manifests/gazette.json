@@ -1,0 +1,86 @@
+{
+  "dataset": "gazette",
+  "name": "Sluzben vesnik MK-SQ legal parallel corpus",
+  "source": "https://huggingface.co/datasets/EdonFetaji/slvesnik-mk-sq",
+  "access": "public",
+  "licence": "cc-by-4.0",
+  "revision": "07af5bbbb2a2c5277e3eb9c032a86682148fb269",
+  "revision_note": "Pinned for E02 onwards. E01 did not record the revision it loaded; the repo HEAD (07af5bb, last modified 2026-09-21 09:59:27+00:00) predates E01's first invocation (2026-09-21 19:46:49 UTC).",
+  "revision_used_by": {
+    "E01_gazette_verbis_mix": "NOT RECORDED"
+  },
+  "row_counts": {
+    "train": 270083,
+    "validation": 13355,
+    "test": 10174
+  },
+  "split_method": "issue-disjoint",
+  "issue_overlap": {
+    "revision": "07af5bbbb2a2c5277e3eb9c032a86682148fb269",
+    "test_issues": 90,
+    "train_issues": 2099,
+    "test_issues_in_train": 0
+  },
+  "files": [
+    {
+      "path": "data/test-00000-of-00001.parquet",
+      "size_bytes": 1239094,
+      "sha256": "e89c5e5e5d8750db2ada0b9409871d1527b53311b9c0b97cbabc96225bd7a140",
+      "git_blob_id": "74523776c6daaf21f33fa48589fbd4c5104c69fe",
+      "last_commit": "07af5bbbb2a2c5277e3eb9c032a86682148fb269"
+    },
+    {
+      "path": "data/train-00000-of-00001.parquet",
+      "size_bytes": 31973535,
+      "sha256": "51d29b67b8d8d3f15ecde2fd495f9a7bce68f5d6c93daa4e8a2b570ce068d4ad",
+      "git_blob_id": "80f184d134ffe0b21df6167555f93acfdc37f5d7",
+      "last_commit": "07af5bbbb2a2c5277e3eb9c032a86682148fb269"
+    },
+    {
+      "path": "data/validation-00000-of-00001.parquet",
+      "size_bytes": 1621777,
+      "sha256": "0720ee77d48b0bddc35a282af29edb56d172d6080247a02581b7dd989463be10",
+      "git_blob_id": "fce5d9d718245201fdde292109a176ae418b5dd9",
+      "last_commit": "07af5bbbb2a2c5277e3eb9c032a86682148fb269"
+    }
+  ],
+  "derived_files_as_used_by_E01": [
+    {
+      "path": "work/data/processed/gazette_train.parquet",
+      "sha256": "NOT RECORDED (file exists only in work/ on the GPU box; run scripts/registry/hash_work_dir.py there)"
+    },
+    {
+      "path": "work/data/processed/gazette_dev.parquet",
+      "sha256": "NOT RECORDED (file exists only in work/ on the GPU box; run scripts/registry/hash_work_dir.py there)"
+    },
+    {
+      "path": "work/data/processed/gazette_test.parquet",
+      "sha256": "NOT RECORDED (file exists only in work/ on the GPU box; run scripts/registry/hash_work_dir.py there)"
+    },
+    {
+      "path": "work/data/processed/train_clean.parquet",
+      "sha256": "NOT RECORDED (file exists only in work/ on the GPU box; run scripts/registry/hash_work_dir.py there)"
+    },
+    {
+      "path": "work/data/processed/train_bidirectional.parquet",
+      "sha256": "NOT RECORDED (file exists only in work/ on the GPU box; run scripts/registry/hash_work_dir.py there)"
+    },
+    {
+      "path": "work/data/processed/leakage_report.json",
+      "sha256": "NOT RECORDED (file exists only in work/ on the GPU box; run scripts/registry/hash_work_dir.py there)"
+    }
+  ],
+  "produced_by": [
+    "scripts/data/prepare_corpus.py (configs/prepare_corpus_v1.yaml)",
+    "scripts/data/repair_corpus.py",
+    "scripts/data/prune_columns.py",
+    "scripts/data/redact_corpus.py",
+    "scripts/data/publish_hf.py",
+    "gazzette-parallel-corpus/01_*.ipynb"
+  ],
+  "known_issues": [
+    "Formulaic text: after digit normalisation, 48.58% of test pairs are exact templates or 5-gram near duplicates of training sentences despite the issue-disjoint split (E01 overlap audit).",
+    "30157 training pairs share an exact (lowercased, whitespace-normalised) side with dev/test/FLORES+/NTREX and are removed by the training script before training.",
+    "OCR-derived text; some segments contain OCR artefacts."
+  ]
+}

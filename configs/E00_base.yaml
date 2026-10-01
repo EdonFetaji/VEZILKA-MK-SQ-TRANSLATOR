@@ -1,0 +1,31 @@
+# ============================================================================
+# E00_base (arm M0) -- zero-shot NLLB-200-distilled-600M, no training.
+#
+# E00 was not a separate run: the base model was evaluated inside E01's final evaluation
+# (step 12 of scripts/train_nllb_gazette_verbis_ct2.py at commit 540e36c), on the same test
+# sets with the same decoding. Its results are the "base" rows of E01's result files, copied
+# to experiments/E00_base/ with checksums (experiments/E00_base/SOURCES.json).
+# ============================================================================
+exp_id: E00_base
+paper_arm: "M0"
+description: Untrained NLLB-200-distilled-600M, zero-shot, evaluated alongside E01.
+status: done
+parent_exp: null
+evaluated_in: E01_gazette_verbis_mix
+code:
+  git_commit: 540e36cf359e550afb39bd5bddab35d2ccec9376
+  script: scripts/train_nllb_gazette_verbis_ct2.py   # step 12 only; path at that commit
+base_model:
+  name: facebook/nllb-200-distilled-600M
+  revision: f8d333a098d19b4fd9a8b18f94170487ad3f821d   # from E01's progress.log
+languages: {mk: mkd_Cyrl, sq: als_Latn}
+training: none
+final_evaluation:                   # identical to E01's final_evaluation
+  test_sets: [gazette_test_full, flores_devtest, ntrex]
+  systems: [base]
+  beams: 4
+  max_new_tokens: 256
+  batch: 32
+  metrics: {bleu: sacrebleu_default_13a, chrf: {word_order: 2}}
+data:
+  manifests: [data/manifests/gazette.json, data/manifests/flores_plus.json, data/manifests/ntrex.json, data/manifests/verbis.json]

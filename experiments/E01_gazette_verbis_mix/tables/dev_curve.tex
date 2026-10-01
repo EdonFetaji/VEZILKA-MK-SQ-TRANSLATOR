@@ -1,0 +1,17 @@
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lrrrrr}
+\toprule
+Step & BLEU MK$\rightarrow$SQ & chrF++ MK$\rightarrow$SQ & BLEU SQ$\rightarrow$MK & chrF++ SQ$\rightarrow$MK & chrF++ mean \\
+\midrule
+1000 & 42.52 & 62.38 & 57.46 & 72.53 & 67.46 \\
+2000 & 48.57 & 67.18 & 64.64 & 78.24 & 72.71 \\
+3000 & 49.85 & 68.07 & 64.66 & 78.96 & 73.52 \\
+4000 & 46.48 & 67.59 & 62.12 & 78.87 & 73.23 \\
+4115 & 46.51 & 67.62 & 63.35 & 79.57 & 73.60 \\
+\bottomrule
+\end{tabular}
+\caption{Gazette dev evaluation during training (greedy, 500 sentences per direction). Source: \texttt{eval/dev\_curve.csv}.}
+\label{tab:e01-dev_curve}
+\end{table}

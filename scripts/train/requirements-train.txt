@@ -1,6 +1,6 @@
-# Dependencies for scripts/train_nllb_gazette_verbis_ct2.py
+# Dependencies for scripts/train/train_nllb_gazette_verbis_ct2.py and scripts/train/smoke_test_nllb_run.py
 #
-#   uv pip install -r scripts/requirements-train.txt
+#   uv pip install -r scripts/train/requirements-train.txt
 #
 # torch is deliberately NOT listed: it is installed separately with a CUDA
 # build that supports the RTX 5080 (Blackwell, sm_120), and installing this
@@ -17,3 +17,4 @@ polars>=1.0
 pyarrow>=17
 huggingface_hub>=0.25
 matplotlib>=3.8
+pyyaml>=6.0

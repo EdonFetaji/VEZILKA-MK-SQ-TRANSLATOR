@@ -1,0 +1,20 @@
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{llrrrrrrrrrr}
+\toprule
+Class & Dir. & Pairs & \% pairs & BLEU base & BLEU FT & BLEU CT2 & $\Delta$BLEU & chrF++ base & chrF++ FT & chrF++ CT2 & $\Delta$chrF++ \\
+\midrule
+exact template & MK$\rightarrow$SQ & 1856 & 18.24 & 32.67 & 71.03 & 70.97 & 38.36 & 51.88 & 81.65 & 81.64 & 29.77 \\
+exact template & SQ$\rightarrow$MK & 1856 & 18.24 & 21.17 & 78.11 & 77.68 & 56.94 & 50.45 & 86.66 & 86.44 & 36.21 \\
+near duplicate & MK$\rightarrow$SQ & 3087 & 30.34 & 28.50 & 57.90 & 57.94 & 29.40 & 50.59 & 75.25 & 75.27 & 24.66 \\
+near duplicate & SQ$\rightarrow$MK & 3087 & 30.34 & 31.25 & 68.06 & 67.94 & 36.81 & 53.09 & 81.78 & 81.73 & 28.69 \\
+novel & MK$\rightarrow$SQ & 5231 & 51.42 & 26.46 & 48.83 & 48.92 & 22.37 & 49.88 & 69.07 & 69.17 & 19.19 \\
+novel & SQ$\rightarrow$MK & 5231 & 51.42 & 29.93 & 58.59 & 58.41 & 28.66 & 52.45 & 75.38 & 75.34 & 22.93 \\
+all & MK$\rightarrow$SQ & 10174 & 100.00 & 27.74 & 54.02 & 54.08 & 26.27 & 50.30 & 72.28 & 72.35 & 21.98 \\
+all & SQ$\rightarrow$MK & 10174 & 100.00 & 29.63 & 63.64 & 63.45 & 34.01 & 52.46 & 78.55 & 78.49 & 26.09 \\
+\bottomrule
+\end{tabular}
+\caption{Gazette test by overlap with the Gazette training sentences (normalised: lowercase, digits to 0, whitespace collapsed; near duplicate = character 5-gram Jaccard ≥ 0.8). Source: \texttt{eval/gazette\_test\_overlap\_results.csv}.}
+\label{tab:e01-overlap}
+\end{table}

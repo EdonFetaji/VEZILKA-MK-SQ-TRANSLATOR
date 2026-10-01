@@ -1,0 +1,7 @@
+model,direction,n_sentences,bleu,chrf,bleu_delta_vs_base,chrf_delta_vs_base,bleu_signature,chrf_signature,timestamp
+base,mk_sq,1997,23.14,48.91,0.0,0.0,nrefs:1|case:mixed|eff:no|tok:13a|smooth:exp|version:2.6.0,nrefs:1|case:mixed|eff:yes|nc:6|nw:2|space:no|version:2.6.0,2026-09-22T02:50:49+00:00
+base,sq_mk,1997,21.25,49.54,0.0,0.0,nrefs:1|case:mixed|eff:no|tok:13a|smooth:exp|version:2.6.0,nrefs:1|case:mixed|eff:yes|nc:6|nw:2|space:no|version:2.6.0,2026-09-22T02:50:50+00:00
+finetuned_hf,mk_sq,1997,18.13,44.49,-5.0,-4.41,nrefs:1|case:mixed|eff:no|tok:13a|smooth:exp|version:2.6.0,nrefs:1|case:mixed|eff:yes|nc:6|nw:2|space:no|version:2.6.0,2026-09-22T02:50:51+00:00
+finetuned_hf,sq_mk,1997,17.98,47.05,-3.26,-2.49,nrefs:1|case:mixed|eff:no|tok:13a|smooth:exp|version:2.6.0,nrefs:1|case:mixed|eff:yes|nc:6|nw:2|space:no|version:2.6.0,2026-09-22T02:50:51+00:00
+finetuned_ct2,mk_sq,1997,18.22,44.54,-4.91,-4.37,nrefs:1|case:mixed|eff:no|tok:13a|smooth:exp|version:2.6.0,nrefs:1|case:mixed|eff:yes|nc:6|nw:2|space:no|version:2.6.0,2026-09-22T02:50:52+00:00
+finetuned_ct2,sq_mk,1997,17.95,47.06,-3.3,-2.48,nrefs:1|case:mixed|eff:no|tok:13a|smooth:exp|version:2.6.0,nrefs:1|case:mixed|eff:yes|nc:6|nw:2|space:no|version:2.6.0,2026-09-22T02:50:53+00:00
