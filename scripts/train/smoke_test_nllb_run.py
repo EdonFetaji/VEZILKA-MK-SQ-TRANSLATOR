@@ -302,14 +302,14 @@ def role_quick(m) -> None:
     def ntrex():
         sizes = []
         for code in ("mkd", "sqi"):
-            req = urllib.request.Request(m.NTREX_URL.format(code=code), method="HEAD")
+            req = urllib.request.Request(m.NTREX_URL.format(commit=m.NTREX_COMMIT, code=code), method="HEAD")
             with urllib.request.urlopen(req, timeout=30) as r:
                 sizes.append(f"{code} HTTP {r.status}")
         return ", ".join(sizes)
 
     def verbis():
         local = m.ROOT / m.VERBIS_PATH
-        path = str(local) if local.exists() else hf_hub_download(m.HF_RESULTS_REPO, m.VERBIS_HF_PATH, token=m.TOKEN)
+        path = str(local) if local.exists() else hf_hub_download(m.VERBIS_REPO, m.VERBIS_HF_PATH, token=m.TOKEN)
         cols = pl.read_parquet_schema(path)
         need = {"mk", "mk_description", "sq", "sq_description"}
         assert need <= set(cols), f"columns {list(cols)} lack {sorted(need - set(cols))}"
