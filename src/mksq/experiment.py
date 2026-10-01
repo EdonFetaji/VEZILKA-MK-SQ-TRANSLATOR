@@ -100,8 +100,10 @@ def git_head() -> str:
 
 def uncommitted(paths=TRACKED_FOR_RUNS) -> list[str]:
     """Uncommitted (modified, staged or untracked, not ignored) files under the given paths."""
-    out = git("status", "--porcelain", "--untracked-files=all", "--", *paths)
-    return [line[3:] for line in out.splitlines() if line.strip()]
+    # not git(): its .strip() would eat the leading status space of the first line (" M path" -> "M path")
+    r = subprocess.run(["git", "-C", str(ROOT), "status", "--porcelain", "--untracked-files=all", "--", *paths],
+                       capture_output=True, text=True, check=True)
+    return [line[3:] for line in r.stdout.splitlines() if line.strip()]
 
 
 def manifest_sha256s() -> dict[str, str]:
