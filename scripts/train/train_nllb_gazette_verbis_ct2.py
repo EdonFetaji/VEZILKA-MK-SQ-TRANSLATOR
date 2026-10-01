@@ -1559,10 +1559,12 @@ def _append_train_log(row: dict) -> None:
 
 
 def _append_dev_curve(row: dict) -> pl.DataFrame:
-    new = pl.DataFrame([row])
+    # The file on disk carries the provenance columns (write_csv); stamp the new row too so the
+    # schemas match, and keep each old row's own provenance (it may come from an earlier commit).
+    new = pl.DataFrame([{**row, **PROV_COLS}])
     if DEV_CURVE.exists():
         old = pl.read_csv(DEV_CURVE).filter(pl.col("step") != row["step"])
-        new = pl.concat([old, new], how="vertical_relaxed").sort("step")
+        new = pl.concat([old, new], how="diagonal_relaxed").sort("step")
     write_csv(new, DEV_CURVE)
     return new
 
