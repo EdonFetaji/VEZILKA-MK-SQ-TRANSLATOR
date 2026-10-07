@@ -229,8 +229,8 @@ def overlap_audit(test: pl.DataFrame, blocks: dict, models: list[str]) -> pl.Dat
         overlap_class=pl.Series(classes), best_train_jaccard=pl.Series(best_j.round(4)))
     import pyarrow.parquet as pq
     tmp = OUT_PAIRS.with_name(OUT_PAIRS.name + ".tmp")
-    table = pairs.to_arrow()
-    pq.write_table(table.replace_schema_metadata({b"provenance": json.dumps(PROV).encode()}), tmp, compression="zstd")
+    arrow = pairs.to_arrow()  # not "table": that would shadow table() used below
+    pq.write_table(arrow.replace_schema_metadata({b"provenance": json.dumps(PROV).encode()}), tmp, compression="zstd")
     os.replace(tmp, OUT_PAIRS)
 
     rows = []
