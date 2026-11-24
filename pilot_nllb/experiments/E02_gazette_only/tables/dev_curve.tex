@@ -1,0 +1,16 @@
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lrrrrrr}
+\toprule
+Step & BLEU MK$\rightarrow$SQ & chrF++ MK$\rightarrow$SQ & BLEU SQ$\rightarrow$MK & chrF++ SQ$\rightarrow$MK & chrF++ mean & E01 chrF++ mean \\
+\midrule
+1000 & 45.91 & 65.54 & 60.89 & 76.10 & 70.82 & 67.46 \\
+2000 & 49.20 & 68.21 & 64.43 & 78.19 & 73.19 & 72.71 \\
+3000 & 49.88 & 68.09 & 65.19 & 79.27 & 73.68 & 73.52 \\
+3650 & 46.07 & 67.72 & 65.14 & 79.73 & 73.73 & -- \\
+\bottomrule
+\end{tabular}
+\caption{E02 Gazette dev evaluation during training (greedy, 500 sentences per direction), with E01's mean at the same step. Read from progress.log: eval/dev\_curve.csv lacks the final step. Source: \texttt{progress.log (dev @ step lines); E01: experiments/E01\_gazette\_verbis\_mix/results.json}.}
+\label{tab:e02-dev-curve}
+\end{table}

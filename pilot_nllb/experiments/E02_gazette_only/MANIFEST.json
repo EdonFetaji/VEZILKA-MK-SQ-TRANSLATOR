@@ -1,0 +1,299 @@
+{
+  "generated_at": "2026-10-07T09:15:35+00:00",
+  "artifacts": [
+    {
+      "artifact": "progress.log",
+      "location": "hf://EdonFetaji/mk-sq-nllb600m-e02-gazette-only/progress.log",
+      "hf_revision": "a5d93046ed56f5442cb3b434f95d5f0f39774108",
+      "last_commit": "b36de02c8fdf201195aabe38a62ebd8cf3c30698",
+      "last_commit_date": "2026-10-01 18:49:28+00:00",
+      "size_bytes": 133318,
+      "sha256": "4290a9067e9771b0b0750a0402bf3be70659b192216269fa8cd198ed282617fc"
+    },
+    {
+      "artifact": "config.json",
+      "location": "hf://EdonFetaji/mk-sq-nllb600m-e02-gazette-only/config.json",
+      "hf_revision": "a5d93046ed56f5442cb3b434f95d5f0f39774108",
+      "last_commit": "8c41439ab2a94930384d0ec43be6a4e835da08b9",
+      "last_commit_date": "2026-10-01 15:48:26+00:00",
+      "size_bytes": 818,
+      "sha256": "a5e74be5b35cb8fc2146942e3898d3187a630616d8cdf541def60b117b36402a"
+    },
+    {
+      "artifact": "generation_config.json",
+      "location": "hf://EdonFetaji/mk-sq-nllb600m-e02-gazette-only/generation_config.json",
+      "hf_revision": "a5d93046ed56f5442cb3b434f95d5f0f39774108",
+      "last_commit": "8c41439ab2a94930384d0ec43be6a4e835da08b9",
+      "last_commit_date": "2026-10-01 15:48:26+00:00",
+      "size_bytes": 194,
+      "sha256": "d8b87906caf765bf7d2aef36de5016351803a68dec56af10a76808830a102a97"
+    },
+    {
+      "artifact": "provenance.json",
+      "location": "hf://EdonFetaji/mk-sq-nllb600m-e02-gazette-only/provenance.json",
+      "hf_revision": "a5d93046ed56f5442cb3b434f95d5f0f39774108",
+      "last_commit": "8c41439ab2a94930384d0ec43be6a4e835da08b9",
+      "last_commit_date": "2026-10-01 15:48:26+00:00",
+      "size_bytes": 592,
+      "sha256": "215b56d09a8b509b0c4aeeb9955acbe7450b6370ba5d54c6f803e7055298f774"
+    },
+    {
+      "artifact": "eval/run_info.json",
+      "location": "hf://EdonFetaji/mk-sq-nllb600m-e02-gazette-only/eval/run_info.json",
+      "hf_revision": "a5d93046ed56f5442cb3b434f95d5f0f39774108",
+      "last_commit": "5893ac6bdbd6a3724c6dd7a20ac33dade011643d",
+      "last_commit_date": "2026-10-01 15:49:18+00:00",
+      "size_bytes": 13491,
+      "sha256": "a04ac191999211d20ee9aee0cec4e9e541bfada0002cf7eb09b7b47b1d8d92e0"
+    },
+    {
+      "artifact": "eval/train_log.csv",
+      "location": "hf://EdonFetaji/mk-sq-nllb600m-e02-gazette-only/eval/train_log.csv",
+      "hf_revision": "a5d93046ed56f5442cb3b434f95d5f0f39774108",
+      "last_commit": "8b3ef4e42947e8e0b3dcb8923ae4693b447ca5bd",
+      "last_commit_date": "2026-10-01 15:33:14+00:00",
+      "size_bytes": 30958,
+      "sha256": "f27129181e07b7e287a67a3651fcc238286a6a30c8ed75f5ed83c2e34a6ed682"
+    },
+    {
+      "artifact": "eval/dev_curve.csv",
+      "location": "hf://EdonFetaji/mk-sq-nllb600m-e02-gazette-only/eval/dev_curve.csv",
+      "hf_revision": "a5d93046ed56f5442cb3b434f95d5f0f39774108",
+      "last_commit": "8b3ef4e42947e8e0b3dcb8923ae4693b447ca5bd",
+      "last_commit_date": "2026-10-01 15:33:14+00:00",
+      "size_bytes": 1455,
+      "sha256": "835a6fb02dfa2e5fce1ab81c11146fed23555cbd527675db4960c32102e3c2ed"
+    },
+    {
+      "artifact": "eval/gazette_test_results.csv",
+      "location": "hf://EdonFetaji/mk-sq-nllb600m-e02-gazette-only/eval/gazette_test_results.csv",
+      "hf_revision": "a5d93046ed56f5442cb3b434f95d5f0f39774108",
+      "last_commit": "9cc1b0646a177cef78a19ba146d3eccb9208eca4",
+      "last_commit_date": "2026-10-01 18:22:45+00:00",
+      "size_bytes": 3682,
+      "sha256": "dee35b6451b06fe7f0e793677396d8814fa072f81b6846319abc45196b8fca30"
+    },
+    {
+      "artifact": "eval/flores_results.csv",
+      "location": "hf://EdonFetaji/mk-sq-nllb600m-e02-gazette-only/eval/flores_results.csv",
+      "hf_revision": "a5d93046ed56f5442cb3b434f95d5f0f39774108",
+      "last_commit": "1321580fa969d8472b2a0c3246063954fc739b4b",
+      "last_commit_date": "2026-10-01 18:30:54+00:00",
+      "size_bytes": 3676,
+      "sha256": "4f1ba00f1ef61cead1bf76afae86ae686e8e4f507c790382d0ac2c1b68299942"
+    },
+    {
+      "artifact": "eval/ntrex_results.csv",
+      "location": "hf://EdonFetaji/mk-sq-nllb600m-e02-gazette-only/eval/ntrex_results.csv",
+      "hf_revision": "a5d93046ed56f5442cb3b434f95d5f0f39774108",
+      "last_commit": "3aea3a06366ce059ea6ba1f6db319d4e9b07e8c4",
+      "last_commit_date": "2026-10-01 18:47:33+00:00",
+      "size_bytes": 3677,
+      "sha256": "af89a6faedcc23d4f1aabf582b3f5e1577ac79e8d95c36666f8b42de1d0e879e"
+    },
+    {
+      "artifact": "eval/gazette_test_overlap_results.csv",
+      "location": "hf://EdonFetaji/mk-sq-nllb600m-e02-gazette-only/eval/gazette_test_overlap_results.csv",
+      "hf_revision": "a5d93046ed56f5442cb3b434f95d5f0f39774108",
+      "last_commit": "a5d93046ed56f5442cb3b434f95d5f0f39774108",
+      "last_commit_date": "2026-10-07 09:00:47+00:00",
+      "size_bytes": 10562,
+      "sha256": "a3058a701386ab7b2693ba275e30c998bc35004765f4e0a65efa4299647adb54"
+    },
+    {
+      "artifact": "eval/terminology_results.csv",
+      "location": "hf://EdonFetaji/mk-sq-nllb600m-e02-gazette-only/eval/terminology_results.csv",
+      "hf_revision": "a5d93046ed56f5442cb3b434f95d5f0f39774108",
+      "last_commit": "a5d93046ed56f5442cb3b434f95d5f0f39774108",
+      "last_commit_date": "2026-10-07 09:00:47+00:00",
+      "size_bytes": 3723,
+      "sha256": "d27853b56478ac5c92315497145001fc1f67131a66916bc690e7d58c89a26f2c"
+    },
+    {
+      "artifact": "eval/number_fidelity_results.csv",
+      "location": "hf://EdonFetaji/mk-sq-nllb600m-e02-gazette-only/eval/number_fidelity_results.csv",
+      "hf_revision": "a5d93046ed56f5442cb3b434f95d5f0f39774108",
+      "last_commit": "a5d93046ed56f5442cb3b434f95d5f0f39774108",
+      "last_commit_date": "2026-10-07 09:00:47+00:00",
+      "size_bytes": 3591,
+      "sha256": "bcb21d7f1722da296cf09946d9c5e9a9522fe2fc9a35d978c2f67be1cb3846ac"
+    },
+    {
+      "artifact": "eval/translations_gazette_test.parquet",
+      "location": "hf://EdonFetaji/mk-sq-nllb600m-e02-gazette-only/eval/translations_gazette_test.parquet",
+      "hf_revision": "a5d93046ed56f5442cb3b434f95d5f0f39774108",
+      "last_commit": "9cc1b0646a177cef78a19ba146d3eccb9208eca4",
+      "last_commit_date": "2026-10-01 18:22:45+00:00",
+      "size_bytes": 5113228,
+      "sha256": "83ab821d321a63e90d46518a6b53bfc3336cfb88320f0a3d42bcbafd6ebde008"
+    },
+    {
+      "artifact": "eval/translations_flores.parquet",
+      "location": "hf://EdonFetaji/mk-sq-nllb600m-e02-gazette-only/eval/translations_flores.parquet",
+      "hf_revision": "a5d93046ed56f5442cb3b434f95d5f0f39774108",
+      "last_commit": "1321580fa969d8472b2a0c3246063954fc739b4b",
+      "last_commit_date": "2026-10-01 18:30:54+00:00",
+      "size_bytes": 765515,
+      "sha256": "fea2d90547af1e67ef19d6820ae7beb5a5a0b9b5149d3717bd79970afe11abd4"
+    },
+    {
+      "artifact": "eval/translations_ntrex.parquet",
+      "location": "hf://EdonFetaji/mk-sq-nllb600m-e02-gazette-only/eval/translations_ntrex.parquet",
+      "hf_revision": "a5d93046ed56f5442cb3b434f95d5f0f39774108",
+      "last_commit": "3aea3a06366ce059ea6ba1f6db319d4e9b07e8c4",
+      "last_commit_date": "2026-10-01 18:47:33+00:00",
+      "size_bytes": 1408198,
+      "sha256": "6be2a9ebdfb14acbb09ee795d4d22bddb050d74ecae50fd2c6c01cc2daf1ad14"
+    },
+    {
+      "artifact": "checkpoints/checkpoint-3650/trainer_state.json",
+      "location": "hf://EdonFetaji/mk-sq-nllb600m-e02-gazette-only/checkpoints/checkpoint-3650/trainer_state.json",
+      "hf_revision": "a5d93046ed56f5442cb3b434f95d5f0f39774108",
+      "last_commit": "114c6a3eaad63732a87893df91c0e356bc29fbcf",
+      "last_commit_date": "2026-10-01 15:48:11+00:00",
+      "size_bytes": 15328,
+      "sha256": "eee068bbc3435108b5bd7405fc4692e2f4d72059f6706b86d25b5577f1c2a19d"
+    },
+    {
+      "artifact": "data/verbis/verbis_terms.parquet",
+      "location": "hf://EdonFetaji/mk-sq-nllb600m-e02-gazette-only/data/verbis/verbis_terms.parquet",
+      "hf_revision": "a5d93046ed56f5442cb3b434f95d5f0f39774108",
+      "last_commit": "3846d83f16f9d0f152e51b7717e3e413f09908db",
+      "last_commit_date": "2026-10-01 09:54:27+00:00",
+      "size_bytes": 368742,
+      "sha256": "7fc7a0e8e420439089c83e9f26043c8879790f7e6d460bd53cd21acaf34b7eca"
+    },
+    {
+      "artifact": "data/verbis/verbis_defs.parquet",
+      "location": "hf://EdonFetaji/mk-sq-nllb600m-e02-gazette-only/data/verbis/verbis_defs.parquet",
+      "hf_revision": "a5d93046ed56f5442cb3b434f95d5f0f39774108",
+      "last_commit": "3846d83f16f9d0f152e51b7717e3e413f09908db",
+      "last_commit_date": "2026-10-01 09:54:27+00:00",
+      "size_bytes": 2698271,
+      "sha256": "b66b973222cd9e410997ecb9f6818e90c0d2507ebc13ce0ef9352ca6817042b1"
+    },
+    {
+      "artifact": "eval/translations_gazette_test.parquet",
+      "location": "hf://EdonFetaji/mk-sq-nllb600m-gazette-verbis/eval/translations_gazette_test.parquet",
+      "hf_revision": "3fad45be925bbdc88e6b07672628ba8e1b180178",
+      "last_commit": "821cb659dc97a0521f88696964b750abdcc5655a",
+      "last_commit_date": "2026-09-22 02:27:17+00:00",
+      "size_bytes": 4662954,
+      "sha256": "2654cd9823fb7e60cc523d78fd458ce4982407439876a9d9a744ea0d03d28d2a"
+    },
+    {
+      "artifact": "eval/translations_flores.parquet",
+      "location": "hf://EdonFetaji/mk-sq-nllb600m-gazette-verbis/eval/translations_flores.parquet",
+      "hf_revision": "3fad45be925bbdc88e6b07672628ba8e1b180178",
+      "last_commit": "3cc86e4fda031e52324e48c5f56fbc7c8d504828",
+      "last_commit_date": "2026-09-22 02:34:29+00:00",
+      "size_bytes": 691102,
+      "sha256": "a7b2da44d596c5d42498da95ff8f2f5c2a80d141b3e0bd216aeed9fcb797ccff"
+    },
+    {
+      "artifact": "eval/translations_ntrex.parquet",
+      "location": "hf://EdonFetaji/mk-sq-nllb600m-gazette-verbis/eval/translations_ntrex.parquet",
+      "hf_revision": "3fad45be925bbdc88e6b07672628ba8e1b180178",
+      "last_commit": "3c810545fdb16a7fb774b99a8e9a096d75db4c90",
+      "last_commit_date": "2026-09-22 02:49:29+00:00",
+      "size_bytes": 1250964,
+      "sha256": "dec0f2a58bfc902b23c6b6d64c644ff74a6faf5979ca93727f0f142f1f8a7ffe"
+    },
+    {
+      "artifact": "experiments/E01_gazette_verbis_mix/run_info.json",
+      "location": "git:experiments/E01_gazette_verbis_mix/run_info.json",
+      "git_head": "fcb4355e2b41182a0322434568a3543a97360cf4",
+      "last_commit": "8a2978e72e026631ec1da9dd8e3f6aff82c4425b",
+      "size_bytes": 7152,
+      "sha256": "328a382475f2cdce64e34e8fa54e6b4b72b3fdec170182c2103be1745561acb8"
+    },
+    {
+      "artifact": "experiments/E01_gazette_verbis_mix/train_log.csv",
+      "location": "git:experiments/E01_gazette_verbis_mix/train_log.csv",
+      "git_head": "fcb4355e2b41182a0322434568a3543a97360cf4",
+      "last_commit": "8a2978e72e026631ec1da9dd8e3f6aff82c4425b",
+      "size_bytes": 10743,
+      "sha256": "838616955dabeaf69b4ebc21bc635e310f21cadd05fd0d14e75e0dc95a85f09e"
+    },
+    {
+      "artifact": "experiments/E01_gazette_verbis_mix/results.json",
+      "location": "git:experiments/E01_gazette_verbis_mix/results.json",
+      "git_head": "fcb4355e2b41182a0322434568a3543a97360cf4",
+      "last_commit": "8a2978e72e026631ec1da9dd8e3f6aff82c4425b",
+      "size_bytes": 39574,
+      "sha256": "6b193d2e27554bbd95d725de5266bfec179448002b6ee8dd0eeb2ac83058e9b5"
+    },
+    {
+      "artifact": "experiments/E01_gazette_verbis_mix/results/gazette_test_results.csv",
+      "location": "git:experiments/E01_gazette_verbis_mix/results/gazette_test_results.csv",
+      "git_head": "fcb4355e2b41182a0322434568a3543a97360cf4",
+      "last_commit": "8a2978e72e026631ec1da9dd8e3f6aff82c4425b",
+      "size_bytes": 1257,
+      "sha256": "ac5ebb869231b67984029c3b40f9f3700310664bf011704a1df81a2ffaad977e"
+    },
+    {
+      "artifact": "experiments/E01_gazette_verbis_mix/results/flores_results.csv",
+      "location": "git:experiments/E01_gazette_verbis_mix/results/flores_results.csv",
+      "git_head": "fcb4355e2b41182a0322434568a3543a97360cf4",
+      "last_commit": "8a2978e72e026631ec1da9dd8e3f6aff82c4425b",
+      "size_bytes": 1250,
+      "sha256": "852f8b56618255974a7185c5be2efde814478ebbedc24746bcc4361e319e917d"
+    },
+    {
+      "artifact": "experiments/E01_gazette_verbis_mix/results/ntrex_results.csv",
+      "location": "git:experiments/E01_gazette_verbis_mix/results/ntrex_results.csv",
+      "git_head": "fcb4355e2b41182a0322434568a3543a97360cf4",
+      "last_commit": "8a2978e72e026631ec1da9dd8e3f6aff82c4425b",
+      "size_bytes": 1250,
+      "sha256": "25e784fa9d7a89e4a0ecf8ebcb9a7e87dc67141fbb9a671e6f9f1aba20f97dd8"
+    },
+    {
+      "artifact": "experiments/E01_gazette_verbis_mix/analysis/gazette_test_overlap_results.csv",
+      "location": "git:experiments/E01_gazette_verbis_mix/analysis/gazette_test_overlap_results.csv",
+      "git_head": "fcb4355e2b41182a0322434568a3543a97360cf4",
+      "last_commit": "8a2978e72e026631ec1da9dd8e3f6aff82c4425b",
+      "size_bytes": 1245,
+      "sha256": "3a35994a439cbad90b82b4fe7feabebe4f87819f766ceec5f763f30d1ebc73dc"
+    },
+    {
+      "artifact": "experiments/E01_gazette_verbis_mix/analysis/terminology_results.csv",
+      "location": "git:experiments/E01_gazette_verbis_mix/analysis/terminology_results.csv",
+      "git_head": "fcb4355e2b41182a0322434568a3543a97360cf4",
+      "last_commit": "8a2978e72e026631ec1da9dd8e3f6aff82c4425b",
+      "size_bytes": 530,
+      "sha256": "86879bb8d58c23e008b5090ac8d3e8bf809ae7fd153ea13d1f5995d53e98e141"
+    },
+    {
+      "artifact": "experiments/E01_gazette_verbis_mix/analysis/number_fidelity_results.csv",
+      "location": "git:experiments/E01_gazette_verbis_mix/analysis/number_fidelity_results.csv",
+      "git_head": "fcb4355e2b41182a0322434568a3543a97360cf4",
+      "last_commit": "8a2978e72e026631ec1da9dd8e3f6aff82c4425b",
+      "size_bytes": 396,
+      "sha256": "6c78e3c599941a20fdf29cdb4f774f074fc1c72a9af10076a966eab7585c051a"
+    },
+    {
+      "artifact": "configs/E02_gazette_only.yaml",
+      "location": "git:configs/E02_gazette_only.yaml",
+      "git_head": "fcb4355e2b41182a0322434568a3543a97360cf4",
+      "last_commit": "8a2978e72e026631ec1da9dd8e3f6aff82c4425b",
+      "size_bytes": 6493,
+      "sha256": "7b810fb9b9a6bf1cd7a158cb6c711a13a8f84e7af37b94f67dc44dd7b84baadd"
+    },
+    {
+      "artifact": "configs/E01_gazette_verbis_mix.yaml",
+      "location": "git:configs/E01_gazette_verbis_mix.yaml",
+      "git_head": "fcb4355e2b41182a0322434568a3543a97360cf4",
+      "last_commit": "8a2978e72e026631ec1da9dd8e3f6aff82c4425b",
+      "size_bytes": 5756,
+      "sha256": "71072934c81117c49088ba06fc8a9c53fdb057078fa4edd67ae2e50eb1d0fbb9"
+    },
+    {
+      "artifact": "experiments/E02_gazette_only/build_report.py",
+      "location": "git:experiments/E02_gazette_only/build_report.py",
+      "git_head": "fcb4355e2b41182a0322434568a3543a97360cf4",
+      "last_commit": null,
+      "size_bytes": 61681,
+      "sha256": "a323c50e7f981aabb2fbaf0babb08a056e135f757ef7589ddb91c9f2b61bd798"
+    }
+  ]
+}

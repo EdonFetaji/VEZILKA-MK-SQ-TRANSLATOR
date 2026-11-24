@@ -1,0 +1,75 @@
+{
+  "exp_id": "E02_gazette_only",
+  "copied_from": "hf://EdonFetaji/mk-sq-nllb600m-e02-gazette-only@a5d93046ed56f5442cb3b434f95d5f0f39774108",
+  "originals_unchanged": true,
+  "verbis_content_scan": "58296 Verbis strings checked, none present",
+  "files": [
+    {
+      "path": "config.yaml",
+      "source": "configs/E02_gazette_only.yaml",
+      "sha256": "7b810fb9b9a6bf1cd7a158cb6c711a13a8f84e7af37b94f67dc44dd7b84baadd"
+    },
+    {
+      "path": "run_info.json",
+      "source": "hf://EdonFetaji/mk-sq-nllb600m-e02-gazette-only/eval/run_info.json",
+      "hf_revision": "a5d93046ed56f5442cb3b434f95d5f0f39774108",
+      "sha256": "a04ac191999211d20ee9aee0cec4e9e541bfada0002cf7eb09b7b47b1d8d92e0"
+    },
+    {
+      "path": "train_log.csv",
+      "source": "hf://EdonFetaji/mk-sq-nllb600m-e02-gazette-only/eval/train_log.csv",
+      "hf_revision": "a5d93046ed56f5442cb3b434f95d5f0f39774108",
+      "sha256": "f27129181e07b7e287a67a3651fcc238286a6a30c8ed75f5ed83c2e34a6ed682"
+    },
+    {
+      "path": "dev_curve.csv",
+      "source": "hf://EdonFetaji/mk-sq-nllb600m-e02-gazette-only/eval/dev_curve.csv",
+      "hf_revision": "a5d93046ed56f5442cb3b434f95d5f0f39774108",
+      "sha256": "835a6fb02dfa2e5fce1ab81c11146fed23555cbd527675db4960c32102e3c2ed"
+    },
+    {
+      "path": "progress.log",
+      "source": "hf://EdonFetaji/mk-sq-nllb600m-e02-gazette-only/progress.log",
+      "hf_revision": "a5d93046ed56f5442cb3b434f95d5f0f39774108",
+      "source_sha256": "4290a9067e9771b0b0750a0402bf3be70659b192216269fa8cd198ed282617fc",
+      "redacted": "25 example-translation records removed (mksq.experiment.redact_log_examples); all other lines verbatim",
+      "sha256": "af1e6531f51a60ae1083f4295c0aed60c25cd921a29cbffefdfe4b2a55bb7a38"
+    },
+    {
+      "path": "results/gazette_test_results.csv",
+      "source": "hf://EdonFetaji/mk-sq-nllb600m-e02-gazette-only/eval/gazette_test_results.csv",
+      "hf_revision": "a5d93046ed56f5442cb3b434f95d5f0f39774108",
+      "sha256": "dee35b6451b06fe7f0e793677396d8814fa072f81b6846319abc45196b8fca30"
+    },
+    {
+      "path": "results/flores_results.csv",
+      "source": "hf://EdonFetaji/mk-sq-nllb600m-e02-gazette-only/eval/flores_results.csv",
+      "hf_revision": "a5d93046ed56f5442cb3b434f95d5f0f39774108",
+      "sha256": "4f1ba00f1ef61cead1bf76afae86ae686e8e4f507c790382d0ac2c1b68299942"
+    },
+    {
+      "path": "results/ntrex_results.csv",
+      "source": "hf://EdonFetaji/mk-sq-nllb600m-e02-gazette-only/eval/ntrex_results.csv",
+      "hf_revision": "a5d93046ed56f5442cb3b434f95d5f0f39774108",
+      "sha256": "af89a6faedcc23d4f1aabf582b3f5e1577ac79e8d95c36666f8b42de1d0e879e"
+    },
+    {
+      "path": "analysis/gazette_test_overlap_results.csv",
+      "source": "hf://EdonFetaji/mk-sq-nllb600m-e02-gazette-only/eval/gazette_test_overlap_results.csv",
+      "hf_revision": "a5d93046ed56f5442cb3b434f95d5f0f39774108",
+      "sha256": "a3058a701386ab7b2693ba275e30c998bc35004765f4e0a65efa4299647adb54"
+    },
+    {
+      "path": "analysis/terminology_results.csv",
+      "source": "hf://EdonFetaji/mk-sq-nllb600m-e02-gazette-only/eval/terminology_results.csv",
+      "hf_revision": "a5d93046ed56f5442cb3b434f95d5f0f39774108",
+      "sha256": "d27853b56478ac5c92315497145001fc1f67131a66916bc690e7d58c89a26f2c"
+    },
+    {
+      "path": "analysis/number_fidelity_results.csv",
+      "source": "hf://EdonFetaji/mk-sq-nllb600m-e02-gazette-only/eval/number_fidelity_results.csv",
+      "hf_revision": "a5d93046ed56f5442cb3b434f95d5f0f39774108",
+      "sha256": "bcb21d7f1722da296cf09946d9c5e9a9522fe2fc9a35d978c2f67be1cb3846ac"
+    }
+  ]
+}

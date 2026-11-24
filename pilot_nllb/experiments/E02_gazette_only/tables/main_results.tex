@@ -1,0 +1,18 @@
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{llrrrrrrrrrrrr}
+\toprule
+Test set & Dir. & BLEU E00 & BLEU E01 & BLEU E02 & p vs E00 & $\Delta$BLEU vs E01 & p vs E01 & chrF++ E00 & chrF++ E01 & chrF++ E02 & p vs E00 & $\Delta$chrF++ vs E01 & p vs E01 \\
+\midrule
+Gazette test & MK$\rightarrow$SQ & 27.74 & 54.02 & 54.28 & 0.001 & 0.26 & 0.001 & 50.30 & 72.28 & 72.42 & 0.001 & 0.14 & 0.006 \\
+Gazette test & SQ$\rightarrow$MK & 29.63 & 63.64 & 63.80 & 0.001 & 0.16 & 0.010 & 52.46 & 78.55 & 78.60 & 0.001 & 0.06 & 0.158 \\
+FLORES+ devtest & MK$\rightarrow$SQ & 22.08 & 19.45 & 15.99 & 0.001 & -3.46 & 0.001 & 48.58 & 46.61 & 43.80 & 0.001 & -2.81 & 0.001 \\
+FLORES+ devtest & SQ$\rightarrow$MK & 21.39 & 18.89 & 16.79 & 0.001 & -2.10 & 0.001 & 49.50 & 49.07 & 47.28 & 0.001 & -1.79 & 0.001 \\
+NTREX-128 & MK$\rightarrow$SQ & 23.14 & 18.13 & 15.25 & 0.001 & -2.88 & 0.001 & 48.91 & 44.49 & 42.29 & 0.001 & -2.21 & 0.001 \\
+NTREX-128 & SQ$\rightarrow$MK & 21.25 & 17.98 & 15.89 & 0.001 & -2.09 & 0.001 & 49.54 & 47.05 & 45.44 & 0.001 & -1.61 & 0.001 \\
+\bottomrule
+\end{tabular}
+\caption{BLEU and chrF++ (beam 4) of the base model (E00), E01 (Gazette + Verbis) and E02 (Gazette only), HF bf16 models. p vs E00: paired bootstrap, base vs E02; $\Delta$ and p vs E01: E02 -- E01 (1,000 resamples, seed 42). Source: \texttt{eval/*\_results.csv (E02), experiments/E01\_gazette\_verbis\_mix/results/*.csv; significance: results.json}.}
+\label{tab:e02-main-results}
+\end{table}

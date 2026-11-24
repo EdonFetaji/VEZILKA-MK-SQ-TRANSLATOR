@@ -1,0 +1,2004 @@
+2026-10-01 08:57:00 | INFO    | start | QUICK PREFLIGHT
+2026-10-01 08:57:00 | INFO    | quick preflight: HF token, GPU, >= 14 GB free VRAM, private repo, test upload | repo root: /home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR | work dir: /home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR/runs/E02_gazette_only
+2026-10-01 08:57:01 | INFO    | quick preflight: HF token, GPU, >= 14 GB free VRAM, private repo, test upload | Hugging Face token: found (environment variable HF_TOKEN), user EdonFetaji
+2026-10-01 08:57:01 | INFO    | quick preflight: HF token, GPU, >= 14 GB free VRAM, private repo, test upload | GPU: NVIDIA GeForce RTX 5080 | compute capability 12.0 | driver 595.84 | torch 2.14.0+cu130 (CUDA 13.0)
+2026-10-01 08:57:01 | INFO    | quick preflight: HF token, GPU, >= 14 GB free VRAM, private repo, test upload | VRAM: 16.21 GB free of 16.61 GB
+2026-10-01 08:57:01 | INFO    | quick preflight: HF token, GPU, >= 14 GB free VRAM, private repo, test upload | TF32 enabled; bf16 supported
+2026-10-01 08:57:01 | INFO    | quick preflight: HF token, GPU, >= 14 GB free VRAM, private repo, test upload | run info:
+{
+  "exp_id": "E02_gazette_only",
+  "script": "scripts/train/train_nllb_gazette_verbis_ct2.py",
+  "git": {
+    "commit": "8a2978e72e026631ec1da9dd8e3f6aff82c4425b",
+    "dirty": true
+  },
+  "versions": {
+    "python": "3.12.3",
+    "torch": "2.14.0+cu130",
+    "transformers": "5.17.0",
+    "datasets": "5.0.1",
+    "ctranslate2": "4.8.2",
+    "sacrebleu": "2.6.0",
+    "huggingface_hub": "1.32.0",
+    "accelerate": "1.15.0",
+    "sentence_transformers": "6.1.0",
+    "polars": "1.44.2"
+  },
+  "gpu": {
+    "gpu_name": "NVIDIA GeForce RTX 5080",
+    "compute_capability": "12.0",
+    "driver": "595.84",
+    "cuda_torch": "13.0",
+    "torch": "2.14.0+cu130",
+    "torch_arch_list": [
+      "sm_75",
+      "sm_80",
+      "sm_86",
+      "sm_90",
+      "sm_100",
+      "sm_120"
+    ],
+    "vram_free_gb": 16.21,
+    "vram_total_gb": 16.61
+  },
+  "config": {
+    "exp_id": "E02_gazette_only",
+    "paper_arm": "M1",
+    "description": "Gazette-only control: identical to E01_gazette_verbis_mix except that no Verbis data is used for training, so E01 vs E02 isolates the contribution of the Verbis lexicon.",
+    "status": "planned",
+    "parent_exp": "E01_gazette_verbis_mix",
+    "code": {
+      "git_commit": "recorded at run time",
+      "script": "scripts/train/train_nllb_gazette_verbis_ct2.py"
+    },
+    "outputs": {
+      "work_dir": "runs/E02_gazette_only",
+      "hf_results_repo": "EdonFetaji/mk-sq-nllb600m-e02-gazette-only",
+      "legacy_repo_name": false
+    },
+    "base_model": {
+      "name": "facebook/nllb-200-distilled-600M",
+      "revision": "f8d333a098d19b4fd9a8b18f94170487ad3f821d"
+    },
+    "languages": {
+      "mk": "mkd_Cyrl",
+      "sq": "als_Latn"
+    },
+    "data": {
+      "gazette": {
+        "repo": "EdonFetaji/slvesnik-mk-sq",
+        "revision": "07af5bbbb2a2c5277e3eb9c032a86682148fb269",
+        "dev_split": "validation",
+        "manifest": "data/manifests/gazette.json"
+      },
+      "verbis": {
+        "storage_repo": "EdonFetaji/mk-sq-nllb600m-gazette-verbis",
+        "raw_path": "data/verbis/verbis_mk_sq.parquet",
+        "local_cache": "data/verbis_mk_sq.parquet",
+        "use_for_training": false,
+        "use_for_evaluation": true,
+        "headword_cleaning": [
+          "strip_trailing_parenthetical",
+          "strip_albanian_inflection_ending",
+          "lowercase_all_caps_longer_than_4",
+          "drop_empty",
+          "dedup"
+        ],
+        "labse_model": "sentence-transformers/LaBSE",
+        "labse_min_score": 0.7,
+        "manifest": "data/manifests/verbis.json"
+      },
+      "flores_plus": {
+        "repo": "openlanguagedata/flores_plus",
+        "revision": "5fec6c13f9e5a4db2f745d4ec0d7c9721ddc4f06",
+        "split": "devtest",
+        "langs": {
+          "mk": "mkd_Cyrl",
+          "sq": "als_Latn"
+        },
+        "manifest": "data/manifests/flores_plus.json"
+      },
+      "ntrex": {
+        "repo": "MicrosoftTranslator/NTREX",
+        "commit": "468c6b69c7f6a75d31d4743d9daba2af566cc18d",
+        "files": {
+          "mk": "NTREX-128/newstest2019-ref.mkd.txt",
+          "sq": "NTREX-128/newstest2019-ref.sqi.txt"
+        },
+        "manifest": "data/manifests/ntrex.json"
+      },
+      "leakage_removal": {
+        "normalisation": "lowercase_collapse_whitespace",
+        "rule": "remove a train pair if its mk OR sq side occurs in any held-out set",
+        "held_out": [
+          "gazette_dev",
+          "gazette_test",
+          "flores_devtest",
+          "ntrex"
+        ]
+      },
+      "bidirectional": true,
+      "max_tokens": 192,
+      "expected": {
+        "row_counts": {
+          "gazette_train": 270083,
+          "gazette_dev": 13355,
+          "gazette_test": 10174,
+          "flores_devtest": 1012,
+          "ntrex": 1997,
+          "verbis_entries": 15925
+        },
+        "content_sha256": {
+          "gazette_test": "167bd7740f5f2bdc8d91e3788bf9695f3f74e1416cc8ae72e3ee973dfb1aa37b",
+          "dev_eval_ids": "507d8eeb9195508b3b03999d9282de7cc482c2d16ff1e7a0e6fdf611c3d4ea5e"
+        }
+      }
+    },
+    "training": {
+      "method": "full_parameter_sft",
+      "optim": "adafactor",
+      "learning_rate": 0.0001,
+      "lr_scheduler": "linear",
+      "warmup_steps": 1000,
+      "epochs": 1,
+      "label_smoothing": 0.1,
+      "weight_decay": 0.01,
+      "max_grad_norm": 1.0,
+      "bf16": true,
+      "tf32": true,
+      "sampling": "group_by_length",
+      "per_device_batch": 8,
+      "grad_accumulation": 16,
+      "gradient_checkpointing": false,
+      "dataloader_num_workers": 8,
+      "seed": 42,
+      "logging_steps": 50,
+      "save_total_limit": 3
+    },
+    "checkpoint_selection": {
+      "data": "gazette_dev",
+      "size_per_direction": 500,
+      "sampling_seed": 42,
+      "decoding": "greedy",
+      "batch": 32,
+      "max_new_tokens": 256,
+      "every_steps": 1000,
+      "metric": "eval_chrf"
+    },
+    "final_evaluation": {
+      "test_sets": [
+        "gazette_test_full",
+        "flores_devtest",
+        "ntrex"
+      ],
+      "systems": [
+        "base",
+        "finetuned_hf",
+        "finetuned_ct2"
+      ],
+      "beams": 4,
+      "max_new_tokens": 256,
+      "batch": 32,
+      "ct2": {
+        "quantization": "int8",
+        "gpu_compute_type": "int8_float16",
+        "cpu_compute_type": "int8",
+        "cpu_threads": 16
+      },
+      "metrics": {
+        "bleu": "sacrebleu_default_13a",
+        "chrf": {
+          "word_order": 2
+        }
+      },
+      "save_every_sentences": 2000
+    },
+    "analysis": {
+      "overlap": {
+        "normalisation": "lowercase_digits_to_0_collapse_whitespace",
+        "shingle_chars": 5,
+        "near_duplicate_jaccard": 0.8,
+        "minhash_perms": 128,
+        "lsh_bands": 16,
+        "compare_against": "train_clean_gazette"
+      },
+      "terminology": {
+        "terms": "verbis_terms",
+        "min_source_chars": 5,
+        "prefix_rule": "max(4, len-2)",
+        "rare_max_train_sentences": 5
+      },
+      "number_fidelity": {
+        "pattern": "\\d+",
+        "compare": "multiset"
+      },
+      "significance": {
+        "test": "paired_bootstrap",
+        "resamples": 1000,
+        "seed": 42
+      }
+    },
+    "hardware": {
+      "min_free_vram_gb": 14
+    },
+    "comparison": {
+      "against": "E01_gazette_verbis_mix",
+      "experimental_differences": [
+        "data.verbis.use_for_training"
+      ],
+      "bookkeeping_differences": [
+        "exp_id",
+        "paper_arm",
+        "description",
+        "status",
+        "parent_exp",
+        "code",
+        "outputs",
+        "comparison",
+        "data.gazette.revision",
+        "data.flores_plus.revision",
+        "data.ntrex.commit"
+      ]
+    }
+  },
+  "results_repo": "https://huggingface.co/EdonFetaji/mk-sq-nllb600m-e02-gazette-only",
+  "invocations": [
+    "2026-10-01T08:57:01+00:00"
+  ],
+  "updated_at": "2026-10-01T08:57:01+00:00",
+  "provenance": {
+    "exp_id": "E02_gazette_only",
+    "git_commit": "8a2978e72e026631ec1da9dd8e3f6aff82c4425b",
+    "config_path": "configs/E02_gazette_only.yaml",
+    "config_sha256": "7b810fb9b9a6bf1cd7a158cb6c711a13a8f84e7af37b94f67dc44dd7b84baadd",
+    "manifest_sha256": {
+      "flores_plus": "3030e828566543440a86f0f294c17ad58eccebb04b17f987afc7cf88c2351bd4",
+      "gazette": "976bfc1e8c65f7795352c9dcb263d26e02fa5448d2fa312c50e451cd899e359f",
+      "ntrex": "71f675a0dba99f9947fd78f34fa816a80d101a5accbdadf677e3a11d14f1edfd",
+      "verbis": "15ef8db0ada5470cb2d24d41e9ee83f6a85bbb8b67f824630259ba71583da9bc"
+    }
+  }
+}
+
+2026-10-01 08:57:01 | INFO    | quick preflight: HF token, GPU, >= 14 GB free VRAM, private repo, test upload | results repo: https://huggingface.co/EdonFetaji/mk-sq-nllb600m-e02-gazette-only
+2026-10-01 08:57:01 | INFO    | quick preflight: HF token, GPU, >= 14 GB free VRAM, private repo, test upload | results repo verified PRIVATE: https://huggingface.co/EdonFetaji/mk-sq-nllb600m-e02-gazette-only
+2026-10-01 08:57:02 | INFO    | quick preflight: HF token, GPU, >= 14 GB free VRAM, private repo, test upload | uploaded: eval/run_info.json
+2026-10-01 08:57:02 | INFO    | quick preflight: HF token, GPU, >= 14 GB free VRAM, private repo, test upload | preflight test upload OK
+2026-10-01 08:57:03 | INFO    | quick FLORES+ devtest (gated) downloadable | FLORES+ mkd_Cyrl: devtest/mkd_Cyrl.jsonl
+2026-10-01 08:57:03 | ERROR   | quick NTREX-128 reachable on GitHub | NTREX-128 reachable on GitHub failed:
+Traceback (most recent call last):
+  File "/home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR/scripts/train/smoke_test_nllb_run.py", line 281, in stage
+    ok, detail = True, fn()
+                       ^^^^
+  File "/home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR/scripts/train/smoke_test_nllb_run.py", line 305, in ntrex
+    req = urllib.request.Request(m.NTREX_URL.format(code=code), method="HEAD")
+                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 'commit'
+
+2026-10-01 08:57:08 | INFO    | quick GPU: memory probe (worst-case 192+192-token batches) | memory probe: batch 8 x accumulation 16 (gradient checkpointing False) OK, peak 10.95 GB
+2026-10-01 08:57:11 | WARNING | quick GPU: Trainer + one real training step | training arguments not supported by transformers 5.17.0, ignored: ['save_safetensors']
+2026-10-01 08:57:17 | INFO    | quick CTranslate2: base conversion + GPU run | converting /home/edon.fetaji/.cache/huggingface/hub/models--facebook--nllb-200-distilled-600M/snapshots/f8d333a098d19b4fd9a8b18f94170487ad3f821d -> ct2/base_int8 (int8)
+2026-10-01 08:57:26 | INFO    | quick CTranslate2: base conversion + GPU run | wrote ct2/base_int8: ['config.json', 'model.bin', 'provenance.json', 'sentencepiece.bpe.model', 'shared_vocabulary.json', 'special_tokens_map.json', 'tokenizer.json', 'tokenizer_config.json']
+2026-10-01 08:57:27 | WARNING | quick CTranslate2: base conversion + GPU run | CTranslate2 cannot use this GPU (Traceback (most recent call last):
+  File "<string>", line 6, in <module>
+RuntimeError: Library libcublas.so.12 is not found or cannot be loaded) -- falling back to CPU, compute_type int8, 16 threads
+2026-10-01 09:01:07 | INFO    | start | QUICK PREFLIGHT
+2026-10-01 09:01:07 | INFO    | quick preflight: HF token, GPU, >= 14 GB free VRAM, private repo, test upload | repo root: /home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR | work dir: /home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR/runs/E02_gazette_only
+2026-10-01 09:01:07 | INFO    | quick preflight: HF token, GPU, >= 14 GB free VRAM, private repo, test upload | Hugging Face token: found (environment variable HF_TOKEN), user EdonFetaji
+2026-10-01 09:01:07 | INFO    | quick preflight: HF token, GPU, >= 14 GB free VRAM, private repo, test upload | GPU: NVIDIA GeForce RTX 5080 | compute capability 12.0 | driver 595.84 | torch 2.14.0+cu130 (CUDA 13.0)
+2026-10-01 09:01:07 | INFO    | quick preflight: HF token, GPU, >= 14 GB free VRAM, private repo, test upload | VRAM: 15.50 GB free of 16.61 GB
+2026-10-01 09:01:07 | INFO    | quick preflight: HF token, GPU, >= 14 GB free VRAM, private repo, test upload | TF32 enabled; bf16 supported
+2026-10-01 09:01:07 | INFO    | quick preflight: HF token, GPU, >= 14 GB free VRAM, private repo, test upload | run info:
+{
+  "exp_id": "E02_gazette_only",
+  "script": "scripts/train/train_nllb_gazette_verbis_ct2.py",
+  "git": {
+    "commit": "a912aa1095684d92996915d7b8119272f1fc9a12",
+    "dirty": true
+  },
+  "versions": {
+    "python": "3.12.3",
+    "torch": "2.14.0+cu130",
+    "transformers": "5.17.0",
+    "datasets": "5.0.1",
+    "ctranslate2": "4.8.2",
+    "sacrebleu": "2.6.0",
+    "huggingface_hub": "1.32.0",
+    "accelerate": "1.15.0",
+    "sentence_transformers": "6.1.0",
+    "polars": "1.44.2"
+  },
+  "gpu": {
+    "gpu_name": "NVIDIA GeForce RTX 5080",
+    "compute_capability": "12.0",
+    "driver": "595.84",
+    "cuda_torch": "13.0",
+    "torch": "2.14.0+cu130",
+    "torch_arch_list": [
+      "sm_75",
+      "sm_80",
+      "sm_86",
+      "sm_90",
+      "sm_100",
+      "sm_120"
+    ],
+    "vram_free_gb": 15.5,
+    "vram_total_gb": 16.61
+  },
+  "config": {
+    "exp_id": "E02_gazette_only",
+    "paper_arm": "M1",
+    "description": "Gazette-only control: identical to E01_gazette_verbis_mix except that no Verbis data is used for training, so E01 vs E02 isolates the contribution of the Verbis lexicon.",
+    "status": "planned",
+    "parent_exp": "E01_gazette_verbis_mix",
+    "code": {
+      "git_commit": "recorded at run time",
+      "script": "scripts/train/train_nllb_gazette_verbis_ct2.py"
+    },
+    "outputs": {
+      "work_dir": "runs/E02_gazette_only",
+      "hf_results_repo": "EdonFetaji/mk-sq-nllb600m-e02-gazette-only",
+      "legacy_repo_name": false
+    },
+    "base_model": {
+      "name": "facebook/nllb-200-distilled-600M",
+      "revision": "f8d333a098d19b4fd9a8b18f94170487ad3f821d"
+    },
+    "languages": {
+      "mk": "mkd_Cyrl",
+      "sq": "als_Latn"
+    },
+    "data": {
+      "gazette": {
+        "repo": "EdonFetaji/slvesnik-mk-sq",
+        "revision": "07af5bbbb2a2c5277e3eb9c032a86682148fb269",
+        "dev_split": "validation",
+        "manifest": "data/manifests/gazette.json"
+      },
+      "verbis": {
+        "storage_repo": "EdonFetaji/mk-sq-nllb600m-gazette-verbis",
+        "raw_path": "data/verbis/verbis_mk_sq.parquet",
+        "local_cache": "data/verbis_mk_sq.parquet",
+        "use_for_training": false,
+        "use_for_evaluation": true,
+        "headword_cleaning": [
+          "strip_trailing_parenthetical",
+          "strip_albanian_inflection_ending",
+          "lowercase_all_caps_longer_than_4",
+          "drop_empty",
+          "dedup"
+        ],
+        "labse_model": "sentence-transformers/LaBSE",
+        "labse_min_score": 0.7,
+        "manifest": "data/manifests/verbis.json"
+      },
+      "flores_plus": {
+        "repo": "openlanguagedata/flores_plus",
+        "revision": "5fec6c13f9e5a4db2f745d4ec0d7c9721ddc4f06",
+        "split": "devtest",
+        "langs": {
+          "mk": "mkd_Cyrl",
+          "sq": "als_Latn"
+        },
+        "manifest": "data/manifests/flores_plus.json"
+      },
+      "ntrex": {
+        "repo": "MicrosoftTranslator/NTREX",
+        "commit": "468c6b69c7f6a75d31d4743d9daba2af566cc18d",
+        "files": {
+          "mk": "NTREX-128/newstest2019-ref.mkd.txt",
+          "sq": "NTREX-128/newstest2019-ref.sqi.txt"
+        },
+        "manifest": "data/manifests/ntrex.json"
+      },
+      "leakage_removal": {
+        "normalisation": "lowercase_collapse_whitespace",
+        "rule": "remove a train pair if its mk OR sq side occurs in any held-out set",
+        "held_out": [
+          "gazette_dev",
+          "gazette_test",
+          "flores_devtest",
+          "ntrex"
+        ]
+      },
+      "bidirectional": true,
+      "max_tokens": 192,
+      "expected": {
+        "row_counts": {
+          "gazette_train": 270083,
+          "gazette_dev": 13355,
+          "gazette_test": 10174,
+          "flores_devtest": 1012,
+          "ntrex": 1997,
+          "verbis_entries": 15925
+        },
+        "content_sha256": {
+          "gazette_test": "167bd7740f5f2bdc8d91e3788bf9695f3f74e1416cc8ae72e3ee973dfb1aa37b",
+          "dev_eval_ids": "507d8eeb9195508b3b03999d9282de7cc482c2d16ff1e7a0e6fdf611c3d4ea5e"
+        }
+      }
+    },
+    "training": {
+      "method": "full_parameter_sft",
+      "optim": "adafactor",
+      "learning_rate": 0.0001,
+      "lr_scheduler": "linear",
+      "warmup_steps": 1000,
+      "epochs": 1,
+      "label_smoothing": 0.1,
+      "weight_decay": 0.01,
+      "max_grad_norm": 1.0,
+      "bf16": true,
+      "tf32": true,
+      "sampling": "group_by_length",
+      "per_device_batch": 8,
+      "grad_accumulation": 16,
+      "gradient_checkpointing": false,
+      "dataloader_num_workers": 8,
+      "seed": 42,
+      "logging_steps": 50,
+      "save_total_limit": 3
+    },
+    "checkpoint_selection": {
+      "data": "gazette_dev",
+      "size_per_direction": 500,
+      "sampling_seed": 42,
+      "decoding": "greedy",
+      "batch": 32,
+      "max_new_tokens": 256,
+      "every_steps": 1000,
+      "metric": "eval_chrf"
+    },
+    "final_evaluation": {
+      "test_sets": [
+        "gazette_test_full",
+        "flores_devtest",
+        "ntrex"
+      ],
+      "systems": [
+        "base",
+        "finetuned_hf",
+        "finetuned_ct2"
+      ],
+      "beams": 4,
+      "max_new_tokens": 256,
+      "batch": 32,
+      "ct2": {
+        "quantization": "int8",
+        "gpu_compute_type": "int8_float16",
+        "cpu_compute_type": "int8",
+        "cpu_threads": 16
+      },
+      "metrics": {
+        "bleu": "sacrebleu_default_13a",
+        "chrf": {
+          "word_order": 2
+        }
+      },
+      "save_every_sentences": 2000
+    },
+    "analysis": {
+      "overlap": {
+        "normalisation": "lowercase_digits_to_0_collapse_whitespace",
+        "shingle_chars": 5,
+        "near_duplicate_jaccard": 0.8,
+        "minhash_perms": 128,
+        "lsh_bands": 16,
+        "compare_against": "train_clean_gazette"
+      },
+      "terminology": {
+        "terms": "verbis_terms",
+        "min_source_chars": 5,
+        "prefix_rule": "max(4, len-2)",
+        "rare_max_train_sentences": 5
+      },
+      "number_fidelity": {
+        "pattern": "\\d+",
+        "compare": "multiset"
+      },
+      "significance": {
+        "test": "paired_bootstrap",
+        "resamples": 1000,
+        "seed": 42
+      }
+    },
+    "hardware": {
+      "min_free_vram_gb": 14
+    },
+    "comparison": {
+      "against": "E01_gazette_verbis_mix",
+      "experimental_differences": [
+        "data.verbis.use_for_training"
+      ],
+      "bookkeeping_differences": [
+        "exp_id",
+        "paper_arm",
+        "description",
+        "status",
+        "parent_exp",
+        "code",
+        "outputs",
+        "comparison",
+        "data.gazette.revision",
+        "data.flores_plus.revision",
+        "data.ntrex.commit"
+      ]
+    }
+  },
+  "results_repo": "https://huggingface.co/EdonFetaji/mk-sq-nllb600m-e02-gazette-only",
+  "invocations": [
+    "2026-10-01T08:57:01+00:00",
+    "2026-10-01T09:01:07+00:00"
+  ],
+  "updated_at": "2026-10-01T09:01:07+00:00",
+  "provenance": {
+    "exp_id": "E02_gazette_only",
+    "git_commit": "a912aa1095684d92996915d7b8119272f1fc9a12",
+    "config_path": "configs/E02_gazette_only.yaml",
+    "config_sha256": "7b810fb9b9a6bf1cd7a158cb6c711a13a8f84e7af37b94f67dc44dd7b84baadd",
+    "manifest_sha256": {
+      "flores_plus": "3030e828566543440a86f0f294c17ad58eccebb04b17f987afc7cf88c2351bd4",
+      "gazette": "976bfc1e8c65f7795352c9dcb263d26e02fa5448d2fa312c50e451cd899e359f",
+      "ntrex": "71f675a0dba99f9947fd78f34fa816a80d101a5accbdadf677e3a11d14f1edfd",
+      "verbis": "15ef8db0ada5470cb2d24d41e9ee83f6a85bbb8b67f824630259ba71583da9bc"
+    }
+  }
+}
+
+2026-10-01 09:01:07 | INFO    | quick preflight: HF token, GPU, >= 14 GB free VRAM, private repo, test upload | results repo: https://huggingface.co/EdonFetaji/mk-sq-nllb600m-e02-gazette-only
+2026-10-01 09:01:08 | INFO    | quick preflight: HF token, GPU, >= 14 GB free VRAM, private repo, test upload | results repo verified PRIVATE: https://huggingface.co/EdonFetaji/mk-sq-nllb600m-e02-gazette-only
+2026-10-01 09:01:08 | INFO    | quick preflight: HF token, GPU, >= 14 GB free VRAM, private repo, test upload | uploaded: eval/run_info.json
+2026-10-01 09:01:08 | INFO    | quick preflight: HF token, GPU, >= 14 GB free VRAM, private repo, test upload | preflight test upload OK
+2026-10-01 09:01:09 | INFO    | quick FLORES+ devtest (gated) downloadable | FLORES+ mkd_Cyrl: devtest/mkd_Cyrl.jsonl
+2026-10-01 09:01:13 | INFO    | quick GPU: memory probe (worst-case 192+192-token batches) | memory probe: batch 8 x accumulation 16 (gradient checkpointing False) OK, peak 10.95 GB
+2026-10-01 09:01:16 | WARNING | quick GPU: Trainer + one real training step | training arguments not supported by transformers 5.17.0, ignored: ['save_safetensors']
+2026-10-01 09:01:23 | WARNING | quick CTranslate2: base conversion + GPU run | CTranslate2 cannot use this GPU (Traceback (most recent call last):
+  File "<string>", line 6, in <module>
+RuntimeError: Library libcublas.so.12 is not found or cannot be loaded) -- falling back to CPU, compute_type int8, 16 threads
+2026-10-01 09:53:05 | INFO    | start | ==============================================================================
+2026-10-01 09:53:05 | INFO    | start | run started (pid 1127293): scripts/train/train_nllb_gazette_verbis_ct2.py E02_gazette_only
+2026-10-01 09:53:05 | INFO    | start | experiment E02_gazette_only | config configs/E02_gazette_only.yaml (sha256 7b810fb9b9a6) | commit 5673db1c62c3 | results repo EdonFetaji/mk-sq-nllb600m-e02-gazette-only
+2026-10-01 09:53:05 | INFO    | start | provenance: {"exp_id": "E02_gazette_only", "git_commit": "5673db1c62c36755bf06f51d1c9c1a80c6efad26", "config_path": "configs/E02_gazette_only.yaml", "config_sha256": "7b810fb9b9a6bf1cd7a158cb6c711a13a8f84e7af37b94f67dc44dd7b84baadd", "manifest_sha256": {"flores_plus": "3030e828566543440a86f0f294c17ad58eccebb04b17f987afc7cf88c2351bd4", "gazette": "976bfc1e8c65f7795352c9dcb263d26e02fa5448d2fa312c50e451cd899e359f", "ntrex": "71f675a0dba99f9947fd78f34fa816a80d101a5accbdadf677e3a11d14f1edfd", "verbis": "15ef8db0ada5470cb2d24d41e9ee83f6a85bbb8b67f824630259ba71583da9bc"}}
+2026-10-01 09:53:05 | INFO    | step  1 preflight | ===== start
+2026-10-01 09:53:05 | INFO    | step  1 preflight | repo root: /home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR | work dir: /home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR/runs/E02_gazette_only
+2026-10-01 09:53:05 | INFO    | step  1 preflight | Hugging Face token: found (environment variable HF_TOKEN), user EdonFetaji
+2026-10-01 09:53:05 | INFO    | step  1 preflight | GPU: NVIDIA GeForce RTX 5080 | compute capability 12.0 | driver 595.84 | torch 2.14.0+cu130 (CUDA 13.0)
+2026-10-01 09:53:05 | INFO    | step  1 preflight | VRAM: 16.21 GB free of 16.61 GB
+2026-10-01 09:53:05 | INFO    | step  1 preflight | TF32 enabled; bf16 supported
+2026-10-01 09:53:05 | INFO    | step  1 preflight | run info:
+{
+  "exp_id": "E02_gazette_only",
+  "script": "scripts/train/train_nllb_gazette_verbis_ct2.py",
+  "git": {
+    "commit": "5673db1c62c36755bf06f51d1c9c1a80c6efad26",
+    "dirty": false
+  },
+  "versions": {
+    "python": "3.12.3",
+    "torch": "2.14.0+cu130",
+    "transformers": "5.17.0",
+    "datasets": "5.0.1",
+    "ctranslate2": "4.8.2",
+    "sacrebleu": "2.6.0",
+    "huggingface_hub": "1.32.0",
+    "accelerate": "1.15.0",
+    "sentence_transformers": "6.1.0",
+    "polars": "1.44.2"
+  },
+  "gpu": {
+    "gpu_name": "NVIDIA GeForce RTX 5080",
+    "compute_capability": "12.0",
+    "driver": "595.84",
+    "cuda_torch": "13.0",
+    "torch": "2.14.0+cu130",
+    "torch_arch_list": [
+      "sm_75",
+      "sm_80",
+      "sm_86",
+      "sm_90",
+      "sm_100",
+      "sm_120"
+    ],
+    "vram_free_gb": 16.21,
+    "vram_total_gb": 16.61
+  },
+  "config": {
+    "exp_id": "E02_gazette_only",
+    "paper_arm": "M1",
+    "description": "Gazette-only control: identical to E01_gazette_verbis_mix except that no Verbis data is used for training, so E01 vs E02 isolates the contribution of the Verbis lexicon.",
+    "status": "planned",
+    "parent_exp": "E01_gazette_verbis_mix",
+    "code": {
+      "git_commit": "recorded at run time",
+      "script": "scripts/train/train_nllb_gazette_verbis_ct2.py"
+    },
+    "outputs": {
+      "work_dir": "runs/E02_gazette_only",
+      "hf_results_repo": "EdonFetaji/mk-sq-nllb600m-e02-gazette-only",
+      "legacy_repo_name": false
+    },
+    "base_model": {
+      "name": "facebook/nllb-200-distilled-600M",
+      "revision": "f8d333a098d19b4fd9a8b18f94170487ad3f821d"
+    },
+    "languages": {
+      "mk": "mkd_Cyrl",
+      "sq": "als_Latn"
+    },
+    "data": {
+      "gazette": {
+        "repo": "EdonFetaji/slvesnik-mk-sq",
+        "revision": "07af5bbbb2a2c5277e3eb9c032a86682148fb269",
+        "dev_split": "validation",
+        "manifest": "data/manifests/gazette.json"
+      },
+      "verbis": {
+        "storage_repo": "EdonFetaji/mk-sq-nllb600m-gazette-verbis",
+        "raw_path": "data/verbis/verbis_mk_sq.parquet",
+        "local_cache": "data/verbis_mk_sq.parquet",
+        "use_for_training": false,
+        "use_for_evaluation": true,
+        "headword_cleaning": [
+          "strip_trailing_parenthetical",
+          "strip_albanian_inflection_ending",
+          "lowercase_all_caps_longer_than_4",
+          "drop_empty",
+          "dedup"
+        ],
+        "labse_model": "sentence-transformers/LaBSE",
+        "labse_min_score": 0.7,
+        "manifest": "data/manifests/verbis.json"
+      },
+      "flores_plus": {
+        "repo": "openlanguagedata/flores_plus",
+        "revision": "5fec6c13f9e5a4db2f745d4ec0d7c9721ddc4f06",
+        "split": "devtest",
+        "langs": {
+          "mk": "mkd_Cyrl",
+          "sq": "als_Latn"
+        },
+        "manifest": "data/manifests/flores_plus.json"
+      },
+      "ntrex": {
+        "repo": "MicrosoftTranslator/NTREX",
+        "commit": "468c6b69c7f6a75d31d4743d9daba2af566cc18d",
+        "files": {
+          "mk": "NTREX-128/newstest2019-ref.mkd.txt",
+          "sq": "NTREX-128/newstest2019-ref.sqi.txt"
+        },
+        "manifest": "data/manifests/ntrex.json"
+      },
+      "leakage_removal": {
+        "normalisation": "lowercase_collapse_whitespace",
+        "rule": "remove a train pair if its mk OR sq side occurs in any held-out set",
+        "held_out": [
+          "gazette_dev",
+          "gazette_test",
+          "flores_devtest",
+          "ntrex"
+        ]
+      },
+      "bidirectional": true,
+      "max_tokens": 192,
+      "expected": {
+        "row_counts": {
+          "gazette_train": 270083,
+          "gazette_dev": 13355,
+          "gazette_test": 10174,
+          "flores_devtest": 1012,
+          "ntrex": 1997,
+          "verbis_entries": 15925
+        },
+        "content_sha256": {
+          "gazette_test": "167bd7740f5f2bdc8d91e3788bf9695f3f74e1416cc8ae72e3ee973dfb1aa37b",
+          "dev_eval_ids": "507d8eeb9195508b3b03999d9282de7cc482c2d16ff1e7a0e6fdf611c3d4ea5e"
+        }
+      }
+    },
+    "training": {
+      "method": "full_parameter_sft",
+      "optim": "adafactor",
+      "learning_rate": 0.0001,
+      "lr_scheduler": "linear",
+      "warmup_steps": 1000,
+      "epochs": 1,
+      "label_smoothing": 0.1,
+      "weight_decay": 0.01,
+      "max_grad_norm": 1.0,
+      "bf16": true,
+      "tf32": true,
+      "sampling": "group_by_length",
+      "per_device_batch": 8,
+      "grad_accumulation": 16,
+      "gradient_checkpointing": false,
+      "dataloader_num_workers": 8,
+      "seed": 42,
+      "logging_steps": 50,
+      "save_total_limit": 3
+    },
+    "checkpoint_selection": {
+      "data": "gazette_dev",
+      "size_per_direction": 500,
+      "sampling_seed": 42,
+      "decoding": "greedy",
+      "batch": 32,
+      "max_new_tokens": 256,
+      "every_steps": 1000,
+      "metric": "eval_chrf"
+    },
+    "final_evaluation": {
+      "test_sets": [
+        "gazette_test_full",
+        "flores_devtest",
+        "ntrex"
+      ],
+      "systems": [
+        "base",
+        "finetuned_hf",
+        "finetuned_ct2"
+      ],
+      "beams": 4,
+      "max_new_tokens": 256,
+      "batch": 32,
+      "ct2": {
+        "quantization": "int8",
+        "gpu_compute_type": "int8_float16",
+        "cpu_compute_type": "int8",
+        "cpu_threads": 16
+      },
+      "metrics": {
+        "bleu": "sacrebleu_default_13a",
+        "chrf": {
+          "word_order": 2
+        }
+      },
+      "save_every_sentences": 2000
+    },
+    "analysis": {
+      "overlap": {
+        "normalisation": "lowercase_digits_to_0_collapse_whitespace",
+        "shingle_chars": 5,
+        "near_duplicate_jaccard": 0.8,
+        "minhash_perms": 128,
+        "lsh_bands": 16,
+        "compare_against": "train_clean_gazette"
+      },
+      "terminology": {
+        "terms": "verbis_terms",
+        "min_source_chars": 5,
+        "prefix_rule": "max(4, len-2)",
+        "rare_max_train_sentences": 5
+      },
+      "number_fidelity": {
+        "pattern": "\\d+",
+        "compare": "multiset"
+      },
+      "significance": {
+        "test": "paired_bootstrap",
+        "resamples": 1000,
+        "seed": 42
+      }
+    },
+    "hardware": {
+      "min_free_vram_gb": 14
+    },
+    "comparison": {
+      "against": "E01_gazette_verbis_mix",
+      "experimental_differences": [
+        "data.verbis.use_for_training"
+      ],
+      "bookkeeping_differences": [
+        "exp_id",
+        "paper_arm",
+        "description",
+        "status",
+        "parent_exp",
+        "code",
+        "outputs",
+        "comparison",
+        "data.gazette.revision",
+        "data.flores_plus.revision",
+        "data.ntrex.commit"
+      ]
+    }
+  },
+  "results_repo": "https://huggingface.co/EdonFetaji/mk-sq-nllb600m-e02-gazette-only",
+  "invocations": [
+    "2026-10-01T08:57:01+00:00",
+    "2026-10-01T09:01:07+00:00",
+    "2026-10-01T09:53:05+00:00"
+  ],
+  "updated_at": "2026-10-01T09:53:05+00:00",
+  "provenance": {
+    "exp_id": "E02_gazette_only",
+    "git_commit": "5673db1c62c36755bf06f51d1c9c1a80c6efad26",
+    "config_path": "configs/E02_gazette_only.yaml",
+    "config_sha256": "7b810fb9b9a6bf1cd7a158cb6c711a13a8f84e7af37b94f67dc44dd7b84baadd",
+    "manifest_sha256": {
+      "flores_plus": "3030e828566543440a86f0f294c17ad58eccebb04b17f987afc7cf88c2351bd4",
+      "gazette": "976bfc1e8c65f7795352c9dcb263d26e02fa5448d2fa312c50e451cd899e359f",
+      "ntrex": "71f675a0dba99f9947fd78f34fa816a80d101a5accbdadf677e3a11d14f1edfd",
+      "verbis": "15ef8db0ada5470cb2d24d41e9ee83f6a85bbb8b67f824630259ba71583da9bc"
+    }
+  }
+}
+
+2026-10-01 09:53:05 | INFO    | step  1 preflight | results repo: https://huggingface.co/EdonFetaji/mk-sq-nllb600m-e02-gazette-only
+2026-10-01 09:53:05 | INFO    | step  1 preflight | results repo verified PRIVATE: https://huggingface.co/EdonFetaji/mk-sq-nllb600m-e02-gazette-only
+2026-10-01 09:53:06 | INFO    | step  1 preflight | uploaded: eval/run_info.json
+2026-10-01 09:53:06 | INFO    | step  1 preflight | preflight test upload OK
+2026-10-01 09:53:06 | INFO    | step  1 preflight | ===== done in 0h00m01s
+2026-10-01 09:53:06 | INFO    | step  2 gazette corpus | ===== start
+2026-10-01 09:53:06 | INFO    | step  2 gazette corpus | gazette: 3 file(s) verified against data/manifests/gazette.json
+2026-10-01 09:53:08 | INFO    | step  2 gazette corpus | Gazette split 'train': 270083 rows | schema: {'pair_id': 'string', 'mk_text': 'string', 'sq_text': 'string', 'year': 'int16', 'issue_no': 'int16', 'issue_key': 'string', 'mk_component_type': 'string', 'sq_component_type': 'string', 'mk_page': 'int16', 'sq_page': 'int16', 'mk_component': 'int16', 'sq_component': 'int16', 'is_high_quality': 'bool', 'quality_confidence': 'float32', 'sonar_cosine': 'float32', 'gale_church_inferred': 'bool', 'mk_ocr_confidence': 'float32', 'sq_ocr_confidence': 'float32', 'source_pdf': 'string', 'split': 'string', 'redacted': 'bool'}
+2026-10-01 09:53:08 | INFO    | step  2 gazette corpus | Gazette split 'validation': 13355 rows | schema: {'pair_id': 'string', 'mk_text': 'string', 'sq_text': 'string', 'year': 'int16', 'issue_no': 'int16', 'issue_key': 'string', 'mk_component_type': 'string', 'sq_component_type': 'string', 'mk_page': 'int16', 'sq_page': 'int16', 'mk_component': 'int16', 'sq_component': 'int16', 'is_high_quality': 'bool', 'quality_confidence': 'float32', 'sonar_cosine': 'float32', 'gale_church_inferred': 'bool', 'mk_ocr_confidence': 'float32', 'sq_ocr_confidence': 'float32', 'source_pdf': 'string', 'split': 'string', 'redacted': 'bool'}
+2026-10-01 09:53:08 | INFO    | step  2 gazette corpus | Gazette split 'test': 10174 rows | schema: {'pair_id': 'string', 'mk_text': 'string', 'sq_text': 'string', 'year': 'int16', 'issue_no': 'int16', 'issue_key': 'string', 'mk_component_type': 'string', 'sq_component_type': 'string', 'mk_page': 'int16', 'sq_page': 'int16', 'mk_component': 'int16', 'sq_component': 'int16', 'is_high_quality': 'bool', 'quality_confidence': 'float32', 'sonar_cosine': 'float32', 'gale_church_inferred': 'bool', 'mk_ocr_confidence': 'float32', 'sq_ocr_confidence': 'float32', 'source_pdf': 'string', 'split': 'string', 'redacted': 'bool'}
+2026-10-01 09:53:08 | INFO    | step  2 gazette corpus | column mapping: mk_text -> mk, sq_text -> sq (also kept: ['pair_id', 'issue_key'])
+2026-10-01 09:53:09 | INFO    | step  2 gazette corpus | wrote data/processed/gazette_train.parquet (270083 rows)
+2026-10-01 09:53:09 | INFO    | step  2 gazette corpus | wrote data/processed/gazette_test.parquet (10174 rows)
+2026-10-01 09:53:09 | INFO    | step  2 gazette corpus | wrote data/processed/gazette_dev.parquet (13355 rows)
+2026-10-01 09:53:09 | INFO    | step  2 gazette corpus | Gazette train: 270083 rows
+2026-10-01 09:53:09 | INFO    | step  2 gazette corpus | Gazette dev  : 13355 rows
+2026-10-01 09:53:09 | INFO    | step  2 gazette corpus | Gazette test : 10174 rows
+2026-10-01 09:53:09 | INFO    | step  2 gazette corpus | data check: gazette_train matches the reference experiment
+2026-10-01 09:53:09 | INFO    | step  2 gazette corpus | data check: gazette_dev matches the reference experiment
+2026-10-01 09:53:09 | INFO    | step  2 gazette corpus | data check: gazette_test matches the reference experiment
+2026-10-01 09:53:09 | ERROR   | step  2 gazette corpus | FAILED after 0h00m02s: Fatal: data check failed: gazette_test = 167bd7740f5f2bdc8d91e3788bf9695f3f74e1416cc8ae72e3ee973dfb1aa37b, config data.expected says 10174. The data differ from the reference experiment, so the comparison would not be valid.
+2026-10-01 09:53:09 | ERROR   | step  2 gazette corpus | traceback:
+Traceback (most recent call last):
+  File "/home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR/scripts/train/train_nllb_gazette_verbis_ct2.py", line 347, in run_step
+    out = fn(*args)
+          ^^^^^^^^^
+  File "/home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR/scripts/train/train_nllb_gazette_verbis_ct2.py", line 1044, in step2_gazette
+    expect("gazette_test", X.content_sha256(zip(test["mk"], test["sq"])))
+  File "/home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR/scripts/train/train_nllb_gazette_verbis_ct2.py", line 312, in expect
+    raise Fatal(f"data check failed: {key} = {value}, config data.expected says {want}. The data differ from "
+Fatal: data check failed: gazette_test = 167bd7740f5f2bdc8d91e3788bf9695f3f74e1416cc8ae72e3ee973dfb1aa37b, config data.expected says 10174. The data differ from the reference experiment, so the comparison would not be valid.
+
+2026-10-01 09:53:10 | INFO    | step  2 gazette corpus | uploaded: progress.log
+2026-10-01 09:55:36 | INFO    | start | ==============================================================================
+2026-10-01 09:55:36 | INFO    | start | run started (pid 1129571): scripts/train/train_nllb_gazette_verbis_ct2.py E02_gazette_only
+2026-10-01 09:55:36 | INFO    | start | experiment E02_gazette_only | config configs/E02_gazette_only.yaml (sha256 7b810fb9b9a6) | commit bd3c440952c7 | results repo EdonFetaji/mk-sq-nllb600m-e02-gazette-only
+2026-10-01 09:55:36 | INFO    | start | provenance: {"exp_id": "E02_gazette_only", "git_commit": "bd3c440952c78e130a1c6d0da8d7213ab87e7280", "config_path": "configs/E02_gazette_only.yaml", "config_sha256": "7b810fb9b9a6bf1cd7a158cb6c711a13a8f84e7af37b94f67dc44dd7b84baadd", "manifest_sha256": {"flores_plus": "3030e828566543440a86f0f294c17ad58eccebb04b17f987afc7cf88c2351bd4", "gazette": "976bfc1e8c65f7795352c9dcb263d26e02fa5448d2fa312c50e451cd899e359f", "ntrex": "71f675a0dba99f9947fd78f34fa816a80d101a5accbdadf677e3a11d14f1edfd", "verbis": "15ef8db0ada5470cb2d24d41e9ee83f6a85bbb8b67f824630259ba71583da9bc"}}
+2026-10-01 09:55:36 | INFO    | step  1 preflight | ===== start
+2026-10-01 09:55:36 | INFO    | step  1 preflight | repo root: /home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR | work dir: /home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR/runs/E02_gazette_only
+2026-10-01 09:55:36 | INFO    | step  1 preflight | Hugging Face token: found (environment variable HF_TOKEN), user EdonFetaji
+2026-10-01 09:55:36 | INFO    | step  1 preflight | GPU: NVIDIA GeForce RTX 5080 | compute capability 12.0 | driver 595.84 | torch 2.14.0+cu130 (CUDA 13.0)
+2026-10-01 09:55:36 | INFO    | step  1 preflight | VRAM: 16.21 GB free of 16.61 GB
+2026-10-01 09:55:36 | INFO    | step  1 preflight | TF32 enabled; bf16 supported
+2026-10-01 09:55:36 | INFO    | step  1 preflight | run info:
+{
+  "exp_id": "E02_gazette_only",
+  "script": "scripts/train/train_nllb_gazette_verbis_ct2.py",
+  "git": {
+    "commit": "bd3c440952c78e130a1c6d0da8d7213ab87e7280",
+    "dirty": false
+  },
+  "versions": {
+    "python": "3.12.3",
+    "torch": "2.14.0+cu130",
+    "transformers": "5.17.0",
+    "datasets": "5.0.1",
+    "ctranslate2": "4.8.2",
+    "sacrebleu": "2.6.0",
+    "huggingface_hub": "1.32.0",
+    "accelerate": "1.15.0",
+    "sentence_transformers": "6.1.0",
+    "polars": "1.44.2"
+  },
+  "gpu": {
+    "gpu_name": "NVIDIA GeForce RTX 5080",
+    "compute_capability": "12.0",
+    "driver": "595.84",
+    "cuda_torch": "13.0",
+    "torch": "2.14.0+cu130",
+    "torch_arch_list": [
+      "sm_75",
+      "sm_80",
+      "sm_86",
+      "sm_90",
+      "sm_100",
+      "sm_120"
+    ],
+    "vram_free_gb": 16.21,
+    "vram_total_gb": 16.61
+  },
+  "config": {
+    "exp_id": "E02_gazette_only",
+    "paper_arm": "M1",
+    "description": "Gazette-only control: identical to E01_gazette_verbis_mix except that no Verbis data is used for training, so E01 vs E02 isolates the contribution of the Verbis lexicon.",
+    "status": "planned",
+    "parent_exp": "E01_gazette_verbis_mix",
+    "code": {
+      "git_commit": "recorded at run time",
+      "script": "scripts/train/train_nllb_gazette_verbis_ct2.py"
+    },
+    "outputs": {
+      "work_dir": "runs/E02_gazette_only",
+      "hf_results_repo": "EdonFetaji/mk-sq-nllb600m-e02-gazette-only",
+      "legacy_repo_name": false
+    },
+    "base_model": {
+      "name": "facebook/nllb-200-distilled-600M",
+      "revision": "f8d333a098d19b4fd9a8b18f94170487ad3f821d"
+    },
+    "languages": {
+      "mk": "mkd_Cyrl",
+      "sq": "als_Latn"
+    },
+    "data": {
+      "gazette": {
+        "repo": "EdonFetaji/slvesnik-mk-sq",
+        "revision": "07af5bbbb2a2c5277e3eb9c032a86682148fb269",
+        "dev_split": "validation",
+        "manifest": "data/manifests/gazette.json"
+      },
+      "verbis": {
+        "storage_repo": "EdonFetaji/mk-sq-nllb600m-gazette-verbis",
+        "raw_path": "data/verbis/verbis_mk_sq.parquet",
+        "local_cache": "data/verbis_mk_sq.parquet",
+        "use_for_training": false,
+        "use_for_evaluation": true,
+        "headword_cleaning": [
+          "strip_trailing_parenthetical",
+          "strip_albanian_inflection_ending",
+          "lowercase_all_caps_longer_than_4",
+          "drop_empty",
+          "dedup"
+        ],
+        "labse_model": "sentence-transformers/LaBSE",
+        "labse_min_score": 0.7,
+        "manifest": "data/manifests/verbis.json"
+      },
+      "flores_plus": {
+        "repo": "openlanguagedata/flores_plus",
+        "revision": "5fec6c13f9e5a4db2f745d4ec0d7c9721ddc4f06",
+        "split": "devtest",
+        "langs": {
+          "mk": "mkd_Cyrl",
+          "sq": "als_Latn"
+        },
+        "manifest": "data/manifests/flores_plus.json"
+      },
+      "ntrex": {
+        "repo": "MicrosoftTranslator/NTREX",
+        "commit": "468c6b69c7f6a75d31d4743d9daba2af566cc18d",
+        "files": {
+          "mk": "NTREX-128/newstest2019-ref.mkd.txt",
+          "sq": "NTREX-128/newstest2019-ref.sqi.txt"
+        },
+        "manifest": "data/manifests/ntrex.json"
+      },
+      "leakage_removal": {
+        "normalisation": "lowercase_collapse_whitespace",
+        "rule": "remove a train pair if its mk OR sq side occurs in any held-out set",
+        "held_out": [
+          "gazette_dev",
+          "gazette_test",
+          "flores_devtest",
+          "ntrex"
+        ]
+      },
+      "bidirectional": true,
+      "max_tokens": 192,
+      "expected": {
+        "row_counts": {
+          "gazette_train": 270083,
+          "gazette_dev": 13355,
+          "gazette_test": 10174,
+          "flores_devtest": 1012,
+          "ntrex": 1997,
+          "verbis_entries": 15925
+        },
+        "content_sha256": {
+          "gazette_test": "167bd7740f5f2bdc8d91e3788bf9695f3f74e1416cc8ae72e3ee973dfb1aa37b",
+          "dev_eval_ids": "507d8eeb9195508b3b03999d9282de7cc482c2d16ff1e7a0e6fdf611c3d4ea5e"
+        }
+      }
+    },
+    "training": {
+      "method": "full_parameter_sft",
+      "optim": "adafactor",
+      "learning_rate": 0.0001,
+      "lr_scheduler": "linear",
+      "warmup_steps": 1000,
+      "epochs": 1,
+      "label_smoothing": 0.1,
+      "weight_decay": 0.01,
+      "max_grad_norm": 1.0,
+      "bf16": true,
+      "tf32": true,
+      "sampling": "group_by_length",
+      "per_device_batch": 8,
+      "grad_accumulation": 16,
+      "gradient_checkpointing": false,
+      "dataloader_num_workers": 8,
+      "seed": 42,
+      "logging_steps": 50,
+      "save_total_limit": 3
+    },
+    "checkpoint_selection": {
+      "data": "gazette_dev",
+      "size_per_direction": 500,
+      "sampling_seed": 42,
+      "decoding": "greedy",
+      "batch": 32,
+      "max_new_tokens": 256,
+      "every_steps": 1000,
+      "metric": "eval_chrf"
+    },
+    "final_evaluation": {
+      "test_sets": [
+        "gazette_test_full",
+        "flores_devtest",
+        "ntrex"
+      ],
+      "systems": [
+        "base",
+        "finetuned_hf",
+        "finetuned_ct2"
+      ],
+      "beams": 4,
+      "max_new_tokens": 256,
+      "batch": 32,
+      "ct2": {
+        "quantization": "int8",
+        "gpu_compute_type": "int8_float16",
+        "cpu_compute_type": "int8",
+        "cpu_threads": 16
+      },
+      "metrics": {
+        "bleu": "sacrebleu_default_13a",
+        "chrf": {
+          "word_order": 2
+        }
+      },
+      "save_every_sentences": 2000
+    },
+    "analysis": {
+      "overlap": {
+        "normalisation": "lowercase_digits_to_0_collapse_whitespace",
+        "shingle_chars": 5,
+        "near_duplicate_jaccard": 0.8,
+        "minhash_perms": 128,
+        "lsh_bands": 16,
+        "compare_against": "train_clean_gazette"
+      },
+      "terminology": {
+        "terms": "verbis_terms",
+        "min_source_chars": 5,
+        "prefix_rule": "max(4, len-2)",
+        "rare_max_train_sentences": 5
+      },
+      "number_fidelity": {
+        "pattern": "\\d+",
+        "compare": "multiset"
+      },
+      "significance": {
+        "test": "paired_bootstrap",
+        "resamples": 1000,
+        "seed": 42
+      }
+    },
+    "hardware": {
+      "min_free_vram_gb": 14
+    },
+    "comparison": {
+      "against": "E01_gazette_verbis_mix",
+      "experimental_differences": [
+        "data.verbis.use_for_training"
+      ],
+      "bookkeeping_differences": [
+        "exp_id",
+        "paper_arm",
+        "description",
+        "status",
+        "parent_exp",
+        "code",
+        "outputs",
+        "comparison",
+        "data.gazette.revision",
+        "data.flores_plus.revision",
+        "data.ntrex.commit"
+      ]
+    }
+  },
+  "results_repo": "https://huggingface.co/EdonFetaji/mk-sq-nllb600m-e02-gazette-only",
+  "invocations": [
+    "2026-10-01T08:57:01+00:00",
+    "2026-10-01T09:01:07+00:00",
+    "2026-10-01T09:53:05+00:00",
+    "2026-10-01T09:55:36+00:00"
+  ],
+  "updated_at": "2026-10-01T09:55:36+00:00",
+  "provenance": {
+    "exp_id": "E02_gazette_only",
+    "git_commit": "bd3c440952c78e130a1c6d0da8d7213ab87e7280",
+    "config_path": "configs/E02_gazette_only.yaml",
+    "config_sha256": "7b810fb9b9a6bf1cd7a158cb6c711a13a8f84e7af37b94f67dc44dd7b84baadd",
+    "manifest_sha256": {
+      "flores_plus": "3030e828566543440a86f0f294c17ad58eccebb04b17f987afc7cf88c2351bd4",
+      "gazette": "976bfc1e8c65f7795352c9dcb263d26e02fa5448d2fa312c50e451cd899e359f",
+      "ntrex": "71f675a0dba99f9947fd78f34fa816a80d101a5accbdadf677e3a11d14f1edfd",
+      "verbis": "15ef8db0ada5470cb2d24d41e9ee83f6a85bbb8b67f824630259ba71583da9bc"
+    }
+  }
+}
+
+2026-10-01 09:55:36 | INFO    | step  1 preflight | results repo: https://huggingface.co/EdonFetaji/mk-sq-nllb600m-e02-gazette-only
+2026-10-01 09:55:37 | INFO    | step  1 preflight | results repo verified PRIVATE: https://huggingface.co/EdonFetaji/mk-sq-nllb600m-e02-gazette-only
+2026-10-01 09:55:37 | INFO    | step  1 preflight | uploaded: eval/run_info.json
+2026-10-01 09:55:37 | INFO    | step  1 preflight | preflight test upload OK
+2026-10-01 09:55:37 | INFO    | step  1 preflight | ===== done in 0h00m01s
+2026-10-01 09:55:37 | INFO    | step  2 gazette corpus | ===== start
+2026-10-01 09:55:37 | INFO    | step  2 gazette corpus | loaded from disk: data/processed/gazette_train.parquet
+2026-10-01 09:55:37 | INFO    | step  2 gazette corpus | loaded from disk: data/processed/gazette_dev.parquet
+2026-10-01 09:55:37 | INFO    | step  2 gazette corpus | loaded from disk: data/processed/gazette_test.parquet
+2026-10-01 09:55:37 | INFO    | step  2 gazette corpus | Gazette train: 270083 rows
+2026-10-01 09:55:37 | INFO    | step  2 gazette corpus | Gazette dev  : 13355 rows
+2026-10-01 09:55:37 | INFO    | step  2 gazette corpus | Gazette test : 10174 rows
+2026-10-01 09:55:37 | INFO    | step  2 gazette corpus | data check: gazette_train matches the reference experiment
+2026-10-01 09:55:37 | INFO    | step  2 gazette corpus | data check: gazette_dev matches the reference experiment
+2026-10-01 09:55:37 | INFO    | step  2 gazette corpus | data check: gazette_test matches the reference experiment
+2026-10-01 09:55:37 | INFO    | step  2 gazette corpus | data check: gazette_test matches the reference experiment
+2026-10-01 09:55:37 | INFO    | step  2 gazette corpus | ===== done in 0h00m00s
+2026-10-01 09:55:37 | INFO    | step  3 external test sets | ===== start
+2026-10-01 09:55:37 | INFO    | step  3 external test sets | FLORES+ mkd_Cyrl: devtest/mkd_Cyrl.jsonl
+2026-10-01 09:55:38 | INFO    | step  3 external test sets | FLORES+ als_Latn: devtest/als_Latn.jsonl
+2026-10-01 09:55:38 | INFO    | step  3 external test sets | wrote data/processed/flores_devtest.parquet (1012 rows)
+2026-10-01 09:55:38 | INFO    | step  3 external test sets | downloaded https://raw.githubusercontent.com/MicrosoftTranslator/NTREX/468c6b69c7f6a75d31d4743d9daba2af566cc18d/NTREX-128/newstest2019-ref.mkd.txt -> data/raw/ntrex/newstest2019-ref.mkd.txt (491500 bytes)
+2026-10-01 09:55:38 | INFO    | step  3 external test sets | downloaded https://raw.githubusercontent.com/MicrosoftTranslator/NTREX/468c6b69c7f6a75d31d4743d9daba2af566cc18d/NTREX-128/newstest2019-ref.sqi.txt -> data/raw/ntrex/newstest2019-ref.sqi.txt (310123 bytes)
+2026-10-01 09:55:38 | INFO    | step  3 external test sets | wrote data/processed/ntrex.parquet (1997 rows)
+2026-10-01 09:55:38 | INFO    | step  3 external test sets | FLORES+ devtest: 1012 sentences | NTREX-128: 1997 sentences
+2026-10-01 09:55:38 | INFO    | step  3 external test sets | data check: flores_devtest matches the reference experiment
+2026-10-01 09:55:38 | INFO    | step  3 external test sets | data check: ntrex matches the reference experiment
+2026-10-01 09:55:38 | INFO    | step  3 external test sets | ===== done in 0h00m01s
+2026-10-01 09:55:38 | INFO    | step  4 verbis | ===== start
+2026-10-01 09:55:38 | INFO    | step  4 verbis | loaded from disk: /home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR/data/verbis_mk_sq.parquet
+2026-10-01 09:55:38 | INFO    | step  4 verbis | Verbis: 15925 entries
+2026-10-01 09:55:39 | INFO    | step  4 verbis | wrote data/processed/verbis_terms.parquet (15093 rows)
+2026-10-01 09:55:39 | INFO    | step  4 verbis | scoring 15822 definition pairs with sentence-transformers/LaBSE
+2026-10-01 09:55:56 | INFO    | step  4 verbis | LaBSE freed; GPU memory allocated now 0.13 GB
+2026-10-01 09:55:56 | INFO    | step  4 verbis | wrote data/processed/verbis_defs_scored.parquet (15822 rows)
+2026-10-01 09:55:56 | INFO    | step  4 verbis | wrote data/processed/verbis_defs.parquet (15305 rows)
+2026-10-01 09:55:56 | INFO    | step  4 verbis | Verbis term pairs kept: 15093
+2026-10-01 09:55:56 | INFO    | step  4 verbis | Verbis definition pairs: 15822 scored, 15305 kept with LaBSE >= 0.70 (96.7%), median score 0.939
+2026-10-01 09:55:56 | INFO    | step  4 verbis | data check: verbis_entries matches the reference experiment
+2026-10-01 09:55:56 | INFO    | step  4 verbis | Verbis used for training: False (always used to measure terminology)
+2026-10-01 09:56:10 | INFO    | step  4 verbis | uploaded: data/verbis/verbis_terms.parquet, data/verbis/verbis_defs_scored.parquet, data/verbis/verbis_defs.parquet
+2026-10-01 09:56:10 | INFO    | step  4 verbis | ===== done in 0h00m31s
+2026-10-01 09:56:10 | INFO    | step  5 leakage removal | ===== start
+2026-10-01 09:56:11 | INFO    | step  5 leakage removal | held-out texts: 24011 unique mk, 25783 unique sq
+2026-10-01 09:56:11 | INFO    | step  5 leakage removal | data.verbis.use_for_training is false -- training on Gazette only
+2026-10-01 09:56:12 | INFO    | step  5 leakage removal | wrote data/processed/train_clean.parquet (239926 rows)
+2026-10-01 09:56:12 | INFO    | step  5 leakage removal | leakage gazette     : removed 30157 of 270083 rows (mk matches 26346, sq matches 7895) -> 239926
+2026-10-01 09:56:12 | INFO    | step  5 leakage removal | ===== done in 0h00m01s
+2026-10-01 09:56:12 | INFO    | step  6 bidirectional training set | ===== start
+2026-10-01 09:56:13 | INFO    | step  6 bidirectional training set | wrote data/processed/train_bidirectional.parquet (479852 rows)
+2026-10-01 09:56:13 | INFO    | step  6 bidirectional training set | final training composition (479852 examples, both directions):
+2026-10-01 09:56:13 | INFO    | step  6 bidirectional training set |   gazette          479852 examples (100.0%)
+2026-10-01 09:56:13 | INFO    | step  6 bidirectional training set |   directions: mk->sq 239926, sq->mk 239926
+2026-10-01 09:56:13 | INFO    | step  6 bidirectional training set | ===== done in 0h00m00s
+2026-10-01 09:56:13 | INFO    | step  7 tokenisation | ===== start
+2026-10-01 09:56:14 | INFO    | step  7 tokenisation | mkd_Cyrl->als_Latn: input_ids start ['mkd_Cyrl', '▁О', 'П'], labels start ['als_Latn', '▁GEN', 'ER'] -- OK
+2026-10-01 09:56:14 | INFO    | step  7 tokenisation | als_Latn->mkd_Cyrl: input_ids start ['als_Latn', '▁GEN', 'ER'], labels start ['mkd_Cyrl', '▁О', 'П'] -- OK
+2026-10-01 09:56:52 | INFO    | step  7 tokenisation | train: 479852 -> 467094 examples (12758 dropped for > 192 tokens, 2.66%)
+2026-10-01 09:56:52 | INFO    | step  7 tokenisation | wrote data/tokenized/train (467094 rows)
+2026-10-01 09:57:20 | INFO    | step  7 tokenisation | wrote data/tokenized/dev (26710 rows)
+2026-10-01 09:57:20 | INFO    | step  7 tokenisation | train: language tokens verified on 2000 examples (both directions present)
+2026-10-01 09:57:20 | INFO    | step  7 tokenisation | dev: language tokens verified on 2000 examples (both directions present)
+2026-10-01 09:57:20 | INFO    | step  7 tokenisation | tokenised train: 467094 examples, length mean 61.4 / p95 140 / max 192 tokens | dev: 26710 examples
+2026-10-01 09:57:21 | INFO    | step  7 tokenisation | uploaded: eval/run_info.json
+2026-10-01 09:57:21 | INFO    | step  7 tokenisation | ===== done in 0h01m08s
+2026-10-01 09:57:21 | INFO    | step  8 training | ===== start
+2026-10-01 09:57:22 | INFO    | step  8 training | wrote eval/dev_eval_ids.parquet (1000 rows)
+2026-10-01 09:57:22 | INFO    | step  8 training | data check: dev_eval_ids matches the reference experiment
+2026-10-01 09:57:22 | INFO    | step  8 training | dev eval set mk_sq: 500 sentences
+2026-10-01 09:57:22 | INFO    | step  8 training | dev eval set sq_mk: 500 sentences
+2026-10-01 09:57:24 | INFO    | step  8 training | memory probe: batch 8 x accumulation 16 (gradient checkpointing False) OK, peak 10.97 GB
+2026-10-01 09:57:24 | WARNING | step  8 training | training arguments not supported by transformers 5.17.0, ignored: ['save_safetensors']
+2026-10-01 09:57:24 | INFO    | step  8 training | training settings: batch 8 x accumulation 16 = effective 128 | gradient checkpointing False | adafactor lr 1e-04, warmup 1000, linear decay, 1 epoch | label smoothing 0.1 | bf16 + tf32 | length-grouped batches | transformers 5.17.0
+2026-10-01 09:57:25 | INFO    | step  8 training | uploaded: eval/run_info.json
+2026-10-01 09:57:26 | INFO    | step  8 training | training starts at step 0 of 3650 (36.5 optimizer steps per 1%)
+2026-10-01 10:01:22 | INFO    | step  8 training | projection after 200 steps: 1.18 s/step -> full epoch (3650 steps) ~ 1h11m41s, remaining ~ 1h07m46s (plus ~1-2 min per dev evaluation)
+2026-10-01 10:07:15 | INFO    | step  8 training | step 500/3650 (13.7%) | loss 2.7260 | lr 4.99e-05 | 108.7 samples/s | peak GPU mem 12.64 GB | ETA 1h01m52s
+2026-10-01 10:17:05 | INFO    | step  8 training | step 1000/3650 (27.4%) | loss 2.4933 | lr 9.99e-05 | 108.7 samples/s | peak GPU mem 12.64 GB | ETA 0h52m02s
+2026-10-01 10:17:32 | INFO    | step  8 training | dev @ step 1000: mk→sq BLEU 45.91 chrF++ 65.54 | sq→mk BLEU 60.89 chrF++ 76.10 | mean chrF++ 70.82 (best 70.82 @ step 1000) | 27s
+2026-10-01 10:17:35 | INFO    | step  8 training | checkpoint upload queued in the background: checkpoint-1000
+2026-10-01 10:27:38 | INFO    | step  8 training | step 1500/3650 (41.1%) | loss 2.3769 | lr 8.12e-05 | 95.6 samples/s | peak GPU mem 12.64 GB | ETA 0h43m16s
+2026-10-01 10:39:27 | INFO    | step  8 training | step 2000/3650 (54.8%) | loss 2.3402 | lr 6.23e-05 | 83.1 samples/s | peak GPU mem 12.64 GB | ETA 0h34m39s
+2026-10-01 10:40:09 | ERROR   | step  8 training | FAILED after 0h42m47s: ComputeError: schema lengths differ
+2026-10-01 10:40:09 | ERROR   | step  8 training | traceback:
+Traceback (most recent call last):
+  File "/home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR/scripts/train/train_nllb_gazette_verbis_ct2.py", line 348, in run_step
+    out = fn(*args)
+          ^^^^^^^^^
+  File "/home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR/scripts/train/train_nllb_gazette_verbis_ct2.py", line 1838, in step8_train
+    trainer.train(resume_from_checkpoint=last)
+  File "/home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR/.venv/lib/python3.12/site-packages/transformers/trainer.py", line 1520, in train
+    return inner_training_loop(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR/.venv/lib/python3.12/site-packages/transformers/trainer.py", line 1602, in _inner_training_loop
+    self._run_epoch(
+  File "/home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR/.venv/lib/python3.12/site-packages/transformers/trainer.py", line 1883, in _run_epoch
+    self._maybe_log_save_evaluate(
+  File "/home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR/.venv/lib/python3.12/site-packages/transformers/trainer.py", line 2196, in _maybe_log_save_evaluate
+    metrics = self._evaluate(trial, ignore_keys_for_eval)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR/.venv/lib/python3.12/site-packages/transformers/trainer.py", line 3171, in _evaluate
+    metrics = self.evaluate(ignore_keys=ignore_keys_for_eval)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR/scripts/train/train_nllb_gazette_verbis_ct2.py", line 1749, in evaluate
+    self.monitor.after_dev_eval(self.state.global_step, metrics, time.time() - t0)
+  File "/home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR/scripts/train/train_nllb_gazette_verbis_ct2.py", line 1707, in after_dev_eval
+    curve = _append_dev_curve(row)
+            ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR/scripts/train/train_nllb_gazette_verbis_ct2.py", line 1565, in _append_dev_curve
+    new = pl.concat([old, new], how="vertical_relaxed").sort("step")
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR/.venv/lib/python3.12/site-packages/polars/functions/eager.py", line 297, in concat
+    )._collect_eager(optimizations=QueryOptFlags._eager())
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR/.venv/lib/python3.12/site-packages/polars/lazyframe/frame.py", line 2240, in _collect_eager
+    return _eager_engine().collect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR/.venv/lib/python3.12/site-packages/polars/lazyframe/engine.py", line 443, in collect
+    return wrap_df(ldf.collect(self.name, callback))
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+polars.exceptions.ComputeError: schema lengths differ
+
+2026-10-01 10:40:10 | INFO    | step  8 training | uploaded: progress.log
+2026-10-01 14:51:21 | INFO    | start | ==============================================================================
+2026-10-01 14:51:21 | INFO    | start | run started (pid 1441813): scripts/train/train_nllb_gazette_verbis_ct2.py E02_gazette_only
+2026-10-01 14:51:21 | INFO    | start | experiment E02_gazette_only | config configs/E02_gazette_only.yaml (sha256 7b810fb9b9a6) | commit ccd58f998fc9 | results repo EdonFetaji/mk-sq-nllb600m-e02-gazette-only
+2026-10-01 14:51:21 | INFO    | start | provenance: {"exp_id": "E02_gazette_only", "git_commit": "ccd58f998fc91bd5a9e93d152ea10723b6009e0d", "config_path": "configs/E02_gazette_only.yaml", "config_sha256": "7b810fb9b9a6bf1cd7a158cb6c711a13a8f84e7af37b94f67dc44dd7b84baadd", "manifest_sha256": {"flores_plus": "3030e828566543440a86f0f294c17ad58eccebb04b17f987afc7cf88c2351bd4", "gazette": "976bfc1e8c65f7795352c9dcb263d26e02fa5448d2fa312c50e451cd899e359f", "ntrex": "71f675a0dba99f9947fd78f34fa816a80d101a5accbdadf677e3a11d14f1edfd", "verbis": "15ef8db0ada5470cb2d24d41e9ee83f6a85bbb8b67f824630259ba71583da9bc"}}
+2026-10-01 14:51:21 | INFO    | step  1 preflight | ===== start
+2026-10-01 14:51:21 | INFO    | step  1 preflight | repo root: /home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR | work dir: /home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR/runs/E02_gazette_only
+2026-10-01 14:51:21 | ERROR   | step  1 preflight | FAILED after 0h00m00s: Fatal: the Hugging Face token (from cached login) was rejected: Invalid user token. The token stored is invalid. Please run `hf auth login --force` to set a new token.
+2026-10-01 14:51:21 | ERROR   | step  1 preflight | traceback:
+Traceback (most recent call last):
+  File "/home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR/.venv/lib/python3.12/site-packages/huggingface_hub/utils/_http.py", line 836, in hf_raise_for_status
+    response.raise_for_status()
+  File "/home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR/.venv/lib/python3.12/site-packages/httpx/_models.py", line 829, in raise_for_status
+    raise HTTPStatusError(message, request=request, response=self)
+httpx.HTTPStatusError: Client error '401 Unauthorized' for url 'https://huggingface.co/api/whoami-v2'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/401
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR/.venv/lib/python3.12/site-packages/huggingface_hub/hf_api.py", line 2361, in _inner_whoami
+    hf_raise_for_status(r)
+  File "/home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR/.venv/lib/python3.12/site-packages/huggingface_hub/utils/_http.py", line 966, in hf_raise_for_status
+    raise _format(HfHubHTTPError, str(e), response) from e
+huggingface_hub.errors.HfHubHTTPError: Client error '401 Unauthorized' for url 'https://huggingface.co/api/whoami-v2' (Request ID: Root=1-6abe7302-42b9fbf07472ebda135619f9;4e413d91-6a79-4ad6-a865-074bbe5b0320)
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/401
+
+Invalid username or password.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR/scripts/train/train_nllb_gazette_verbis_ct2.py", line 938, in step1_preflight
+    who = HfApi(token=TOKEN).whoami()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR/.venv/lib/python3.12/site-packages/huggingface_hub/utils/_validators.py", line 91, in _inner_fn
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR/.venv/lib/python3.12/site-packages/huggingface_hub/hf_api.py", line 2348, in whoami
+    output = self._inner_whoami(token=token)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR/.venv/lib/python3.12/site-packages/huggingface_hub/hf_api.py", line 2377, in _inner_whoami
+    raise HfHubHTTPError(error_message, response=e.response) from e
+huggingface_hub.errors.HfHubHTTPError: Invalid user token. The token stored is invalid. Please run `hf auth login --force` to set a new token.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR/scripts/train/train_nllb_gazette_verbis_ct2.py", line 348, in run_step
+    out = fn(*args)
+          ^^^^^^^^^
+  File "/home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR/scripts/train/train_nllb_gazette_verbis_ct2.py", line 940, in step1_preflight
+    raise Fatal(f"the Hugging Face token (from {source}) was rejected: {e}") from e
+Fatal: the Hugging Face token (from cached login) was rejected: Invalid user token. The token stored is invalid. Please run `hf auth login --force` to set a new token.
+
+2026-10-01 14:54:18 | INFO    | start | ==============================================================================
+2026-10-01 14:54:18 | INFO    | start | run started (pid 1444356): scripts/train/train_nllb_gazette_verbis_ct2.py E02_gazette_only
+2026-10-01 14:54:18 | INFO    | start | experiment E02_gazette_only | config configs/E02_gazette_only.yaml (sha256 7b810fb9b9a6) | commit ccd58f998fc9 | results repo EdonFetaji/mk-sq-nllb600m-e02-gazette-only
+2026-10-01 14:54:18 | INFO    | start | provenance: {"exp_id": "E02_gazette_only", "git_commit": "ccd58f998fc91bd5a9e93d152ea10723b6009e0d", "config_path": "configs/E02_gazette_only.yaml", "config_sha256": "7b810fb9b9a6bf1cd7a158cb6c711a13a8f84e7af37b94f67dc44dd7b84baadd", "manifest_sha256": {"flores_plus": "3030e828566543440a86f0f294c17ad58eccebb04b17f987afc7cf88c2351bd4", "gazette": "976bfc1e8c65f7795352c9dcb263d26e02fa5448d2fa312c50e451cd899e359f", "ntrex": "71f675a0dba99f9947fd78f34fa816a80d101a5accbdadf677e3a11d14f1edfd", "verbis": "15ef8db0ada5470cb2d24d41e9ee83f6a85bbb8b67f824630259ba71583da9bc"}}
+2026-10-01 14:54:18 | INFO    | step  1 preflight | ===== start
+2026-10-01 14:54:18 | INFO    | step  1 preflight | repo root: /home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR | work dir: /home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR/runs/E02_gazette_only
+2026-10-01 14:54:18 | INFO    | step  1 preflight | Hugging Face token: found (cached login), user EdonFetaji
+2026-10-01 14:54:18 | INFO    | step  1 preflight | GPU: NVIDIA GeForce RTX 5080 | compute capability 12.0 | driver 595.84 | torch 2.14.0+cu130 (CUDA 13.0)
+2026-10-01 14:54:18 | INFO    | step  1 preflight | VRAM: 16.21 GB free of 16.61 GB
+2026-10-01 14:54:18 | INFO    | step  1 preflight | TF32 enabled; bf16 supported
+2026-10-01 14:54:18 | INFO    | step  1 preflight | run info:
+{
+  "exp_id": "E02_gazette_only",
+  "script": "scripts/train/train_nllb_gazette_verbis_ct2.py",
+  "git": {
+    "commit": "ccd58f998fc91bd5a9e93d152ea10723b6009e0d",
+    "dirty": false
+  },
+  "versions": {
+    "python": "3.12.3",
+    "torch": "2.14.0+cu130",
+    "transformers": "5.17.0",
+    "datasets": "5.0.1",
+    "ctranslate2": "4.8.2",
+    "sacrebleu": "2.6.0",
+    "huggingface_hub": "1.32.0",
+    "accelerate": "1.15.0",
+    "sentence_transformers": "6.1.0",
+    "polars": "1.44.2"
+  },
+  "gpu": {
+    "gpu_name": "NVIDIA GeForce RTX 5080",
+    "compute_capability": "12.0",
+    "driver": "595.84",
+    "cuda_torch": "13.0",
+    "torch": "2.14.0+cu130",
+    "torch_arch_list": [
+      "sm_75",
+      "sm_80",
+      "sm_86",
+      "sm_90",
+      "sm_100",
+      "sm_120"
+    ],
+    "vram_free_gb": 16.21,
+    "vram_total_gb": 16.61
+  },
+  "config": {
+    "exp_id": "E02_gazette_only",
+    "paper_arm": "M1",
+    "description": "Gazette-only control: identical to E01_gazette_verbis_mix except that no Verbis data is used for training, so E01 vs E02 isolates the contribution of the Verbis lexicon.",
+    "status": "planned",
+    "parent_exp": "E01_gazette_verbis_mix",
+    "code": {
+      "git_commit": "recorded at run time",
+      "script": "scripts/train/train_nllb_gazette_verbis_ct2.py"
+    },
+    "outputs": {
+      "work_dir": "runs/E02_gazette_only",
+      "hf_results_repo": "EdonFetaji/mk-sq-nllb600m-e02-gazette-only",
+      "legacy_repo_name": false
+    },
+    "base_model": {
+      "name": "facebook/nllb-200-distilled-600M",
+      "revision": "f8d333a098d19b4fd9a8b18f94170487ad3f821d"
+    },
+    "languages": {
+      "mk": "mkd_Cyrl",
+      "sq": "als_Latn"
+    },
+    "data": {
+      "gazette": {
+        "repo": "EdonFetaji/slvesnik-mk-sq",
+        "revision": "07af5bbbb2a2c5277e3eb9c032a86682148fb269",
+        "dev_split": "validation",
+        "manifest": "data/manifests/gazette.json"
+      },
+      "verbis": {
+        "storage_repo": "EdonFetaji/mk-sq-nllb600m-gazette-verbis",
+        "raw_path": "data/verbis/verbis_mk_sq.parquet",
+        "local_cache": "data/verbis_mk_sq.parquet",
+        "use_for_training": false,
+        "use_for_evaluation": true,
+        "headword_cleaning": [
+          "strip_trailing_parenthetical",
+          "strip_albanian_inflection_ending",
+          "lowercase_all_caps_longer_than_4",
+          "drop_empty",
+          "dedup"
+        ],
+        "labse_model": "sentence-transformers/LaBSE",
+        "labse_min_score": 0.7,
+        "manifest": "data/manifests/verbis.json"
+      },
+      "flores_plus": {
+        "repo": "openlanguagedata/flores_plus",
+        "revision": "5fec6c13f9e5a4db2f745d4ec0d7c9721ddc4f06",
+        "split": "devtest",
+        "langs": {
+          "mk": "mkd_Cyrl",
+          "sq": "als_Latn"
+        },
+        "manifest": "data/manifests/flores_plus.json"
+      },
+      "ntrex": {
+        "repo": "MicrosoftTranslator/NTREX",
+        "commit": "468c6b69c7f6a75d31d4743d9daba2af566cc18d",
+        "files": {
+          "mk": "NTREX-128/newstest2019-ref.mkd.txt",
+          "sq": "NTREX-128/newstest2019-ref.sqi.txt"
+        },
+        "manifest": "data/manifests/ntrex.json"
+      },
+      "leakage_removal": {
+        "normalisation": "lowercase_collapse_whitespace",
+        "rule": "remove a train pair if its mk OR sq side occurs in any held-out set",
+        "held_out": [
+          "gazette_dev",
+          "gazette_test",
+          "flores_devtest",
+          "ntrex"
+        ]
+      },
+      "bidirectional": true,
+      "max_tokens": 192,
+      "expected": {
+        "row_counts": {
+          "gazette_train": 270083,
+          "gazette_dev": 13355,
+          "gazette_test": 10174,
+          "flores_devtest": 1012,
+          "ntrex": 1997,
+          "verbis_entries": 15925
+        },
+        "content_sha256": {
+          "gazette_test": "167bd7740f5f2bdc8d91e3788bf9695f3f74e1416cc8ae72e3ee973dfb1aa37b",
+          "dev_eval_ids": "507d8eeb9195508b3b03999d9282de7cc482c2d16ff1e7a0e6fdf611c3d4ea5e"
+        }
+      }
+    },
+    "training": {
+      "method": "full_parameter_sft",
+      "optim": "adafactor",
+      "learning_rate": 0.0001,
+      "lr_scheduler": "linear",
+      "warmup_steps": 1000,
+      "epochs": 1,
+      "label_smoothing": 0.1,
+      "weight_decay": 0.01,
+      "max_grad_norm": 1.0,
+      "bf16": true,
+      "tf32": true,
+      "sampling": "group_by_length",
+      "per_device_batch": 8,
+      "grad_accumulation": 16,
+      "gradient_checkpointing": false,
+      "dataloader_num_workers": 8,
+      "seed": 42,
+      "logging_steps": 50,
+      "save_total_limit": 3
+    },
+    "checkpoint_selection": {
+      "data": "gazette_dev",
+      "size_per_direction": 500,
+      "sampling_seed": 42,
+      "decoding": "greedy",
+      "batch": 32,
+      "max_new_tokens": 256,
+      "every_steps": 1000,
+      "metric": "eval_chrf"
+    },
+    "final_evaluation": {
+      "test_sets": [
+        "gazette_test_full",
+        "flores_devtest",
+        "ntrex"
+      ],
+      "systems": [
+        "base",
+        "finetuned_hf",
+        "finetuned_ct2"
+      ],
+      "beams": 4,
+      "max_new_tokens": 256,
+      "batch": 32,
+      "ct2": {
+        "quantization": "int8",
+        "gpu_compute_type": "int8_float16",
+        "cpu_compute_type": "int8",
+        "cpu_threads": 16
+      },
+      "metrics": {
+        "bleu": "sacrebleu_default_13a",
+        "chrf": {
+          "word_order": 2
+        }
+      },
+      "save_every_sentences": 2000
+    },
+    "analysis": {
+      "overlap": {
+        "normalisation": "lowercase_digits_to_0_collapse_whitespace",
+        "shingle_chars": 5,
+        "near_duplicate_jaccard": 0.8,
+        "minhash_perms": 128,
+        "lsh_bands": 16,
+        "compare_against": "train_clean_gazette"
+      },
+      "terminology": {
+        "terms": "verbis_terms",
+        "min_source_chars": 5,
+        "prefix_rule": "max(4, len-2)",
+        "rare_max_train_sentences": 5
+      },
+      "number_fidelity": {
+        "pattern": "\\d+",
+        "compare": "multiset"
+      },
+      "significance": {
+        "test": "paired_bootstrap",
+        "resamples": 1000,
+        "seed": 42
+      }
+    },
+    "hardware": {
+      "min_free_vram_gb": 14
+    },
+    "comparison": {
+      "against": "E01_gazette_verbis_mix",
+      "experimental_differences": [
+        "data.verbis.use_for_training"
+      ],
+      "bookkeeping_differences": [
+        "exp_id",
+        "paper_arm",
+        "description",
+        "status",
+        "parent_exp",
+        "code",
+        "outputs",
+        "comparison",
+        "data.gazette.revision",
+        "data.flores_plus.revision",
+        "data.ntrex.commit"
+      ]
+    }
+  },
+  "results_repo": "https://huggingface.co/EdonFetaji/mk-sq-nllb600m-e02-gazette-only",
+  "invocations": [
+    "2026-10-01T08:57:01+00:00",
+    "2026-10-01T09:01:07+00:00",
+    "2026-10-01T09:53:05+00:00",
+    "2026-10-01T09:55:36+00:00",
+    "2026-10-01T14:54:18+00:00"
+  ],
+  "updated_at": "2026-10-01T14:54:18+00:00",
+  "provenance": {
+    "exp_id": "E02_gazette_only",
+    "git_commit": "ccd58f998fc91bd5a9e93d152ea10723b6009e0d",
+    "config_path": "configs/E02_gazette_only.yaml",
+    "config_sha256": "7b810fb9b9a6bf1cd7a158cb6c711a13a8f84e7af37b94f67dc44dd7b84baadd",
+    "manifest_sha256": {
+      "flores_plus": "3030e828566543440a86f0f294c17ad58eccebb04b17f987afc7cf88c2351bd4",
+      "gazette": "976bfc1e8c65f7795352c9dcb263d26e02fa5448d2fa312c50e451cd899e359f",
+      "ntrex": "71f675a0dba99f9947fd78f34fa816a80d101a5accbdadf677e3a11d14f1edfd",
+      "verbis": "15ef8db0ada5470cb2d24d41e9ee83f6a85bbb8b67f824630259ba71583da9bc"
+    }
+  },
+  "dataset_sizes": {
+    "gazette_train": 270083,
+    "gazette_dev": 13355,
+    "gazette_test": 10174,
+    "flores_devtest": 1012,
+    "ntrex": 1997,
+    "verbis_terms": 15093,
+    "verbis_defs_scored": 15822,
+    "verbis_defs": 15305,
+    "leakage_removed": {
+      "gazette": 30157
+    },
+    "train_clean_pairs": 239926,
+    "train_bidirectional": 479852,
+    "train_composition": {
+      "gazette": 479852
+    },
+    "train_tokenized": 467094,
+    "dev_tokenized": 26710,
+    "train_dropped_over_max_tokens": 12758
+  },
+  "memory_probe": {
+    "per_device_train_batch_size": 8,
+    "gradient_accumulation_steps": 16,
+    "gradient_checkpointing": false,
+    "peak_gb": 10.97,
+    "probe_example_lengths": 192,
+    "attempts": [
+      {
+        "batch": 8,
+        "accumulation": 16,
+        "gradient_checkpointing": false,
+        "ok": true,
+        "peak_gb": 10.97
+      }
+    ]
+  },
+  "training_args": {
+    "output_dir": "/home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR/runs/E02_gazette_only/models/checkpoints",
+    "per_device_train_batch_size": 8,
+    "num_train_epochs": 1,
+    "max_steps": -1,
+    "learning_rate": 0.0001,
+    "lr_scheduler_type": "linear",
+    "lr_scheduler_kwargs": null,
+    "warmup_steps": 1000,
+    "optim": "adafactor",
+    "optim_args": null,
+    "weight_decay": 0.01,
+    "adam_beta1": 0.9,
+    "adam_beta2": 0.999,
+    "adam_epsilon": 1e-08,
+    "optim_target_modules": null,
+    "gradient_accumulation_steps": 16,
+    "average_tokens_across_devices": true,
+    "max_grad_norm": 1.0,
+    "label_smoothing_factor": 0.1,
+    "bf16": true,
+    "fp16": false,
+    "bf16_full_eval": false,
+    "fp16_full_eval": false,
+    "tf32": true,
+    "gradient_checkpointing": false,
+    "gradient_checkpointing_kwargs": {
+      "use_reentrant": false
+    },
+    "torch_compile": false,
+    "torch_compile_backend": null,
+    "torch_compile_mode": null,
+    "use_liger_kernel": false,
+    "liger_kernel_config": null,
+    "use_cache": false,
+    "neftune_noise_alpha": null,
+    "torch_empty_cache_steps": null,
+    "auto_find_batch_size": false,
+    "logging_strategy": "steps",
+    "logging_steps": 50,
+    "logging_first_step": false,
+    "log_on_each_node": true,
+    "logging_nan_inf_filter": true,
+    "include_num_input_tokens_seen": "no",
+    "log_level": "passive",
+    "log_level_replica": "warning",
+    "disable_tqdm": true,
+    "report_to": [],
+    "run_name": null,
+    "project": "huggingface",
+    "trackio_space_id": null,
+    "trackio_bucket_id": null,
+    "trackio_static_space_id": null,
+    "eval_strategy": "steps",
+    "eval_steps": 1000,
+    "eval_delay": 0,
+    "per_device_eval_batch_size": 32,
+    "prediction_loss_only": false,
+    "eval_on_start": false,
+    "eval_do_concat_batches": true,
+    "eval_use_gather_object": false,
+    "eval_accumulation_steps": null,
+    "include_for_metrics": [],
+    "batch_eval_metrics": false,
+    "save_only_model": false,
+    "save_strategy": "steps",
+    "save_steps": 1000,
+    "save_on_each_node": false,
+    "save_total_limit": 3,
+    "enable_jit_checkpoint": false,
+    "push_to_hub": false,
+    "hub_token": "<HUB_TOKEN>",
+    "hub_private_repo": null,
+    "hub_model_id": null,
+    "hub_strategy": "every_save",
+    "hub_always_push": false,
+    "hub_revision": null,
+    "load_best_model_at_end": true,
+    "metric_for_best_model": "eval_chrf",
+    "greater_is_better": true,
+    "ignore_data_skip": false,
+    "restore_callback_states_from_checkpoint": false,
+    "full_determinism": false,
+    "seed": 42,
+    "data_seed": 42,
+    "use_cpu": false,
+    "accelerator_config": {
+      "split_batches": false,
+      "dispatch_batches": null,
+      "even_batches": true,
+      "use_seedable_sampler": true,
+      "non_blocking": false,
+      "gradient_accumulation_kwargs": null
+    },
+    "parallelism_config": null,
+    "dataloader_drop_last": false,
+    "dataloader_num_workers": 8,
+    "dataloader_pin_memory": true,
+    "dataloader_persistent_workers": false,
+    "dataloader_prefetch_factor": null,
+    "dataloader_multiprocessing_context": null,
+    "dataloader_in_order": true,
+    "remove_unused_columns": true,
+    "label_names": null,
+    "train_sampling_strategy": "group_by_length",
+    "length_column_name": "length",
+    "ddp_find_unused_parameters": null,
+    "ddp_bucket_cap_mb": null,
+    "ddp_broadcast_buffers": null,
+    "ddp_static_graph": null,
+    "ddp_backend": null,
+    "ddp_timeout": 1800,
+    "fsdp": null,
+    "fsdp_config": null,
+    "deepspeed": null,
+    "debug": [],
+    "skip_memory_metrics": true,
+    "do_train": false,
+    "do_eval": true,
+    "do_predict": false,
+    "resume_from_checkpoint": null,
+    "local_rank": -1,
+    "sortish_sampler": false,
+    "predict_with_generate": false,
+    "generation_max_length": null,
+    "generation_num_beams": null,
+    "generation_config": null
+  }
+}
+
+2026-10-01 14:54:18 | INFO    | step  1 preflight | results repo: https://huggingface.co/EdonFetaji/mk-sq-nllb600m-e02-gazette-only
+2026-10-01 14:54:18 | INFO    | step  1 preflight | results repo verified PRIVATE: https://huggingface.co/EdonFetaji/mk-sq-nllb600m-e02-gazette-only
+2026-10-01 14:54:19 | INFO    | step  1 preflight | uploaded: eval/run_info.json
+2026-10-01 14:54:19 | INFO    | step  1 preflight | preflight test upload OK
+2026-10-01 14:54:19 | INFO    | step  1 preflight | ===== done in 0h00m01s
+2026-10-01 14:54:19 | INFO    | step  2 gazette corpus | ===== start
+2026-10-01 14:54:19 | INFO    | step  2 gazette corpus | loaded from disk: data/processed/gazette_train.parquet
+2026-10-01 14:54:19 | INFO    | step  2 gazette corpus | loaded from disk: data/processed/gazette_dev.parquet
+2026-10-01 14:54:19 | INFO    | step  2 gazette corpus | loaded from disk: data/processed/gazette_test.parquet
+2026-10-01 14:54:19 | INFO    | step  2 gazette corpus | Gazette train: 270083 rows
+2026-10-01 14:54:19 | INFO    | step  2 gazette corpus | Gazette dev  : 13355 rows
+2026-10-01 14:54:19 | INFO    | step  2 gazette corpus | Gazette test : 10174 rows
+2026-10-01 14:54:19 | INFO    | step  2 gazette corpus | data check: gazette_train matches the reference experiment
+2026-10-01 14:54:19 | INFO    | step  2 gazette corpus | data check: gazette_dev matches the reference experiment
+2026-10-01 14:54:19 | INFO    | step  2 gazette corpus | data check: gazette_test matches the reference experiment
+2026-10-01 14:54:19 | INFO    | step  2 gazette corpus | data check: gazette_test matches the reference experiment
+2026-10-01 14:54:19 | INFO    | step  2 gazette corpus | ===== done in 0h00m00s
+2026-10-01 14:54:19 | INFO    | step  3 external test sets | ===== start
+2026-10-01 14:54:19 | INFO    | step  3 external test sets | loaded from disk: data/processed/flores_devtest.parquet
+2026-10-01 14:54:19 | INFO    | step  3 external test sets | loaded from disk: data/processed/ntrex.parquet
+2026-10-01 14:54:19 | INFO    | step  3 external test sets | FLORES+ devtest: 1012 sentences | NTREX-128: 1997 sentences
+2026-10-01 14:54:19 | INFO    | step  3 external test sets | data check: flores_devtest matches the reference experiment
+2026-10-01 14:54:19 | INFO    | step  3 external test sets | data check: ntrex matches the reference experiment
+2026-10-01 14:54:19 | INFO    | step  3 external test sets | ===== done in 0h00m00s
+2026-10-01 14:54:19 | INFO    | step  4 verbis | ===== start
+2026-10-01 14:54:19 | INFO    | step  4 verbis | loaded from disk: /home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR/data/verbis_mk_sq.parquet
+2026-10-01 14:54:19 | INFO    | step  4 verbis | loaded from disk: data/processed/verbis_terms.parquet
+2026-10-01 14:54:19 | INFO    | step  4 verbis | loaded from disk: data/processed/verbis_defs_scored.parquet
+2026-10-01 14:54:19 | INFO    | step  4 verbis | loaded from disk: data/processed/verbis_defs.parquet
+2026-10-01 14:54:19 | INFO    | step  4 verbis | Verbis term pairs kept: 15093
+2026-10-01 14:54:19 | INFO    | step  4 verbis | Verbis definition pairs: 15822 scored, 15305 kept with LaBSE >= 0.70 (96.7%), median score 0.939
+2026-10-01 14:54:19 | INFO    | step  4 verbis | data check: verbis_entries matches the reference experiment
+2026-10-01 14:54:19 | INFO    | step  4 verbis | Verbis used for training: False (always used to measure terminology)
+2026-10-01 14:54:24 | INFO    | step  4 verbis | uploaded: data/verbis/verbis_terms.parquet, data/verbis/verbis_defs_scored.parquet, data/verbis/verbis_defs.parquet
+2026-10-01 14:54:24 | INFO    | step  4 verbis | ===== done in 0h00m04s
+2026-10-01 14:54:24 | INFO    | step  5 leakage removal | ===== start
+2026-10-01 14:54:24 | INFO    | step  5 leakage removal | loaded from disk: data/processed/train_clean.parquet
+2026-10-01 14:54:24 | INFO    | step  5 leakage removal | loaded from disk: data/processed/leakage_report.json
+2026-10-01 14:54:24 | INFO    | step  5 leakage removal | leakage gazette     : removed 30157 of 270083 rows (mk matches 26346, sq matches 7895) -> 239926
+2026-10-01 14:54:24 | INFO    | step  5 leakage removal | ===== done in 0h00m00s
+2026-10-01 14:54:24 | INFO    | step  6 bidirectional training set | ===== start
+2026-10-01 14:54:24 | INFO    | step  6 bidirectional training set | loaded from disk: data/processed/train_bidirectional.parquet
+2026-10-01 14:54:24 | INFO    | step  6 bidirectional training set | final training composition (479852 examples, both directions):
+2026-10-01 14:54:24 | INFO    | step  6 bidirectional training set |   gazette          479852 examples (100.0%)
+2026-10-01 14:54:24 | INFO    | step  6 bidirectional training set |   directions: mk->sq 239926, sq->mk 239926
+2026-10-01 14:54:24 | INFO    | step  6 bidirectional training set | ===== done in 0h00m00s
+2026-10-01 14:54:24 | INFO    | step  7 tokenisation | ===== start
+2026-10-01 14:54:25 | INFO    | step  7 tokenisation | mkd_Cyrl->als_Latn: input_ids start ['mkd_Cyrl', '▁О', 'П'], labels start ['als_Latn', '▁GEN', 'ER'] -- OK
+2026-10-01 14:54:25 | INFO    | step  7 tokenisation | als_Latn->mkd_Cyrl: input_ids start ['als_Latn', '▁GEN', 'ER'], labels start ['mkd_Cyrl', '▁О', 'П'] -- OK
+2026-10-01 14:54:25 | INFO    | step  7 tokenisation | loaded from disk: data/tokenized/train
+2026-10-01 14:54:25 | INFO    | step  7 tokenisation | loaded from disk: data/tokenized/dev
+2026-10-01 14:54:26 | INFO    | step  7 tokenisation | train: language tokens verified on 2000 examples (both directions present)
+2026-10-01 14:54:26 | INFO    | step  7 tokenisation | dev: language tokens verified on 2000 examples (both directions present)
+2026-10-01 14:54:26 | INFO    | step  7 tokenisation | tokenised train: 467094 examples, length mean 61.4 / p95 140 / max 192 tokens | dev: 26710 examples
+2026-10-01 14:54:28 | INFO    | step  7 tokenisation | uploaded: eval/run_info.json
+2026-10-01 14:54:28 | INFO    | step  7 tokenisation | ===== done in 0h00m03s
+2026-10-01 14:54:28 | INFO    | step  8 training | ===== start
+2026-10-01 14:54:29 | INFO    | step  8 training | loaded from disk: eval/dev_eval_ids.parquet
+2026-10-01 14:54:29 | INFO    | step  8 training | data check: dev_eval_ids matches the reference experiment
+2026-10-01 14:54:29 | INFO    | step  8 training | dev eval set mk_sq: 500 sentences
+2026-10-01 14:54:29 | INFO    | step  8 training | dev eval set sq_mk: 500 sentences
+2026-10-01 14:54:29 | INFO    | step  8 training | loaded from disk: models/memory_probe.json
+2026-10-01 14:54:29 | INFO    | step  8 training | memory probe (from disk): batch 8 x accumulation 16, gradient checkpointing False, peak 10.97 GB
+2026-10-01 14:54:29 | WARNING | step  8 training | training arguments not supported by transformers 5.17.0, ignored: ['save_safetensors']
+2026-10-01 14:54:29 | INFO    | step  8 training | training settings: batch 8 x accumulation 16 = effective 128 | gradient checkpointing False | adafactor lr 1e-04, warmup 1000, linear decay, 1 epoch | label smoothing 0.1 | bf16 + tf32 | length-grouped batches | transformers 5.17.0
+2026-10-01 14:54:30 | INFO    | step  8 training | uploaded: eval/run_info.json
+2026-10-01 14:54:31 | INFO    | step  8 training | resuming from models/checkpoints/checkpoint-1000 (step 1000)
+2026-10-01 14:54:31 | INFO    | step  8 training | resume: dropped 20 rows after step 1000 from eval/train_log.csv
+2026-10-01 14:54:33 | INFO    | step  8 training | training resumes at step 1000 of 3650 (36.5 optimizer steps per 1%)
+2026-10-01 14:58:28 | INFO    | step  8 training | projection after 200 steps: 1.18 s/step -> full epoch (3650 steps) ~ 1h11m37s, remaining ~ 0h48m04s (plus ~1-2 min per dev evaluation)
+2026-10-01 15:04:22 | INFO    | step  8 training | step 1500/3650 (41.1%) | loss 2.3770 | lr 8.12e-05 | 108.2 samples/s | peak GPU mem 12.64 GB | ETA 0h42m15s
+2026-10-01 15:14:13 | INFO    | step  8 training | step 2000/3650 (54.8%) | loss 2.3401 | lr 6.23e-05 | 108.3 samples/s | peak GPU mem 12.64 GB | ETA 0h32m26s
+2026-10-01 15:14:42 | INFO    | step  8 training | dev @ step 2000: mk→sq BLEU 49.20 chrF++ 68.21 | sq→mk BLEU 64.43 chrF++ 78.19 | mean chrF++ 73.19 (best 73.19 @ step 2000) | 30s
+2026-10-01 15:14:45 | INFO    | step  8 training | checkpoint upload queued in the background: checkpoint-2000
+2026-10-01 15:24:37 | INFO    | step  8 training | step 2500/3650 (68.5%) | loss 2.2954 | lr 4.34e-05 | 108.4 samples/s | peak GPU mem 12.64 GB | ETA 0h23m03s
+2026-10-01 15:34:27 | INFO    | step  8 training | step 3000/3650 (82.2%) | loss 2.3021 | lr 2.46e-05 | 108.2 samples/s | peak GPU mem 12.64 GB | ETA 0h12m58s
+2026-10-01 15:34:57 | INFO    | step  8 training | dev @ step 3000: mk→sq BLEU 49.88 chrF++ 68.09 | sq→mk BLEU 65.19 chrF++ 79.27 | mean chrF++ 73.68 (best 73.68 @ step 3000) | 30s
+2026-10-01 15:34:58 | INFO    | step  8 training | uploaded: progress.log, eval/train_log.csv, eval/dev_curve.csv, eval/training_curves.png, eval/run_info.json
+2026-10-01 15:35:01 | INFO    | step  8 training | checkpoint checkpoint-2000 uploaded to https://huggingface.co/EdonFetaji/mk-sq-nllb600m-e02-gazette-only/checkpoints/checkpoint-2000
+2026-10-01 15:35:01 | INFO    | step  8 training | checkpoint upload queued in the background: checkpoint-3000
+2026-10-01 15:44:51 | INFO    | step  8 training | step 3500/3650 (95.9%) | loss 2.2560 | lr 5.70e-06 | 108.0 samples/s | peak GPU mem 12.64 GB | ETA 0h03m01s
+2026-10-01 15:48:22 | INFO    | step  8 training | dev @ step 3650: mk→sq BLEU 46.07 chrF++ 67.72 | sq→mk BLEU 65.14 chrF++ 79.73 | mean chrF++ 73.73 (best 73.73 @ step 3650) | 35s
+2026-10-01 15:48:25 | INFO    | step  8 training | checkpoint checkpoint-3000 uploaded to https://huggingface.co/EdonFetaji/mk-sq-nllb600m-e02-gazette-only/checkpoints/checkpoint-3000
+2026-10-01 15:48:26 | INFO    | step  8 training | checkpoint upload queued in the background: checkpoint-3650
+2026-10-01 15:48:26 | INFO    | step  8 training | training finished: total training time 1h12m53s | best dev step 3650 | best dev chrF++ (mean) 73.73
+2026-10-01 15:48:27 | INFO    | step  8 training | uploaded: eval/run_info.json
+2026-10-01 15:48:27 | INFO    | step  8 training | ===== done in 0h53m58s
+2026-10-01 15:48:27 | INFO    | step  9 save best model | ===== start
+2026-10-01 15:48:27 | INFO    | step  9 save best model | best checkpoint (loaded by load_best_model_at_end): /home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR/runs/E02_gazette_only/models/checkpoints/checkpoint-3650
+2026-10-01 15:48:31 | INFO    | step  9 save best model | saved models/final: ['config.json', 'generation_config.json', 'model.safetensors', 'provenance.json', 'tokenizer.json', 'tokenizer_config.json', 'training_args.bin']
+2026-10-01 15:48:31 | INFO    | step  9 save best model | ===== done in 0h00m04s
+2026-10-01 15:48:32 | INFO    | step 10 ctranslate2 conversion | ===== start
+2026-10-01 15:48:32 | INFO    | step 10 ctranslate2 conversion | converting /home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR/runs/E02_gazette_only/models/final -> ct2/finetuned_int8 (int8)
+2026-10-01 15:48:42 | INFO    | step 10 ctranslate2 conversion | wrote ct2/finetuned_int8: ['config.json', 'model.bin', 'provenance.json', 'shared_vocabulary.json', 'tokenizer.json', 'tokenizer_config.json']
+2026-10-01 15:48:42 | INFO    | step 10 ctranslate2 conversion | loaded from disk: ct2/base_int8
+2026-10-01 15:49:56 | INFO    | step 10 ctranslate2 conversion | removed from the repo: checkpoint-1000 (kept checkpoint-2000, checkpoint-3000, checkpoint-3650)
+2026-10-01 15:50:10 | INFO    | step 10 ctranslate2 conversion | uploaded folder models/final -> https://huggingface.co/EdonFetaji/mk-sq-nllb600m-e02-gazette-only/
+2026-10-01 15:50:55 | INFO    | step 10 ctranslate2 conversion | uploaded folder ct2/finetuned_int8 -> https://huggingface.co/EdonFetaji/mk-sq-nllb600m-e02-gazette-only/ct2/finetuned_int8
+2026-10-01 15:51:01 | INFO    | step 10 ctranslate2 conversion | uploaded folder ct2/base_int8 -> https://huggingface.co/EdonFetaji/mk-sq-nllb600m-e02-gazette-only/ct2/base_int8
+2026-10-01 15:51:01 | INFO    | step 10 ctranslate2 conversion | ===== done in 0h02m28s
+2026-10-01 15:51:01 | INFO    | step 11 ctranslate2 smoke test | ===== start
+2026-10-01 15:51:01 | WARNING | step 11 ctranslate2 smoke test | CTranslate2 cannot use this GPU (Traceback (most recent call last):
+  File "<string>", line 6, in <module>
+RuntimeError: Library libcublas.so.12 is not found or cannot be loaded) -- falling back to CPU, compute_type int8, 16 threads
+2026-10-01 15:51:03 | INFO    | step 11 ctranslate2 smoke test | uploaded: eval/run_info.json
+2026-10-01 15:51:03 | INFO    | step 11 ctranslate2 smoke test | CTranslate2 device: cpu (int8) -- also used in step 12
+2026-10-01 15:51:11 | INFO    | step 11 ctranslate2 smoke test | smoke test mk_sq (Gazette dev): HF and CT2 identical on 4/5
+2026-10-01 15:51:11 | INFO    | step 11 ctranslate2 smoke test | [example translations removed from this copy]
+2026-10-01 15:51:11 | INFO    | step 11 ctranslate2 smoke test | [example translations removed from this copy]
+2026-10-01 15:51:11 | INFO    | step 11 ctranslate2 smoke test | [example translations removed from this copy]
+2026-10-01 15:51:11 | INFO    | step 11 ctranslate2 smoke test | [example translations removed from this copy]
+2026-10-01 15:51:11 | INFO    | step 11 ctranslate2 smoke test | [example translations removed from this copy]
+2026-10-01 15:51:16 | INFO    | step 11 ctranslate2 smoke test | smoke test sq_mk (Gazette dev): HF and CT2 identical on 2/5
+2026-10-01 15:51:16 | INFO    | step 11 ctranslate2 smoke test | [example translations removed from this copy]
+2026-10-01 15:51:16 | INFO    | step 11 ctranslate2 smoke test | [example translations removed from this copy]
+2026-10-01 15:51:16 | INFO    | step 11 ctranslate2 smoke test | [example translations removed from this copy]
+2026-10-01 15:51:16 | INFO    | step 11 ctranslate2 smoke test | [example translations removed from this copy]
+2026-10-01 15:51:16 | INFO    | step 11 ctranslate2 smoke test | [example translations removed from this copy]
+2026-10-01 15:51:16 | INFO    | step 11 ctranslate2 smoke test | ===== done in 0h00m15s
+2026-10-01 15:51:16 | INFO    | step 12 FINAL EVALUATION | ===== start
+2026-10-01 15:51:16 | INFO    | step 12 FINAL EVALUATION | models: base NLLB-600M (HF, GPU) | fine-tuned (HF, GPU) | fine-tuned (CTranslate2 int8, cpu)
+2026-10-01 15:51:16 | INFO    | step 12 FINAL EVALUATION | ---- test set gazette_test ----
+2026-10-01 15:51:16 | INFO    | step 12 FINAL EVALUATION | wrote eval/translations_gazette_test.parquet (20348 rows)
+2026-10-01 15:51:18 | INFO    | step 12 FINAL EVALUATION | loaded base (HF, GPU bf16)
+2026-10-01 15:54:12 | INFO    | step 12 FINAL EVALUATION | gazette_test / base / mk_sq: 2000 / 10174 sentences (11.5 sent/s, ETA 0h11m50s)
+2026-10-01 15:56:16 | INFO    | step 12 FINAL EVALUATION | gazette_test / base / mk_sq: 4000 / 10174 sentences (13.4 sent/s, ETA 0h07m40s)
+2026-10-01 15:57:41 | INFO    | step 12 FINAL EVALUATION | gazette_test / base / mk_sq: 6000 / 10174 sentences (15.7 sent/s, ETA 0h04m26s)
+2026-10-01 15:59:24 | INFO    | step 12 FINAL EVALUATION | gazette_test / base / mk_sq: 8000 / 10174 sentences (16.5 sent/s, ETA 0h02m12s)
+2026-10-01 15:59:43 | INFO    | step 12 FINAL EVALUATION | gazette_test / base / mk_sq: 10000 / 10174 sentences (19.8 sent/s, ETA 0h00m08s)
+2026-10-01 15:59:43 | INFO    | step 12 FINAL EVALUATION | gazette_test / base / mk_sq: 10174 / 10174 sentences (20.1 sent/s, ETA 0h00m00s)
+2026-10-01 16:03:00 | INFO    | step 12 FINAL EVALUATION | gazette_test / base / sq_mk: 2000 / 10174 sentences (10.2 sent/s, ETA 0h13m23s)
+2026-10-01 16:05:17 | INFO    | step 12 FINAL EVALUATION | gazette_test / base / sq_mk: 4000 / 10174 sentences (12.0 sent/s, ETA 0h08m35s)
+2026-10-01 16:07:46 | INFO    | step 12 FINAL EVALUATION | gazette_test / base / sq_mk: 6000 / 10174 sentences (12.4 sent/s, ETA 0h05m35s)
+2026-10-01 16:10:14 | INFO    | step 12 FINAL EVALUATION | gazette_test / base / sq_mk: 8000 / 10174 sentences (12.7 sent/s, ETA 0h02m51s)
+2026-10-01 16:12:19 | INFO    | step 12 FINAL EVALUATION | gazette_test / base / sq_mk: 10000 / 10174 sentences (13.2 sent/s, ETA 0h00m13s)
+2026-10-01 16:12:31 | INFO    | step 12 FINAL EVALUATION | gazette_test / base / sq_mk: 10174 / 10174 sentences (13.2 sent/s, ETA 0h00m00s)
+2026-10-01 16:12:33 | INFO    | step 12 FINAL EVALUATION | loaded finetuned_hf (HF, GPU bf16)
+2026-10-01 16:15:19 | INFO    | step 12 FINAL EVALUATION | gazette_test / finetuned_hf / mk_sq: 2000 / 10174 sentences (12.0 sent/s, ETA 0h11m19s)
+2026-10-01 16:17:01 | INFO    | step 12 FINAL EVALUATION | gazette_test / finetuned_hf / mk_sq: 4000 / 10174 sentences (14.9 sent/s, ETA 0h06m53s)
+2026-10-01 16:17:54 | INFO    | step 12 FINAL EVALUATION | gazette_test / finetuned_hf / mk_sq: 6000 / 10174 sentences (18.7 sent/s, ETA 0h03m43s)
+2026-10-01 16:18:28 | INFO    | step 12 FINAL EVALUATION | gazette_test / finetuned_hf / mk_sq: 8000 / 10174 sentences (22.5 sent/s, ETA 0h01m36s)
+2026-10-01 16:18:41 | INFO    | step 12 FINAL EVALUATION | gazette_test / finetuned_hf / mk_sq: 10000 / 10174 sentences (27.1 sent/s, ETA 0h00m06s)
+2026-10-01 16:18:42 | INFO    | step 12 FINAL EVALUATION | gazette_test / finetuned_hf / mk_sq: 10174 / 10174 sentences (27.6 sent/s, ETA 0h00m00s)
+2026-10-01 16:21:39 | INFO    | step 12 FINAL EVALUATION | gazette_test / finetuned_hf / sq_mk: 2000 / 10174 sentences (11.3 sent/s, ETA 0h12m03s)
+2026-10-01 16:23:18 | INFO    | step 12 FINAL EVALUATION | gazette_test / finetuned_hf / sq_mk: 4000 / 10174 sentences (14.5 sent/s, ETA 0h07m06s)
+2026-10-01 16:24:27 | INFO    | step 12 FINAL EVALUATION | gazette_test / finetuned_hf / sq_mk: 6000 / 10174 sentences (17.4 sent/s, ETA 0h04m00s)
+2026-10-01 16:25:10 | INFO    | step 12 FINAL EVALUATION | gazette_test / finetuned_hf / sq_mk: 8000 / 10174 sentences (20.6 sent/s, ETA 0h01m45s)
+2026-10-01 16:25:25 | INFO    | step 12 FINAL EVALUATION | gazette_test / finetuned_hf / sq_mk: 10000 / 10174 sentences (24.8 sent/s, ETA 0h00m07s)
+2026-10-01 16:25:26 | INFO    | step 12 FINAL EVALUATION | gazette_test / finetuned_hf / sq_mk: 10174 / 10174 sentences (25.2 sent/s, ETA 0h00m00s)
+2026-10-01 16:25:27 | INFO    | step 12 FINAL EVALUATION | loaded finetuned_ct2 (CTranslate2 cpu)
+2026-10-01 17:07:31 | INFO    | step 12 FINAL EVALUATION | gazette_test / finetuned_ct2 / mk_sq: 2000 / 10174 sentences (0.8 sent/s, ETA 2h51m56s)
+2026-10-01 17:19:34 | INFO    | step 12 FINAL EVALUATION | gazette_test / finetuned_ct2 / mk_sq: 4000 / 10174 sentences (1.2 sent/s, ETA 1h23m31s)
+2026-10-01 17:26:27 | INFO    | step 12 FINAL EVALUATION | gazette_test / finetuned_ct2 / mk_sq: 6000 / 10174 sentences (1.6 sent/s, ETA 0h42m26s)
+2026-10-01 17:30:25 | INFO    | step 12 FINAL EVALUATION | gazette_test / finetuned_ct2 / mk_sq: 8000 / 10174 sentences (2.1 sent/s, ETA 0h17m39s)
+2026-10-01 17:31:59 | INFO    | step 12 FINAL EVALUATION | gazette_test / finetuned_ct2 / mk_sq: 10000 / 10174 sentences (2.5 sent/s, ETA 0h01m09s)
+2026-10-01 17:32:01 | INFO    | step 12 FINAL EVALUATION | gazette_test / finetuned_ct2 / mk_sq: 10174 / 10174 sentences (2.5 sent/s, ETA 0h00m00s)
+2026-10-01 18:02:16 | INFO    | step 12 FINAL EVALUATION | gazette_test / finetuned_ct2 / sq_mk: 2000 / 10174 sentences (1.1 sent/s, ETA 2h03m38s)
+2026-10-01 18:12:13 | INFO    | step 12 FINAL EVALUATION | gazette_test / finetuned_ct2 / sq_mk: 4000 / 10174 sentences (1.7 sent/s, ETA 1h02m02s)
+2026-10-01 18:18:33 | INFO    | step 12 FINAL EVALUATION | gazette_test / finetuned_ct2 / sq_mk: 6000 / 10174 sentences (2.1 sent/s, ETA 0h32m22s)
+2026-10-01 18:22:17 | INFO    | step 12 FINAL EVALUATION | gazette_test / finetuned_ct2 / sq_mk: 8000 / 10174 sentences (2.7 sent/s, ETA 0h13m39s)
+2026-10-01 18:23:50 | INFO    | step 12 FINAL EVALUATION | gazette_test / finetuned_ct2 / sq_mk: 10000 / 10174 sentences (3.2 sent/s, ETA 0h00m54s)
+2026-10-01 18:23:53 | INFO    | step 12 FINAL EVALUATION | gazette_test / finetuned_ct2 / sq_mk: 10174 / 10174 sentences (3.3 sent/s, ETA 0h00m00s)
+2026-10-01 18:24:22 | INFO    | step 12 FINAL EVALUATION | results
+gazette_test
+┌───────────────┬───────────┬─────────────┬───────┬───────┬────────────────────┬────────────────────┐
+│ model         ┆ direction ┆ n_sentences ┆ bleu  ┆ chrf  ┆ bleu_delta_vs_base ┆ chrf_delta_vs_base │
+╞═══════════════╪═══════════╪═════════════╪═══════╪═══════╪════════════════════╪════════════════════╡
+│ base          ┆ mk_sq     ┆ 10174       ┆ 27.74 ┆ 50.3  ┆ 0.0                ┆ 0.0                │
+│ base          ┆ sq_mk     ┆ 10174       ┆ 29.63 ┆ 52.46 ┆ 0.0                ┆ 0.0                │
+│ finetuned_hf  ┆ mk_sq     ┆ 10174       ┆ 54.28 ┆ 72.42 ┆ 26.53              ┆ 22.12              │
+│ finetuned_hf  ┆ sq_mk     ┆ 10174       ┆ 63.8  ┆ 78.6  ┆ 34.17              ┆ 26.14              │
+│ finetuned_ct2 ┆ mk_sq     ┆ 10174       ┆ 54.19 ┆ 72.37 ┆ 26.44              ┆ 22.07              │
+│ finetuned_ct2 ┆ sq_mk     ┆ 10174       ┆ 63.68 ┆ 78.62 ┆ 34.05              ┆ 26.16              │
+└───────────────┴───────────┴─────────────┴───────┴───────┴────────────────────┴────────────────────┘
+BLEU signature: nrefs:1|case:mixed|eff:no|tok:13a|smooth:exp|version:2.6.0
+chrF signature: nrefs:1|case:mixed|eff:yes|nc:6|nw:2|space:no|version:2.6.0
+2026-10-01 18:24:22 | INFO    | step 12 FINAL EVALUATION | gazette_test: 5 random examples
+2026-10-01 18:24:22 | INFO    | step 12 FINAL EVALUATION | [example translations removed from this copy]
+2026-10-01 18:24:22 | INFO    | step 12 FINAL EVALUATION | [example translations removed from this copy]
+2026-10-01 18:24:22 | INFO    | step 12 FINAL EVALUATION | [example translations removed from this copy]
+2026-10-01 18:24:22 | INFO    | step 12 FINAL EVALUATION | [example translations removed from this copy]
+2026-10-01 18:24:22 | INFO    | step 12 FINAL EVALUATION | [example translations removed from this copy]
+2026-10-01 18:24:31 | INFO    | step 12 FINAL EVALUATION | uploaded: eval/gazette_test_results.csv, eval/translations_gazette_test.parquet, progress.log
+2026-10-01 18:24:31 | INFO    | step 12 FINAL EVALUATION | ---- test set flores ----
+2026-10-01 18:24:31 | INFO    | step 12 FINAL EVALUATION | wrote eval/translations_flores.parquet (2024 rows)
+2026-10-01 18:24:33 | INFO    | step 12 FINAL EVALUATION | loaded base (HF, GPU bf16)
+2026-10-01 18:24:52 | INFO    | step 12 FINAL EVALUATION | flores / base / mk_sq: 1012 / 1012 sentences (53.5 sent/s, ETA 0h00m00s)
+2026-10-01 18:25:08 | INFO    | step 12 FINAL EVALUATION | flores / base / sq_mk: 1012 / 1012 sentences (64.8 sent/s, ETA 0h00m00s)
+2026-10-01 18:25:09 | INFO    | step 12 FINAL EVALUATION | loaded finetuned_hf (HF, GPU bf16)
+2026-10-01 18:25:48 | INFO    | step 12 FINAL EVALUATION | flores / finetuned_hf / mk_sq: 1012 / 1012 sentences (26.0 sent/s, ETA 0h00m00s)
+2026-10-01 18:26:23 | INFO    | step 12 FINAL EVALUATION | flores / finetuned_hf / sq_mk: 1012 / 1012 sentences (29.2 sent/s, ETA 0h00m00s)
+2026-10-01 18:26:25 | INFO    | step 12 FINAL EVALUATION | loaded finetuned_ct2 (CTranslate2 cpu)
+2026-10-01 18:29:32 | INFO    | step 12 FINAL EVALUATION | flores / finetuned_ct2 / mk_sq: 1012 / 1012 sentences (5.4 sent/s, ETA 0h00m00s)
+2026-10-01 18:32:32 | INFO    | step 12 FINAL EVALUATION | flores / finetuned_ct2 / sq_mk: 1012 / 1012 sentences (5.6 sent/s, ETA 0h00m00s)
+2026-10-01 18:32:34 | INFO    | step 12 FINAL EVALUATION | results
+flores
+┌───────────────┬───────────┬─────────────┬───────┬───────┬────────────────────┬────────────────────┐
+│ model         ┆ direction ┆ n_sentences ┆ bleu  ┆ chrf  ┆ bleu_delta_vs_base ┆ chrf_delta_vs_base │
+╞═══════════════╪═══════════╪═════════════╪═══════╪═══════╪════════════════════╪════════════════════╡
+│ base          ┆ mk_sq     ┆ 1012        ┆ 22.08 ┆ 48.58 ┆ 0.0                ┆ 0.0                │
+│ base          ┆ sq_mk     ┆ 1012        ┆ 21.39 ┆ 49.5  ┆ 0.0                ┆ 0.0                │
+│ finetuned_hf  ┆ mk_sq     ┆ 1012        ┆ 15.99 ┆ 43.8  ┆ -6.09              ┆ -4.78              │
+│ finetuned_hf  ┆ sq_mk     ┆ 1012        ┆ 16.79 ┆ 47.28 ┆ -4.6               ┆ -2.22              │
+│ finetuned_ct2 ┆ mk_sq     ┆ 1012        ┆ 16.22 ┆ 43.59 ┆ -5.86              ┆ -4.99              │
+│ finetuned_ct2 ┆ sq_mk     ┆ 1012        ┆ 16.72 ┆ 47.19 ┆ -4.66              ┆ -2.31              │
+└───────────────┴───────────┴─────────────┴───────┴───────┴────────────────────┴────────────────────┘
+BLEU signature: nrefs:1|case:mixed|eff:no|tok:13a|smooth:exp|version:2.6.0
+chrF signature: nrefs:1|case:mixed|eff:yes|nc:6|nw:2|space:no|version:2.6.0
+2026-10-01 18:32:34 | INFO    | step 12 FINAL EVALUATION | flores: 5 random examples
+2026-10-01 18:32:34 | INFO    | step 12 FINAL EVALUATION | [example translations removed from this copy]
+2026-10-01 18:32:34 | INFO    | step 12 FINAL EVALUATION | [example translations removed from this copy]
+2026-10-01 18:32:34 | INFO    | step 12 FINAL EVALUATION | [example translations removed from this copy]
+2026-10-01 18:32:34 | INFO    | step 12 FINAL EVALUATION | [example translations removed from this copy]
+2026-10-01 18:32:34 | INFO    | step 12 FINAL EVALUATION | [example translations removed from this copy]
+2026-10-01 18:32:39 | INFO    | step 12 FINAL EVALUATION | uploaded: eval/flores_results.csv, eval/translations_flores.parquet, progress.log
+2026-10-01 18:32:39 | INFO    | step 12 FINAL EVALUATION | ---- test set ntrex ----
+2026-10-01 18:32:40 | INFO    | step 12 FINAL EVALUATION | wrote eval/translations_ntrex.parquet (3994 rows)
+2026-10-01 18:32:41 | INFO    | step 12 FINAL EVALUATION | loaded base (HF, GPU bf16)
+2026-10-01 18:33:15 | INFO    | step 12 FINAL EVALUATION | ntrex / base / mk_sq: 1997 / 1997 sentences (59.2 sent/s, ETA 0h00m00s)
+2026-10-01 18:33:47 | INFO    | step 12 FINAL EVALUATION | ntrex / base / sq_mk: 1997 / 1997 sentences (61.2 sent/s, ETA 0h00m00s)
+2026-10-01 18:33:49 | INFO    | step 12 FINAL EVALUATION | loaded finetuned_hf (HF, GPU bf16)
+2026-10-01 18:35:05 | INFO    | step 12 FINAL EVALUATION | ntrex / finetuned_hf / mk_sq: 1997 / 1997 sentences (26.2 sent/s, ETA 0h00m00s)
+2026-10-01 18:36:21 | INFO    | step 12 FINAL EVALUATION | ntrex / finetuned_hf / sq_mk: 1997 / 1997 sentences (26.5 sent/s, ETA 0h00m00s)
+2026-10-01 18:36:22 | INFO    | step 12 FINAL EVALUATION | loaded finetuned_ct2 (CTranslate2 cpu)
+2026-10-01 18:42:47 | INFO    | step 12 FINAL EVALUATION | ntrex / finetuned_ct2 / mk_sq: 1997 / 1997 sentences (5.2 sent/s, ETA 0h00m00s)
+2026-10-01 18:49:07 | INFO    | step 12 FINAL EVALUATION | ntrex / finetuned_ct2 / sq_mk: 1997 / 1997 sentences (5.3 sent/s, ETA 0h00m00s)
+2026-10-01 18:49:12 | INFO    | step 12 FINAL EVALUATION | results
+ntrex
+┌───────────────┬───────────┬─────────────┬───────┬───────┬────────────────────┬────────────────────┐
+│ model         ┆ direction ┆ n_sentences ┆ bleu  ┆ chrf  ┆ bleu_delta_vs_base ┆ chrf_delta_vs_base │
+╞═══════════════╪═══════════╪═════════════╪═══════╪═══════╪════════════════════╪════════════════════╡
+│ base          ┆ mk_sq     ┆ 1997        ┆ 23.14 ┆ 48.91 ┆ 0.0                ┆ 0.0                │
+│ base          ┆ sq_mk     ┆ 1997        ┆ 21.25 ┆ 49.54 ┆ 0.0                ┆ 0.0                │
+│ finetuned_hf  ┆ mk_sq     ┆ 1997        ┆ 15.25 ┆ 42.29 ┆ -7.89              ┆ -6.62              │
+│ finetuned_hf  ┆ sq_mk     ┆ 1997        ┆ 15.89 ┆ 45.44 ┆ -5.36              ┆ -4.1               │
+│ finetuned_ct2 ┆ mk_sq     ┆ 1997        ┆ 15.64 ┆ 42.18 ┆ -7.5               ┆ -6.73              │
+│ finetuned_ct2 ┆ sq_mk     ┆ 1997        ┆ 16.33 ┆ 45.69 ┆ -4.92              ┆ -3.85              │
+└───────────────┴───────────┴─────────────┴───────┴───────┴────────────────────┴────────────────────┘
+BLEU signature: nrefs:1|case:mixed|eff:no|tok:13a|smooth:exp|version:2.6.0
+chrF signature: nrefs:1|case:mixed|eff:yes|nc:6|nw:2|space:no|version:2.6.0
+2026-10-01 18:49:12 | INFO    | step 12 FINAL EVALUATION | ntrex: 5 random examples
+2026-10-01 18:49:12 | INFO    | step 12 FINAL EVALUATION | [example translations removed from this copy]
+2026-10-01 18:49:12 | INFO    | step 12 FINAL EVALUATION | [example translations removed from this copy]
+2026-10-01 18:49:12 | INFO    | step 12 FINAL EVALUATION | [example translations removed from this copy]
+2026-10-01 18:49:12 | INFO    | step 12 FINAL EVALUATION | [example translations removed from this copy]
+2026-10-01 18:49:12 | INFO    | step 12 FINAL EVALUATION | [example translations removed from this copy]
+2026-10-01 18:49:18 | INFO    | step 12 FINAL EVALUATION | uploaded: eval/ntrex_results.csv, eval/translations_ntrex.parquet, progress.log
+2026-10-01 18:49:18 | INFO    | step 12 FINAL EVALUATION | ===== done in 2h58m01s
+2026-10-01 18:49:18 | INFO    | step 12 analysis (overlap, terminology, numbers) | ===== start
+2026-10-01 18:51:11 | ERROR   | step 12 analysis (overlap, terminology, numbers) | FAILED after 0h01m52s: TypeError: 'pyarrow.lib.Table' object is not callable
+2026-10-01 18:51:11 | ERROR   | step 12 analysis (overlap, terminology, numbers) | traceback:
+Traceback (most recent call last):
+  File "/home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR/scripts/train/train_nllb_gazette_verbis_ct2.py", line 348, in run_step
+    out = fn(*args)
+          ^^^^^^^^^
+  File "/home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR/scripts/train/train_nllb_gazette_verbis_ct2.py", line 2125, in step12b_analysis
+    outputs = A.run(EXP_ID, work_dir=W, provenance=PROV)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR/scripts/eval/analyze_gazette_results.py", line 399, in run
+    overlap_audit(test, blocks, models)
+  File "/home/edon.fetaji/VEZILKA-MK-SQ-TRANSLATOR/scripts/eval/analyze_gazette_results.py", line 250, in overlap_audit
+    say(table(counts))
+        ^^^^^^^^^^^^^
+TypeError: 'pyarrow.lib.Table' object is not callable
+

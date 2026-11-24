@@ -35,3 +35,7 @@ tokenized/
 *.pt
 *.pth
 *.ckpt
+
+# ── OS / tooling noise ──
+.DS_Store
+.ruff_cache/

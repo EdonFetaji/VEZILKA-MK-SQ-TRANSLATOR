@@ -1,0 +1,137 @@
+# ============================================================================
+# E02_gazette_only (arm M1) -- identical to configs/E01_gazette_verbis_mix.yaml
+# except for ONE experimental difference:
+#
+#     data.verbis.use_for_training: false      (E01: true)
+#
+# Same base model and revision, hyperparameters (incl. batch 8 x 16), seed, dev set and
+# dev-evaluation sentences, test sets, evaluation and analyses. Verbis is still loaded,
+# but only to MEASURE terminology (Term Success Rate) exactly as in E01; no Verbis pair is
+# trained on.
+#
+# Bookkeeping differences (no effect on the experiment), listed so the checker can verify
+# that nothing else differs:
+#   exp_id, paper_arm, description, status, parent_exp, code, outputs, comparison,
+#   data.gazette.revision, data.flores_plus.revision, data.ntrex.commit
+#     -> E01 did not record these revisions; E02 pins the repository HEADs that were already
+#        current before E01 ran (see data/manifests/*.json), so the data are the same.
+#   The script also asserts E01's row counts and content fingerprints (data.expected) and
+#   stops if they differ.
+# ============================================================================
+exp_id: E02_gazette_only
+paper_arm: "M1"
+description: >-
+  Gazette-only control: identical to E01_gazette_verbis_mix except that no Verbis data is used for
+  training, so E01 vs E02 isolates the contribution of the Verbis lexicon.
+status: planned
+parent_exp: E01_gazette_verbis_mix
+
+code:
+  git_commit: recorded at run time      # the script refuses to start with uncommitted changes and stamps HEAD on every output
+  script: scripts/train/train_nllb_gazette_verbis_ct2.py
+
+outputs:
+  work_dir: runs/E02_gazette_only                      # gitignored; small artifacts are copied to experiments/E02_gazette_only/
+  hf_results_repo: EdonFetaji/mk-sq-nllb600m-e02-gazette-only   # PRIVATE
+  legacy_repo_name: false
+
+base_model:
+  name: facebook/nllb-200-distilled-600M
+  revision: f8d333a098d19b4fd9a8b18f94170487ad3f821d   # HF cache snapshot on the GPU box, from progress.log
+
+languages: {mk: mkd_Cyrl, sq: als_Latn}
+
+data:
+  gazette:
+    repo: EdonFetaji/slvesnik-mk-sq
+    revision: 07af5bbbb2a2c5277e3eb9c032a86682148fb269   # pinned; files verified against data/manifests/gazette.json
+    dev_split: validation           # the published split; no hold-out created
+    manifest: data/manifests/gazette.json
+  verbis:
+    storage_repo: EdonFetaji/mk-sq-nllb600m-gazette-verbis   # private
+    raw_path: data/verbis/verbis_mk_sq.parquet
+    local_cache: data/verbis_mk_sq.parquet
+    use_for_training: false         # <-- THE ONE EXPERIMENTAL DIFFERENCE (E01: true)
+    use_for_evaluation: true        # Term Success Rate in the analysis
+    headword_cleaning: [strip_trailing_parenthetical, strip_albanian_inflection_ending, lowercase_all_caps_longer_than_4, drop_empty, dedup]
+    labse_model: sentence-transformers/LaBSE
+    labse_min_score: 0.70
+    manifest: data/manifests/verbis.json
+  flores_plus:
+    repo: openlanguagedata/flores_plus
+    revision: 5fec6c13f9e5a4db2f745d4ec0d7c9721ddc4f06   # pinned; file hashes UNTRACKED by decision
+    split: devtest
+    langs: {mk: mkd_Cyrl, sq: als_Latn}
+    manifest: data/manifests/flores_plus.json
+  ntrex:
+    repo: MicrosoftTranslator/NTREX
+    commit: 468c6b69c7f6a75d31d4743d9daba2af566cc18d     # pinned; file hashes UNTRACKED by decision
+    files: {mk: NTREX-128/newstest2019-ref.mkd.txt, sq: NTREX-128/newstest2019-ref.sqi.txt}
+    manifest: data/manifests/ntrex.json
+  leakage_removal:
+    normalisation: lowercase_collapse_whitespace
+    rule: remove a train pair if its mk OR sq side occurs in any held-out set
+    held_out: [gazette_dev, gazette_test, flores_devtest, ntrex]
+  bidirectional: true
+  max_tokens: 192                   # longer examples are dropped, never truncated
+  expected:                         # as recorded by E01 (run_info.json, eval/*.parquet)
+    row_counts: {gazette_train: 270083, gazette_dev: 13355, gazette_test: 10174, flores_devtest: 1012, ntrex: 1997, verbis_entries: 15925}
+    content_sha256:                 # mksq.experiment.content_sha256 over (mk, sq) pairs / (direction, row_idx)
+      gazette_test: 167bd7740f5f2bdc8d91e3788bf9695f3f74e1416cc8ae72e3ee973dfb1aa37b
+      dev_eval_ids: 507d8eeb9195508b3b03999d9282de7cc482c2d16ff1e7a0e6fdf611c3d4ea5e
+
+training:
+  method: full_parameter_sft
+  optim: adafactor
+  learning_rate: 1.0e-4
+  lr_scheduler: linear
+  warmup_steps: 1000
+  epochs: 1
+  label_smoothing: 0.1
+  weight_decay: 0.01
+  max_grad_norm: 1.0
+  bf16: true
+  tf32: true
+  sampling: group_by_length
+  per_device_batch: 8               # chosen by E01's memory probe (16 ran out of memory at 14.97 GB)
+  grad_accumulation: 16             # effective batch 128
+  gradient_checkpointing: false
+  dataloader_num_workers: 8
+  seed: 42
+  logging_steps: 50
+  save_total_limit: 3
+
+checkpoint_selection:
+  data: gazette_dev                 # dev is used ONLY for checkpoint selection
+  size_per_direction: 500
+  sampling_seed: 42
+  decoding: greedy
+  batch: 32
+  max_new_tokens: 256
+  every_steps: 1000                 # plus the final step
+  metric: eval_chrf                 # mean chrF++ of both directions, higher is better
+
+final_evaluation:                   # test sets are used ONLY here
+  test_sets: [gazette_test_full, flores_devtest, ntrex]
+  systems: [base, finetuned_hf, finetuned_ct2]
+  beams: 4
+  max_new_tokens: 256
+  batch: 32
+  ct2: {quantization: int8, gpu_compute_type: int8_float16, cpu_compute_type: int8, cpu_threads: 16}
+  metrics: {bleu: sacrebleu_default_13a, chrf: {word_order: 2}}
+  save_every_sentences: 2000
+
+analysis:                           # scripts/eval/analyze_gazette_results.py
+  overlap: {normalisation: lowercase_digits_to_0_collapse_whitespace, shingle_chars: 5, near_duplicate_jaccard: 0.8, minhash_perms: 128, lsh_bands: 16, compare_against: train_clean_gazette}
+  terminology: {terms: verbis_terms, min_source_chars: 5, prefix_rule: "max(4, len-2)", rare_max_train_sentences: 5}
+  number_fidelity: {pattern: "\\d+", compare: multiset}
+  significance: {test: paired_bootstrap, resamples: 1000, seed: 42}
+
+hardware:
+  min_free_vram_gb: 14
+
+comparison:
+  against: E01_gazette_verbis_mix
+  experimental_differences: [data.verbis.use_for_training]
+  bookkeeping_differences: [exp_id, paper_arm, description, status, parent_exp, code, outputs, comparison,
+                            data.gazette.revision, data.flores_plus.revision, data.ntrex.commit]

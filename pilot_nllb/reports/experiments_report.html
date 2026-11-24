@@ -1,0 +1,989 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MK–SQ Gazette Experiments</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,500;7..72,650&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one reading column (~1040px) of numbered report sections; each chart sits on a plain
+   surface panel with its legend above and a collapsible data table below. */
+:root {
+  --bg: #f5f6f8;
+  --surface: #ffffff;
+  --ink: #12161c;
+  --ink-2: #4a5260;
+  --muted: #737b88;
+  --line: #e2e5ea;
+  --line-strong: #c9ced6;
+  --accent: #2a78d6;
+  /* series identity */
+  --s-base: #9aa1ab;
+  --s-e01: #2a78d6;
+  --s-e02: #eb6834;
+  --s-ct2: #1baf7a;
+  --s-ref: #12161c;
+  /* diverging (gain / loss) */
+  --gain: #2a78d6;
+  --loss: #e34948;
+  --wash: rgba(42,120,214,.08);
+  --seq-1: #b7d3f6; --seq-2: #6da7ec; --seq-3: #1c5cab;
+  --seq-1-ink: #0d366b; --seq-2-ink: #0d366b; --seq-3-ink: #ffffff;
+  --chip-done: #e6f4ec; --chip-done-ink: #1d6b3f;
+  --chip-run: #fff1e6;  --chip-run-ink: #9a4a14;
+  --f-display: "Literata", "Iowan Old Style", Georgia, serif;
+  --f-body: "Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111317; --surface: #191c21; --ink: #f1f3f6; --ink-2: #b8bfca; --muted: #8b929e;
+    --line: #2a2e35; --line-strong: #3a3f48; --accent: #3987e5;
+    --s-base: #6f7682; --s-e01: #3987e5; --s-e02: #d95926; --s-ct2: #199e70; --s-ref: #f1f3f6;
+    --gain: #3987e5; --loss: #e66767; --wash: rgba(57,135,229,.12);
+    --seq-1: #184f95; --seq-2: #3987e5; --seq-3: #9ec5f4; --seq-1-ink: #ffffff; --seq-2-ink: #ffffff; --seq-3-ink: #0d366b;
+    --chip-done: #16301f; --chip-done-ink: #8fd3a8; --chip-run: #3a2210; --chip-run-ink: #f3b17f;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111317; --surface: #191c21; --ink: #f1f3f6; --ink-2: #b8bfca; --muted: #8b929e;
+  --line: #2a2e35; --line-strong: #3a3f48; --accent: #3987e5;
+  --s-base: #6f7682; --s-e01: #3987e5; --s-e02: #d95926; --s-ct2: #199e70; --s-ref: #f1f3f6;
+  --gain: #3987e5; --loss: #e66767; --wash: rgba(57,135,229,.12);
+    --seq-1: #184f95; --seq-2: #3987e5; --seq-3: #9ec5f4; --seq-1-ink: #ffffff; --seq-2-ink: #ffffff; --seq-3-ink: #0d366b;
+  --chip-done: #16301f; --chip-done-ink: #8fd3a8; --chip-run: #3a2210; --chip-run-ink: #f3b17f;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 15px/1.6 var(--f-body); margin: 0; }
+.wrap { max-width: 1040px; margin: 0 auto; padding-inline: 20px; padding-block: 40px 80px; }
+h1, h2, h3 { font-family: var(--f-display); font-weight: 650; text-wrap: balance; margin: 0; letter-spacing: -.01em; }
+h1 { font-size: clamp(2rem, 5vw, 2.9rem); line-height: 1.1; }
+h2 { font-size: 1.55rem; line-height: 1.25; }
+h3 { font-size: 1.08rem; font-family: var(--f-body); font-weight: 600; letter-spacing: 0; }
+p { margin: 0; max-width: 68ch; }
+.muted { color: var(--muted); }
+.mono { font-family: var(--f-mono); font-size: .86em; }
+.num { font-variant-numeric: tabular-nums; }
+a { color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
+
+/* header */
+.eyebrow { font: 500 .78rem/1.4 var(--f-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+header.top { display: grid; gap: 14px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+header.top .lede { color: var(--ink-2); font-size: 1.05rem; }
+.bilingual { font-family: var(--f-display); font-weight: 500; color: var(--ink-2); font-size: 1.05rem; }
+.bilingual span { color: var(--muted); font-family: var(--f-body); font-size: .9rem; padding-inline: 6px; }
+
+.exps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 22px; }
+.exp { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+.exp .row1 { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.exp .id { font: 500 .82rem var(--f-mono); color: var(--ink-2); display: flex; align-items: center; gap: 8px; }
+.exp .name { font-weight: 600; }
+.exp .desc { color: var(--ink-2); font-size: .88rem; }
+.key { width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex: none; }
+.key.base { background: var(--s-base); } .key.e01 { background: var(--s-e01); } .key.e02 { background: var(--s-e02); }
+.key.ct2 { background: var(--s-ct2); } .key.ref { background: var(--s-ref); border-radius: 1px; width: 3px; height: 14px; }
+.key.e02.pending { background: transparent; border: 2px dashed var(--s-e02); }
+.chip { font: 500 .72rem/1 var(--f-mono); padding: 5px 8px; border-radius: 999px; white-space: nowrap; letter-spacing: .02em; }
+.chip.done { background: var(--chip-done); color: var(--chip-done-ink); }
+.chip.run { background: var(--chip-run); color: var(--chip-run-ink); }
+.chip.run::before { content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: currentColor; margin-right: 6px; vertical-align: 1px; }
+
+/* headline figures */
+.figs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; margin-top: 28px; }
+.fig { background: var(--surface); padding: 16px 18px; display: grid; gap: 4px; align-content: start; min-width: 0; }
+.fig .lab { font-size: .82rem; color: var(--ink-2); }
+.fig .val { font: 600 1.9rem/1.15 var(--f-body); letter-spacing: -.01em; }
+.fig .val small { font-size: .95rem; color: var(--muted); font-weight: 500; }
+.fig .delta { font: 500 .82rem var(--f-mono); color: var(--ink-2); }
+.fig .delta b { font-weight: 600; color: var(--ink); }
+.fig .val .k, .fig .delta .k { margin-right: 6px; vertical-align: 2px; }
+.fig .sec { font: 500 .9rem var(--f-mono); color: var(--ink-2); display: flex; align-items: center; }
+
+/* sections */
+section { padding-top: 56px; display: grid; gap: 16px; }
+.sec-head { display: grid; gap: 8px; }
+.sec-head .no { font: 500 .78rem var(--f-mono); color: var(--muted); letter-spacing: .06em; }
+.sec-head p { color: var(--ink-2); }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 18px 18px 10px; display: grid; gap: 12px; min-width: 0; }
+.panel-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px 16px; }
+.panel-head h3 { min-width: 0; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: .83rem; color: var(--ink-2); }
+.legend span { display: inline-flex; align-items: center; gap: 7px; }
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.chart-box { min-width: 0; width: 100%; }
+.note { font-size: .84rem; color: var(--muted); }
+.findings { display: grid; gap: 10px; padding: 0; margin: 0; list-style: none; }
+.findings li { padding-left: 18px; position: relative; max-width: 72ch; color: var(--ink-2); }
+.findings li::before { content: ""; position: absolute; left: 0; top: .72em; width: 8px; height: 2px; background: var(--line-strong); }
+.findings b { color: var(--ink); font-weight: 600; }
+
+/* metric toggle */
+.seg { display: inline-flex; border: 1px solid var(--line-strong); border-radius: 7px; padding: 2px; gap: 2px; background: var(--bg); }
+.seg button { font: 500 .82rem var(--f-body); border: 0; background: transparent; color: var(--ink-2); padding: 5px 12px; border-radius: 5px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 0 0 1px var(--line-strong); }
+.toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); padding-block: 10px; border-bottom: 1px solid var(--line); }
+.toolbar .lab { font-size: .84rem; color: var(--muted); }
+
+/* svg */
+svg.chart { display: block; overflow: visible; font-family: var(--f-body); }
+svg .grid { stroke: var(--line); stroke-width: 1; }
+svg .axis { stroke: var(--line-strong); stroke-width: 1; }
+svg .sep { stroke: var(--line); stroke-width: 1; }
+svg .tick { fill: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+svg .rlabel { fill: var(--ink); font-size: 13px; font-weight: 500; }
+svg .rsub { fill: var(--muted); font-size: 11.5px; }
+svg .val { fill: var(--ink-2); font-size: 12px; font-variant-numeric: tabular-nums; paint-order: stroke; stroke: var(--surface); stroke-width: 4px; stroke-linejoin: round; }
+svg .val.strong { fill: var(--ink); font-weight: 600; }
+svg .conn { stroke: var(--line-strong); stroke-width: 2; stroke-linecap: round; }
+svg .dot { stroke: var(--surface); stroke-width: 2; }
+svg .f-base { fill: var(--s-base); } svg .f-e01 { fill: var(--s-e01); } svg .f-e02 { fill: var(--s-e02); }
+svg .f-ct2 { fill: var(--s-ct2); } svg .f-gain { fill: var(--gain); } svg .f-loss { fill: var(--loss); }
+svg .l-e01 { stroke: var(--s-e01); } svg .l-e02 { stroke: var(--s-e02); } svg .l-ct2 { stroke: var(--s-ct2); } svg .l-base { stroke: var(--s-base); }
+svg .line { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+svg .area-e01 { fill: var(--s-e01); opacity: .1; }
+svg .shade { fill: var(--wash); }
+svg .ref { stroke: var(--s-ref); stroke-width: 2; }
+svg .pending-box { fill: none; stroke: var(--s-e02); stroke-width: 1.5; stroke-dasharray: 4 3; opacity: .8; }
+svg .pending-t { fill: var(--muted); font-size: 11.5px; font-style: italic; }
+svg .cross { stroke: var(--line-strong); stroke-width: 1; }
+svg .hit { fill: transparent; cursor: default; }
+svg .ann { fill: var(--muted); font-size: 11px; }
+
+/* tooltip */
+#tip { position: fixed; z-index: 20; pointer-events: none; background: var(--surface); color: var(--ink); border: 1px solid var(--line-strong); border-radius: 7px; padding: 8px 10px; font-size: .82rem; line-height: 1.45; box-shadow: 0 6px 24px rgba(0,0,0,.12); max-width: 280px; }
+#tip .t { font-weight: 600; margin-bottom: 2px; }
+#tip .r { display: flex; align-items: center; gap: 7px; font-variant-numeric: tabular-nums; }
+#tip .r .k { flex: none; }
+#tip .s { color: var(--muted); font-size: .76rem; }
+
+/* tables */
+details.tbl { border-top: 1px solid var(--line); padding-block: 8px 4px; }
+details.tbl summary { cursor: pointer; font-size: .84rem; color: var(--ink-2); width: fit-content; }
+.tscroll { overflow-x: auto; margin-top: 10px; }
+table { border-collapse: collapse; font-size: .84rem; font-variant-numeric: tabular-nums; min-width: 100%; }
+th, td { text-align: right; padding: 6px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th:first-child, td:first-child, th.l, td.l { text-align: left; }
+th { font-weight: 600; color: var(--ink-2); font-size: .78rem; }
+td.pend { color: var(--muted); font-style: italic; }
+
+/* data flow */
+.flow { display: grid; gap: 0; }
+.flow .st { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--line); align-items: baseline; }
+.flow .st:last-child { border-bottom: 0; }
+.flow .st .what { color: var(--ink-2); min-width: 0; }
+.flow .st .what small { display: block; color: var(--muted); font-size: .8rem; }
+.flow .st .n { font: 500 .95rem var(--f-mono); font-variant-numeric: tabular-nums; }
+.flow .st.total .what { color: var(--ink); font-weight: 600; }
+.flow .st .n.minus { color: var(--loss); }
+
+.kv { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 6px 18px; font-size: .88rem; margin: 0; }
+.kv dt { color: var(--muted); }
+.kv dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+
+footer { margin-top: 64px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--muted); font-size: .82rem; display: grid; gap: 6px; }
+
+@media (max-width: 860px) {
+  .figs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grid3 { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 680px) {
+  .exps, .grid2 { grid-template-columns: minmax(0, 1fr); }
+  .wrap { padding-inline: 16px; }
+}
+@media (max-width: 420px) { .figs { grid-template-columns: minmax(0, 1fr); } }
+@media (prefers-reduced-motion: no-preference) { .seg button { transition: background .15s, color .15s; } }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <div class="eyebrow">Experiment report · NLLB-200-distilled-600M · Macedonian ↔ Albanian</div>
+    <h1>MK–SQ Gazette Experiments</h1>
+    <div class="bilingual">Службен весник <span>↔</span> Gazeta Zyrtare</div>
+    <p class="lede">Fine-tuning a 600M-parameter NLLB model on the bilingual Official Gazette of North Macedonia, with and without the Verbis terminology dictionary. E01 trains on the Gazette plus Verbis term and definition pairs. E02 is the control: the same run with no Verbis data. Both are compared with the zero-shot base model (E00), and E01 against E02 shows what the dictionary adds.</p>
+    <div class="exps" id="exps"></div>
+  </header>
+
+  <div class="figs" id="figs"></div>
+
+  <section id="findings">
+    <div class="sec-head">
+      <div class="no">SUMMARY</div>
+      <h2>What E01 and E02 show</h2>
+    </div>
+    <ul class="findings">
+      <li><b>Large in-domain gain from both runs.</b> On the full Gazette test set (10,174 pairs) BLEU roughly doubled: 27.74 → 54.02 (E01) and 54.28 (E02) MK→SQ, 29.63 → 63.64 (E01) and 63.80 (E02) SQ→MK. E01's gains over the base model have p = 0.001.</li>
+      <li><b>Verbis adds nothing on Gazette test BLEU.</b> E01 and E02 are within 0.26 BLEU and 0.14 chrF++ of each other on the Gazette test, with E02 slightly ahead in both directions.</li>
+      <li><b>Verbis reduces general-domain forgetting.</b> Both runs lose quality on FLORES+ and NTREX-128, but E02 loses more: −4.6 to −7.9 BLEU against −2.5 to −5.0 for E01. E01 is 2.1 to 3.5 BLEU ahead of E02 on every out-of-domain set and direction.</li>
+      <li><b>The E01 gain is not just memorised templates.</b> 48.6% of test pairs are templates or near-duplicates of training sentences; on the novel half E01 still gains +22.37 BLEU MK→SQ and +28.66 SQ→MK.</li>
+      <li><b>E01 terminology reaches the human rate.</b> Term Success Rate rose from 56.3% to 75.8% (MK→SQ) and from 55.2% to 66.9% (SQ→MK). Rare terms still lag, most of all SQ→MK (51.6% vs 78.9%).</li>
+      <li><b>Not yet measured for E02.</b> Significance of E01 vs E02, the overlap breakdown, Term Success Rate and number fidelity need the analysis step on E02's translations. Without E02's TSR we cannot yet say whether Verbis improves terminology.</li>
+    </ul>
+  </section>
+
+  <div class="toolbar" role="group" aria-label="Metric">
+    <span class="lab">Metric for the score charts</span>
+    <div class="seg" id="metricSeg">
+      <button type="button" id="m-bleu" data-m="bleu" aria-pressed="true">BLEU</button>
+      <button type="button" id="m-chrf" data-m="chrf" aria-pressed="false">chrF++</button>
+    </div>
+    <div class="legend" id="sysLegend"></div>
+  </div>
+
+  <section id="main">
+    <div class="sec-head">
+      <div class="no">01 · TEST SETS</div>
+      <h2>In-domain gain, general-domain cost</h2>
+      <p>Each row compares the base model with the two fine-tuned runs on one test set and direction. Beam 4, at most 256 new tokens, sacreBLEU 2.6.0. Hover a dot for the score; E00 and E01 also show their 95% bootstrap intervals.</p>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h3 id="mainTitle">Scores by test set</h3></div>
+      <div class="chart-box" id="c-main"></div>
+      <details class="tbl"><summary>Show table</summary><div class="tscroll" id="t-main"></div></details>
+    </div>
+    <div class="panel">
+      <div class="panel-head">
+        <h3 id="deltaTitle">Change against the base model</h3>
+        <div class="legend"><span><i class="key e01"></i>E01</span><span><i class="key e02"></i>E02</span></div>
+      </div>
+      <div class="chart-box" id="c-delta"></div>
+      <p class="note">p-values are for E01 against the base model: paired bootstrap, 1,000 resamples, seed 42 (0.001 is the smallest value 1,000 resamples can give). E02 significance is not computed yet.</p>
+    </div>
+  </section>
+
+  <section id="verbis">
+    <div class="sec-head">
+      <div class="no">02 · E01 VS E02</div>
+      <h2>What adding Verbis changes</h2>
+      <p>E01 minus E02 for each test set and direction. The two runs differ only in whether Verbis term and definition pairs were in the training mix, so this difference is the dictionary's effect. Positive means E01, the run with Verbis, scores higher.</p>
+    </div>
+    <div class="panel">
+      <div class="panel-head">
+        <h3 id="vTitle">E01 − E02</h3>
+        <div class="legend"><span><i class="key" style="background:var(--gain)"></i>E01 (with Verbis) higher</span><span><i class="key" style="background:var(--loss)"></i>E02 (Gazette only) higher</span></div>
+      </div>
+      <div class="chart-box" id="c-verbis"></div>
+      <p class="note">Single seed per run, and no paired significance test between E01 and E02 yet. Differences of a few tenths of a point on the Gazette test are within what a different seed could produce; the 2–3.5 point out-of-domain differences are consistent across all four comparisons.</p>
+      <details class="tbl"><summary>Show table</summary><div class="tscroll" id="t-verbis"></div></details>
+    </div>
+  </section>
+
+  <section id="overlap">
+    <div class="sec-head">
+      <div class="no">03 · OVERLAP CONTROL</div>
+      <h2>How much of the gain survives on unseen sentences</h2>
+      <p class="note">E02 overlap breakdown: pending (needs the analysis step on E02's translations).</p>
+      <p>The Gazette split is issue-disjoint, but legal text repeats itself. Every test pair was classed against the training set after lowercasing and replacing digits: an <i>exact template</i> matches a training sentence, a <i>near-duplicate</i> has 5-character-shingle Jaccard ≥ 0.8 with one, and the rest are <i>novel</i>.</p>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h3>Composition of the Gazette test set</h3></div>
+      <div class="chart-box" id="c-comp"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h3 id="ovTitle">Scores by overlap class</h3></div>
+      <div class="chart-box" id="c-overlap"></div>
+      <details class="tbl"><summary>Show table</summary><div class="tscroll" id="t-overlap"></div></details>
+    </div>
+  </section>
+
+  <section id="terms">
+    <div class="sec-head">
+      <div class="no">04 · TERMINOLOGY AND NUMBERS</div>
+      <h2>Verbis terms and digits in the output</h2>
+      <p>Term Success Rate counts a Verbis term occurrence in the source as a success when the hypothesis contains the listed target term (prefix match on the first max(4, length − 2) characters). The human reference, scored the same way, is drawn as a vertical line: it is a realistic ceiling, not 100%. <i>Rare</i> terms occur in at most 5 training sentences.</p>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h3>Term Success Rate (%)</h3><div class="legend legend-sys" data-ref="1"></div></div>
+      <div class="chart-box" id="c-tsr"></div>
+      <details class="tbl"><summary>Show table</summary><div class="tscroll" id="t-tsr"></div></details>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h3>Number fidelity: sentences whose digit sequences match the source (%)</h3><div class="legend legend-sys" data-ref="1"></div></div>
+      <div class="chart-box" id="c-num"></div>
+      <p class="note">Only sentences that contain numbers (8,130 MK→SQ, 8,320 SQ→MK). The human reference itself departs from the source digits about a third of the time (formatting, OCR artefacts), so this measures digit copying rather than correctness.</p>
+      <details class="tbl"><summary>Show table</summary><div class="tscroll" id="t-num"></div></details>
+    </div>
+  </section>
+
+  <section id="training">
+    <div class="sec-head">
+      <div class="no">05 · TRAINING</div>
+      <h2>One epoch, 4,115 steps per run</h2>
+      <p>Full-parameter fine-tuning on one RTX 5080, batch 8 × 16 accumulation = 128 examples per step, Adafactor at 1e-4 with 1,000 warm-up steps and linear decay. Dev scores are greedy decoding on 500 Gazette dev sentences per direction, used only to select the checkpoint.</p>
+    </div>
+    <div class="grid3">
+      <div class="panel"><div class="panel-head"><h3>Training loss · E01</h3></div><div class="chart-box" id="c-loss"></div></div>
+      <div class="panel"><div class="panel-head"><h3>Dev chrF++ · MK→SQ</h3><div class="legend"><span><i class="key e01"></i>E01</span><span><i class="key e02"></i>E02</span></div></div><div class="chart-box" id="c-dev-mk"></div></div>
+      <div class="panel"><div class="panel-head"><h3>Dev chrF++ · SQ→MK</h3><div class="legend"><span><i class="key e01"></i>E01</span><span><i class="key e02"></i>E02</span></div></div><div class="chart-box" id="c-dev-sq"></div></div>
+    </div>
+    <p class="note">Loss is label-smoothed (0.1), logged every 50 steps. The shaded band is the warm-up. E01's selected checkpoint is step 4,115, the best <i>mean</i> dev chrF++ (73.60). E02 learns the Gazette faster early on (mean dev chrF++ 70.82 vs 67.46 at step 1,000, since every example is Gazette) and the two are level by step 3,000 (73.68 vs 73.52). E02's training loss and its dev evaluations after step 3,000 are not in this report yet.</p>
+    <div class="panel">
+      <details class="tbl" open><summary>Dev evaluations (greedy, 500 sentences per direction)</summary><div class="tscroll" id="t-dev"></div></details>
+    </div>
+  </section>
+
+  <section id="deploy">
+    <div class="sec-head">
+      <div class="no">06 · DEPLOYMENT</div>
+      <h2>CTranslate2 int8 matches the full-precision model</h2>
+      <p>The fine-tuned model was exported to CTranslate2 with int8 weights. CTranslate2 could not use the GPU on this machine, so the int8 model ran on 16 CPU threads.</p>
+    </div>
+    <div class="grid2">
+      <div class="panel">
+        <div class="panel-head"><h3 id="qTitle">int8 minus bf16</h3></div>
+        <div class="chart-box" id="c-quant"></div>
+        <p class="note">E01 only. 2 of 12 differences reach p &lt; 0.05; the largest is 0.23 BLEU. E02's int8 export behaves the same way: within 0.44 BLEU of its bf16 model on every set (see the table in section 01).</p>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h3>Decoding speed, Gazette test (sentences/s)</h3><div class="legend"><span><i class="key base"></i>Base, GPU</span><span><i class="key e01"></i>E01, GPU</span><span><i class="key ct2"></i>E01 int8, CPU</span></div></div>
+        <div class="chart-box" id="c-speed"></div>
+        <p class="note">Not a like-for-like comparison: bf16 on the GPU against int8 on the CPU.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="data">
+    <div class="sec-head">
+      <div class="no">07 · DATA</div>
+      <h2>What the model was trained on</h2>
+      <p>Any training pair whose Macedonian or Albanian side appears in a held-out set (Gazette dev or test, FLORES+, NTREX-128) was removed before training. Each remaining pair was used in both directions; examples longer than 192 tokens were dropped, not truncated.</p>
+    </div>
+    <div class="grid2">
+      <div class="panel">
+        <div class="panel-head"><h3>E01 training set, step by step</h3></div>
+        <div class="flow" id="flow"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h3>Training mix</h3></div>
+        <div class="chart-box" id="c-mix"></div>
+        <p class="note">E02 drops both Verbis parts and keeps everything else identical, so E01 vs E02 isolates the dictionary's contribution. Verbis is still used in E02 to measure Term Success Rate.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="setup">
+    <div class="sec-head">
+      <div class="no">08 · SETUP AND LIMITS</div>
+      <h2>Configuration and caveats</h2>
+    </div>
+    <div class="grid2">
+      <div class="panel">
+        <dl class="kv">
+          <dt>Base model</dt><dd class="mono">facebook/nllb-200-distilled-600M @ f8d333a</dd>
+          <dt>Method</dt><dd>Full-parameter SFT, both directions in one model</dd>
+          <dt>Optimizer</dt><dd>Adafactor, lr 1e-4, linear, 1,000 warm-up steps</dd>
+          <dt>Batch</dt><dd>8 × 16 = 128 (batch 16 ran out of memory at 14.97 GB)</dd>
+          <dt>Regularisation</dt><dd>Label smoothing 0.1, weight decay 0.01, grad norm 1.0</dd>
+          <dt>Precision</dt><dd>bf16 + TF32</dd>
+          <dt>Seed</dt><dd>42 (single run)</dd>
+          <dt>Hardware</dt><dd>NVIDIA RTX 5080, 16 GB</dd>
+          <dt>Software</dt><dd>torch 2.14.0+cu130, transformers 5.17.0, sacrebleu 2.6.0, ctranslate2 4.8.2</dd>
+          <dt>Training commit</dt><dd class="mono">540e36c</dd>
+          <dt>Results repo</dt><dd class="mono">EdonFetaji/mk-sq-nllb600m-gazette-verbis (private)</dd>
+        </dl>
+      </div>
+      <div class="panel">
+        <ul class="findings">
+          <li><b>One seed per run.</b> No variance across seeds is available, so small E01 vs E02 differences cannot be separated from seed noise.</li>
+          <li><b>E02 is partly analysed.</b> Only test-set scores and three dev evaluations are in. Significance, overlap, terminology, number fidelity and the training log are still to come.</li>
+          <li><b>Formulaic overlap.</b> Full-test scores overstate generalisation; the novel subset is the fairer number.</li>
+          <li><b>TSR is a heuristic.</b> The reference itself uses the listed Verbis target only 73.6% (MK→SQ) and 67.1% (SQ→MK) of the time. Rare-term rates rest on 220 and 128 occurrences.</li>
+          <li><b>Data revisions not logged by E01.</b> The Gazette, FLORES+ and NTREX revisions were inferred from timing; E02 pins them, and E02's base-model scores match E01's exactly on all six test-set directions.</li>
+          <li><b>E02 training was resumed.</b> It crashed (a bug in the dev-curve logging, not in training) at the step-2,000 dev evaluation and resumed from checkpoint 1,000; the step-1,000 dev row comes from commit bd3c440, everything after from ccd58f9.</li>
+          <li><b>Dev vs test decoding.</b> Dev used greedy decoding on 500 sentences per direction; test used beam 4.</li>
+          <li><b>Verbis licence.</b> Redistribution needs the Agency's permission; the data stay private and no entry is shown here.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div>Numbers from <span class="mono">experiments/E01_gazette_verbis_mix/results.json</span>, <span class="mono">train_log.csv</span> and <span class="mono">dev_curve.csv</span> (results repo revision 3fad45b). E00 is the base model evaluated inside E01's final evaluation.</div>
+    <div id="e02foot"></div>
+  </footer>
+</div>
+<div id="tip" hidden></div>
+
+<script>
+// ---------------------------------------------------------------------------
+// Data. E01 is exported from experiments/E01_gazette_verbis_mix/results.json,
+// train_log.csv and dev_curve.csv. E02 holds what has come in so far from
+// runs/E02_gazette_only/eval/ ({gazette_test,flores,ntrex}_results.csv, dev_curve.csv).
+// Missing E02 parts (sig_ft, overlap, terminology, number, train, data) show as
+// "pending"; add them in the same shape as E01 and the charts pick them up.
+// ---------------------------------------------------------------------------
+const RESULTS = {
+  E01: {"main":{"gazette_test":[{"model":"base","direction":"mk_sq","n_sentences":10174,"bleu":27.74,"chrf":50.3,"bleu_delta_vs_base":0.0,"chrf_delta_vs_base":0.0},{"model":"base","direction":"sq_mk","n_sentences":10174,"bleu":29.63,"chrf":52.46,"bleu_delta_vs_base":0.0,"chrf_delta_vs_base":0.0},{"model":"finetuned_hf","direction":"mk_sq","n_sentences":10174,"bleu":54.02,"chrf":72.28,"bleu_delta_vs_base":26.27,"chrf_delta_vs_base":21.98},{"model":"finetuned_hf","direction":"sq_mk","n_sentences":10174,"bleu":63.64,"chrf":78.55,"bleu_delta_vs_base":34.01,"chrf_delta_vs_base":26.09},{"model":"finetuned_ct2","direction":"mk_sq","n_sentences":10174,"bleu":54.08,"chrf":72.35,"bleu_delta_vs_base":26.33,"chrf_delta_vs_base":22.05},{"model":"finetuned_ct2","direction":"sq_mk","n_sentences":10174,"bleu":63.45,"chrf":78.49,"bleu_delta_vs_base":33.82,"chrf_delta_vs_base":26.03}],"flores":[{"model":"base","direction":"mk_sq","n_sentences":1012,"bleu":22.08,"chrf":48.58,"bleu_delta_vs_base":0.0,"chrf_delta_vs_base":0.0},{"model":"base","direction":"sq_mk","n_sentences":1012,"bleu":21.39,"chrf":49.5,"bleu_delta_vs_base":0.0,"chrf_delta_vs_base":0.0},{"model":"finetuned_hf","direction":"mk_sq","n_sentences":1012,"bleu":19.45,"chrf":46.61,"bleu_delta_vs_base":-2.63,"chrf_delta_vs_base":-1.98},{"model":"finetuned_hf","direction":"sq_mk","n_sentences":1012,"bleu":18.89,"chrf":49.07,"bleu_delta_vs_base":-2.5,"chrf_delta_vs_base":-0.43},{"model":"finetuned_ct2","direction":"mk_sq","n_sentences":1012,"bleu":19.22,"chrf":46.57,"bleu_delta_vs_base":-2.86,"chrf_delta_vs_base":-2.01},{"model":"finetuned_ct2","direction":"sq_mk","n_sentences":1012,"bleu":18.83,"chrf":48.97,"bleu_delta_vs_base":-2.56,"chrf_delta_vs_base":-0.53}],"ntrex":[{"model":"base","direction":"mk_sq","n_sentences":1997,"bleu":23.14,"chrf":48.91,"bleu_delta_vs_base":0.0,"chrf_delta_vs_base":0.0},{"model":"base","direction":"sq_mk","n_sentences":1997,"bleu":21.25,"chrf":49.54,"bleu_delta_vs_base":0.0,"chrf_delta_vs_base":0.0},{"model":"finetuned_hf","direction":"mk_sq","n_sentences":1997,"bleu":18.13,"chrf":44.49,"bleu_delta_vs_base":-5.0,"chrf_delta_vs_base":-4.41},{"model":"finetuned_hf","direction":"sq_mk","n_sentences":1997,"bleu":17.98,"chrf":47.05,"bleu_delta_vs_base":-3.26,"chrf_delta_vs_base":-2.49},{"model":"finetuned_ct2","direction":"mk_sq","n_sentences":1997,"bleu":18.22,"chrf":44.54,"bleu_delta_vs_base":-4.91,"chrf_delta_vs_base":-4.37},{"model":"finetuned_ct2","direction":"sq_mk","n_sentences":1997,"bleu":17.95,"chrf":47.06,"bleu_delta_vs_base":-3.3,"chrf_delta_vs_base":-2.48}]},"sig_ft":{"gazette_test/mk_sq":{"bleu":{"base":27.74,"base_ci":[27.21,28.29],"sys":54.02,"sys_ci":[53.36,54.69],"delta":26.27,"p":0.001,"sig":true},"chrf":{"base":50.3,"base_ci":[49.86,50.74],"sys":72.28,"sys_ci":[71.78,72.8],"delta":21.98,"p":0.001,"sig":true}},"gazette_test/sq_mk":{"bleu":{"base":29.63,"base_ci":[28.95,30.35],"sys":63.64,"sys_ci":[62.9,64.37],"delta":34.01,"p":0.001,"sig":true},"chrf":{"base":52.46,"base_ci":[52.0,52.94],"sys":78.55,"sys_ci":[77.96,79.13],"delta":26.09,"p":0.001,"sig":true}},"flores/mk_sq":{"bleu":{"base":22.08,"base_ci":[21.21,22.92],"sys":19.45,"sys_ci":[18.64,20.24],"delta":-2.63,"p":0.001,"sig":true},"chrf":{"base":48.58,"base_ci":[47.84,49.29],"sys":46.61,"sys_ci":[45.94,47.25],"delta":-1.98,"p":0.001,"sig":true}},"flores/sq_mk":{"bleu":{"base":21.39,"base_ci":[20.48,22.21],"sys":18.89,"sys_ci":[17.88,19.89],"delta":-2.5,"p":0.001,"sig":true},"chrf":{"base":49.5,"base_ci":[48.76,50.22],"sys":49.07,"sys_ci":[48.28,49.84],"delta":-0.43,"p":0.0889,"sig":false}},"ntrex/mk_sq":{"bleu":{"base":23.14,"base_ci":[22.53,23.74],"sys":18.13,"sys_ci":[17.48,18.71],"delta":-5.0,"p":0.001,"sig":true},"chrf":{"base":48.91,"base_ci":[48.42,49.4],"sys":44.49,"sys_ci":[44.01,45.0],"delta":-4.41,"p":0.001,"sig":true}},"ntrex/sq_mk":{"bleu":{"base":21.25,"base_ci":[20.54,21.96],"sys":17.98,"sys_ci":[17.28,18.67],"delta":-3.26,"p":0.001,"sig":true},"chrf":{"base":49.54,"base_ci":[48.98,50.11],"sys":47.05,"sys_ci":[46.49,47.61],"delta":-2.49,"p":0.001,"sig":true}}},"sig_q":{"gazette_test/mk_sq":{"bleu":{"base":54.02,"base_ci":[53.36,54.69],"sys":54.08,"sys_ci":[53.42,54.75],"delta":0.06,"p":0.0839,"sig":false},"chrf":{"base":72.28,"base_ci":[71.78,72.8],"sys":72.35,"sys_ci":[71.85,72.86],"delta":0.06,"p":0.0679,"sig":false}},"gazette_test/sq_mk":{"bleu":{"base":63.64,"base_ci":[62.9,64.37],"sys":63.45,"sys_ci":[62.74,64.17],"delta":-0.19,"p":0.002,"sig":true},"chrf":{"base":78.55,"base_ci":[77.96,79.13],"sys":78.49,"sys_ci":[77.9,79.08],"delta":-0.06,"p":0.1099,"sig":false}},"flores/mk_sq":{"bleu":{"base":19.45,"base_ci":[18.64,20.24],"sys":19.22,"sys_ci":[18.39,20.02],"delta":-0.23,"p":0.027,"sig":true},"chrf":{"base":46.61,"base_ci":[45.94,47.25],"sys":46.57,"sys_ci":[45.92,47.2],"delta":-0.03,"p":0.2118,"sig":false}},"flores/sq_mk":{"bleu":{"base":18.89,"base_ci":[17.88,19.89],"sys":18.83,"sys_ci":[17.87,19.79],"delta":-0.06,"p":0.2687,"sig":false},"chrf":{"base":49.07,"base_ci":[48.28,49.84],"sys":48.97,"sys_ci":[48.24,49.68],"delta":-0.1,"p":0.1339,"sig":false}},"ntrex/mk_sq":{"bleu":{"base":18.13,"base_ci":[17.48,18.71],"sys":18.22,"sys_ci":[17.62,18.81],"delta":0.09,"p":0.1608,"sig":false},"chrf":{"base":44.49,"base_ci":[44.01,45.0],"sys":44.54,"sys_ci":[44.06,45.02],"delta":0.04,"p":0.2308,"sig":false}},"ntrex/sq_mk":{"bleu":{"base":17.98,"base_ci":[17.28,18.67],"sys":17.95,"sys_ci":[17.18,18.71],"delta":-0.04,"p":0.2767,"sig":false},"chrf":{"base":47.05,"base_ci":[46.49,47.61],"sys":47.06,"sys_ci":[46.48,47.64],"delta":0.01,"p":0.3806,"sig":false}}},"overlap":[{"class":"exact_template","n_pairs":1856,"pct_pairs":18.24,"model":"base","direction":"mk_sq","bleu":32.67,"chrf":51.88},{"class":"exact_template","n_pairs":1856,"pct_pairs":18.24,"model":"base","direction":"sq_mk","bleu":21.17,"chrf":50.45},{"class":"exact_template","n_pairs":1856,"pct_pairs":18.24,"model":"finetuned_hf","direction":"mk_sq","bleu":71.03,"chrf":81.65},{"class":"exact_template","n_pairs":1856,"pct_pairs":18.24,"model":"finetuned_hf","direction":"sq_mk","bleu":78.11,"chrf":86.66},{"class":"exact_template","n_pairs":1856,"pct_pairs":18.24,"model":"finetuned_ct2","direction":"mk_sq","bleu":70.97,"chrf":81.64},{"class":"exact_template","n_pairs":1856,"pct_pairs":18.24,"model":"finetuned_ct2","direction":"sq_mk","bleu":77.68,"chrf":86.44},{"class":"near_duplicate","n_pairs":3087,"pct_pairs":30.34,"model":"base","direction":"mk_sq","bleu":28.5,"chrf":50.59},{"class":"near_duplicate","n_pairs":3087,"pct_pairs":30.34,"model":"base","direction":"sq_mk","bleu":31.25,"chrf":53.09},{"class":"near_duplicate","n_pairs":3087,"pct_pairs":30.34,"model":"finetuned_hf","direction":"mk_sq","bleu":57.9,"chrf":75.25},{"class":"near_duplicate","n_pairs":3087,"pct_pairs":30.34,"model":"finetuned_hf","direction":"sq_mk","bleu":68.06,"chrf":81.78},{"class":"near_duplicate","n_pairs":3087,"pct_pairs":30.34,"model":"finetuned_ct2","direction":"mk_sq","bleu":57.94,"chrf":75.27},{"class":"near_duplicate","n_pairs":3087,"pct_pairs":30.34,"model":"finetuned_ct2","direction":"sq_mk","bleu":67.94,"chrf":81.73},{"class":"novel","n_pairs":5231,"pct_pairs":51.42,"model":"base","direction":"mk_sq","bleu":26.46,"chrf":49.88},{"class":"novel","n_pairs":5231,"pct_pairs":51.42,"model":"base","direction":"sq_mk","bleu":29.93,"chrf":52.45},{"class":"novel","n_pairs":5231,"pct_pairs":51.42,"model":"finetuned_hf","direction":"mk_sq","bleu":48.83,"chrf":69.07},{"class":"novel","n_pairs":5231,"pct_pairs":51.42,"model":"finetuned_hf","direction":"sq_mk","bleu":58.59,"chrf":75.38},{"class":"novel","n_pairs":5231,"pct_pairs":51.42,"model":"finetuned_ct2","direction":"mk_sq","bleu":48.92,"chrf":69.17},{"class":"novel","n_pairs":5231,"pct_pairs":51.42,"model":"finetuned_ct2","direction":"sq_mk","bleu":58.41,"chrf":75.34},{"class":"all","n_pairs":10174,"pct_pairs":100.0,"model":"base","direction":"mk_sq","bleu":27.74,"chrf":50.3},{"class":"all","n_pairs":10174,"pct_pairs":100.0,"model":"base","direction":"sq_mk","bleu":29.63,"chrf":52.46},{"class":"all","n_pairs":10174,"pct_pairs":100.0,"model":"finetuned_hf","direction":"mk_sq","bleu":54.02,"chrf":72.28},{"class":"all","n_pairs":10174,"pct_pairs":100.0,"model":"finetuned_hf","direction":"sq_mk","bleu":63.64,"chrf":78.55},{"class":"all","n_pairs":10174,"pct_pairs":100.0,"model":"finetuned_ct2","direction":"mk_sq","bleu":54.08,"chrf":72.35},{"class":"all","n_pairs":10174,"pct_pairs":100.0,"model":"finetuned_ct2","direction":"sq_mk","bleu":63.45,"chrf":78.49}],"overlap_summary":{"n_pairs":{"exact_template":1856,"near_duplicate":3087,"novel":5231},"pct_pairs":{"exact_template":18.24,"near_duplicate":30.34,"novel":51.42},"pct_template_or_near_duplicate":48.58,"finetuned_hf_minus_base":{"exact_template/mk_sq":{"bleu":38.36,"chrf":29.77},"exact_template/sq_mk":{"bleu":56.94,"chrf":36.21},"near_duplicate/mk_sq":{"bleu":29.4,"chrf":24.66},"near_duplicate/sq_mk":{"bleu":36.81,"chrf":28.69},"novel/mk_sq":{"bleu":22.37,"chrf":19.19},"novel/sq_mk":{"bleu":28.66,"chrf":22.93},"all/mk_sq":{"bleu":26.27,"chrf":21.98},"all/sq_mk":{"bleu":34.01,"chrf":26.09}}},"terminology":[{"model":"reference","direction":"mk_sq","n_sentences_with_terms":6845,"n_term_occurrences":20049,"n_success":14758,"tsr":73.61,"n_rare_occurrences":220,"n_rare_success":125,"rare_tsr":56.82},{"model":"base","direction":"mk_sq","n_sentences_with_terms":6845,"n_term_occurrences":20049,"n_success":11284,"tsr":56.28,"n_rare_occurrences":220,"n_rare_success":68,"rare_tsr":30.91},{"model":"finetuned_hf","direction":"mk_sq","n_sentences_with_terms":6845,"n_term_occurrences":20049,"n_success":15190,"tsr":75.76,"n_rare_occurrences":220,"n_rare_success":116,"rare_tsr":52.73},{"model":"finetuned_ct2","direction":"mk_sq","n_sentences_with_terms":6845,"n_term_occurrences":20049,"n_success":15197,"tsr":75.8,"n_rare_occurrences":220,"n_rare_success":118,"rare_tsr":53.64},{"model":"reference","direction":"sq_mk","n_sentences_with_terms":5276,"n_term_occurrences":9863,"n_success":6613,"tsr":67.05,"n_rare_occurrences":128,"n_rare_success":101,"rare_tsr":78.91},{"model":"base","direction":"sq_mk","n_sentences_with_terms":5276,"n_term_occurrences":9863,"n_success":5448,"tsr":55.24,"n_rare_occurrences":128,"n_rare_success":46,"rare_tsr":35.94},{"model":"finetuned_hf","direction":"sq_mk","n_sentences_with_terms":5276,"n_term_occurrences":9863,"n_success":6602,"tsr":66.94,"n_rare_occurrences":128,"n_rare_success":66,"rare_tsr":51.56},{"model":"finetuned_ct2","direction":"sq_mk","n_sentences_with_terms":5276,"n_term_occurrences":9863,"n_success":6627,"tsr":67.19,"n_rare_occurrences":128,"n_rare_success":67,"rare_tsr":52.34}],"number":[{"model":"reference","direction":"mk_sq","n_sentences":10174,"match_rate_all":70.33,"n_with_numbers":8130,"match_rate_with_numbers":66.51},{"model":"base","direction":"mk_sq","n_sentences":10174,"match_rate_all":78.16,"n_with_numbers":8130,"match_rate_with_numbers":72.74},{"model":"finetuned_hf","direction":"mk_sq","n_sentences":10174,"match_rate_all":83.87,"n_with_numbers":8130,"match_rate_with_numbers":79.91},{"model":"finetuned_ct2","direction":"mk_sq","n_sentences":10174,"match_rate_all":83.58,"n_with_numbers":8130,"match_rate_with_numbers":79.56},{"model":"reference","direction":"sq_mk","n_sentences":10174,"match_rate_all":70.33,"n_with_numbers":8320,"match_rate_with_numbers":64.99},{"model":"base","direction":"sq_mk","n_sentences":10174,"match_rate_all":71.21,"n_with_numbers":8320,"match_rate_with_numbers":64.89},{"model":"finetuned_hf","direction":"sq_mk","n_sentences":10174,"match_rate_all":83.7,"n_with_numbers":8320,"match_rate_with_numbers":80.41},{"model":"finetuned_ct2","direction":"sq_mk","n_sentences":10174,"match_rate_all":82.97,"n_with_numbers":8320,"match_rate_with_numbers":79.4}],"dev":[{"step":1000,"bleu_mk_sq":42.517,"chrf_mk_sq":62.381,"bleu_sq_mk":57.457,"chrf_sq_mk":72.53,"chrf_mean":67.456},{"step":2000,"bleu_mk_sq":48.57,"chrf_mk_sq":67.18,"bleu_sq_mk":64.636,"chrf_sq_mk":78.236,"chrf_mean":72.708},{"step":3000,"bleu_mk_sq":49.847,"chrf_mk_sq":68.074,"bleu_sq_mk":64.664,"chrf_sq_mk":78.961,"chrf_mean":73.517},{"step":4000,"bleu_mk_sq":46.484,"chrf_mk_sq":67.586,"bleu_sq_mk":62.118,"chrf_sq_mk":78.869,"chrf_mean":73.227},{"step":4115,"bleu_mk_sq":46.505,"chrf_mk_sq":67.62,"bleu_sq_mk":63.346,"chrf_sq_mk":79.573,"chrf_mean":73.596}],"train":[{"step":50.0,"loss":3.94911,"learning_rate":4.9000000000000005e-06,"grad_norm":9.5599,"samples_per_sec":110.29,"gpu_mem_peak_gb":12.63,"gpu_temp_c":53.0,"elapsed_h":0.0161},{"step":100.0,"loss":3.56685,"learning_rate":9.900000000000002e-06,"grad_norm":3.6028,"samples_per_sec":111.18,"gpu_mem_peak_gb":12.64,"gpu_temp_c":56.0,"elapsed_h":0.0321},{"step":150.0,"loss":3.2868,"learning_rate":1.49e-05,"grad_norm":1.9182,"samples_per_sec":110.57,"gpu_mem_peak_gb":12.64,"gpu_temp_c":56.0,"elapsed_h":0.0482},{"step":200.0,"loss":3.14473,"learning_rate":1.9900000000000003e-05,"grad_norm":1.7731,"samples_per_sec":110.78,"gpu_mem_peak_gb":12.64,"gpu_temp_c":57.0,"elapsed_h":0.0642},{"step":250.0,"loss":3.01302,"learning_rate":2.4900000000000002e-05,"grad_norm":1.4436,"samples_per_sec":111.38,"gpu_mem_peak_gb":12.64,"gpu_temp_c":56.0,"elapsed_h":0.0802},{"step":300.0,"loss":2.93663,"learning_rate":2.9900000000000002e-05,"grad_norm":1.3611,"samples_per_sec":110.05,"gpu_mem_peak_gb":12.64,"gpu_temp_c":57.0,"elapsed_h":0.0964},{"step":350.0,"loss":2.8716,"learning_rate":3.49e-05,"grad_norm":1.5219,"samples_per_sec":110.57,"gpu_mem_peak_gb":12.64,"gpu_temp_c":57.0,"elapsed_h":0.1124},{"step":400.0,"loss":2.81909,"learning_rate":3.99e-05,"grad_norm":1.3275,"samples_per_sec":110.06,"gpu_mem_peak_gb":12.64,"gpu_temp_c":58.0,"elapsed_h":0.1286},{"step":450.0,"loss":2.78387,"learning_rate":4.49e-05,"grad_norm":1.2965,"samples_per_sec":111.0,"gpu_mem_peak_gb":12.64,"gpu_temp_c":57.0,"elapsed_h":0.1446},{"step":500.0,"loss":2.75149,"learning_rate":4.99e-05,"grad_norm":1.5308,"samples_per_sec":110.93,"gpu_mem_peak_gb":12.64,"gpu_temp_c":58.0,"elapsed_h":0.1606},{"step":550.0,"loss":2.72077,"learning_rate":5.4900000000000006e-05,"grad_norm":1.4341,"samples_per_sec":111.26,"gpu_mem_peak_gb":12.64,"gpu_temp_c":58.0,"elapsed_h":0.1766},{"step":600.0,"loss":2.68007,"learning_rate":5.99e-05,"grad_norm":1.1469,"samples_per_sec":110.5,"gpu_mem_peak_gb":12.64,"gpu_temp_c":57.0,"elapsed_h":0.1927},{"step":650.0,"loss":2.65892,"learning_rate":6.49e-05,"grad_norm":1.1508,"samples_per_sec":108.97,"gpu_mem_peak_gb":12.64,"gpu_temp_c":56.0,"elapsed_h":0.209},{"step":700.0,"loss":2.64284,"learning_rate":6.99e-05,"grad_norm":1.1287,"samples_per_sec":110.6,"gpu_mem_peak_gb":12.64,"gpu_temp_c":57.0,"elapsed_h":0.2251},{"step":750.0,"loss":2.60342,"learning_rate":7.49e-05,"grad_norm":1.2402,"samples_per_sec":110.63,"gpu_mem_peak_gb":12.64,"gpu_temp_c":58.0,"elapsed_h":0.2412},{"step":800.0,"loss":2.59065,"learning_rate":7.99e-05,"grad_norm":1.1518,"samples_per_sec":110.21,"gpu_mem_peak_gb":12.64,"gpu_temp_c":58.0,"elapsed_h":0.2573},{"step":850.0,"loss":2.57062,"learning_rate":8.49e-05,"grad_norm":1.2286,"samples_per_sec":110.5,"gpu_mem_peak_gb":12.64,"gpu_temp_c":56.0,"elapsed_h":0.2734},{"step":900.0,"loss":2.56504,"learning_rate":8.99e-05,"grad_norm":1.1194,"samples_per_sec":110.77,"gpu_mem_peak_gb":12.64,"gpu_temp_c":57.0,"elapsed_h":0.2894},{"step":950.0,"loss":2.54361,"learning_rate":9.49e-05,"grad_norm":1.1213,"samples_per_sec":110.52,"gpu_mem_peak_gb":12.64,"gpu_temp_c":58.0,"elapsed_h":0.3055},{"step":1000.0,"loss":2.54027,"learning_rate":9.99e-05,"grad_norm":1.6692,"samples_per_sec":110.61,"gpu_mem_peak_gb":12.64,"gpu_temp_c":57.0,"elapsed_h":0.3216},{"step":1050.0,"loss":2.52432,"learning_rate":9.842696629213483e-05,"grad_norm":1.2744,"samples_per_sec":109.58,"gpu_mem_peak_gb":12.64,"gpu_temp_c":58.0,"elapsed_h":0.3479},{"step":1100.0,"loss":2.49617,"learning_rate":9.682182985553772e-05,"grad_norm":1.0063,"samples_per_sec":110.3,"gpu_mem_peak_gb":12.64,"gpu_temp_c":58.0,"elapsed_h":0.3641},{"step":1150.0,"loss":2.46253,"learning_rate":9.521669341894061e-05,"grad_norm":1.1775,"samples_per_sec":110.32,"gpu_mem_peak_gb":12.64,"gpu_temp_c":57.0,"elapsed_h":0.3802},{"step":1200.0,"loss":2.474,"learning_rate":9.36115569823435e-05,"grad_norm":1.0064,"samples_per_sec":110.18,"gpu_mem_peak_gb":12.64,"gpu_temp_c":58.0,"elapsed_h":0.3963},{"step":1250.0,"loss":2.46901,"learning_rate":9.200642054574639e-05,"grad_norm":1.1052,"samples_per_sec":110.6,"gpu_mem_peak_gb":12.64,"gpu_temp_c":58.0,"elapsed_h":0.4124},{"step":1300.0,"loss":2.46418,"learning_rate":9.040128410914928e-05,"grad_norm":1.003,"samples_per_sec":110.6,"gpu_mem_peak_gb":12.64,"gpu_temp_c":58.0,"elapsed_h":0.4285},{"step":1350.0,"loss":2.4606,"learning_rate":8.879614767255216e-05,"grad_norm":1.0739,"samples_per_sec":110.26,"gpu_mem_peak_gb":12.64,"gpu_temp_c":58.0,"elapsed_h":0.4446},{"step":1400.0,"loss":2.43409,"learning_rate":8.719101123595505e-05,"grad_norm":1.7132,"samples_per_sec":110.49,"gpu_mem_peak_gb":12.64,"gpu_temp_c":58.0,"elapsed_h":0.4607},{"step":1450.0,"loss":2.41702,"learning_rate":8.558587479935794e-05,"grad_norm":1.3026,"samples_per_sec":110.86,"gpu_mem_peak_gb":12.64,"gpu_temp_c":57.0,"elapsed_h":0.4767},{"step":1500.0,"loss":2.42753,"learning_rate":8.398073836276083e-05,"grad_norm":1.2336,"samples_per_sec":110.42,"gpu_mem_peak_gb":12.64,"gpu_temp_c":58.0,"elapsed_h":0.4928},{"step":1550.0,"loss":2.41145,"learning_rate":8.237560192616372e-05,"grad_norm":0.9821,"samples_per_sec":110.15,"gpu_mem_peak_gb":12.64,"gpu_temp_c":58.0,"elapsed_h":0.5089},{"step":1600.0,"loss":2.41757,"learning_rate":8.077046548956661e-05,"grad_norm":1.0406,"samples_per_sec":110.62,"gpu_mem_peak_gb":12.64,"gpu_temp_c":56.0,"elapsed_h":0.525},{"step":1650.0,"loss":2.38688,"learning_rate":7.91653290529695e-05,"grad_norm":0.9923,"samples_per_sec":110.27,"gpu_mem_peak_gb":12.64,"gpu_temp_c":58.0,"elapsed_h":0.5411},{"step":1700.0,"loss":2.40301,"learning_rate":7.756019261637239e-05,"grad_norm":1.0676,"samples_per_sec":110.68,"gpu_mem_peak_gb":12.64,"gpu_temp_c":57.0,"elapsed_h":0.5572},{"step":1750.0,"loss":2.40301,"learning_rate":7.595505617977528e-05,"grad_norm":1.4226,"samples_per_sec":109.38,"gpu_mem_peak_gb":12.64,"gpu_temp_c":57.0,"elapsed_h":0.5735},{"step":1800.0,"loss":2.38514,"learning_rate":7.434991974317817e-05,"grad_norm":0.9825,"samples_per_sec":109.95,"gpu_mem_peak_gb":12.64,"gpu_temp_c":58.0,"elapsed_h":0.5896},{"step":1850.0,"loss":2.39596,"learning_rate":7.274478330658106e-05,"grad_norm":1.2017,"samples_per_sec":110.13,"gpu_mem_peak_gb":12.64,"gpu_temp_c":58.0,"elapsed_h":0.6058},{"step":1900.0,"loss":2.37036,"learning_rate":7.113964686998395e-05,"grad_norm":1.1833,"samples_per_sec":110.45,"gpu_mem_peak_gb":12.64,"gpu_temp_c":58.0,"elapsed_h":0.6219},{"step":1950.0,"loss":2.37066,"learning_rate":6.953451043338684e-05,"grad_norm":0.9778,"samples_per_sec":110.68,"gpu_mem_peak_gb":12.64,"gpu_temp_c":58.0,"elapsed_h":0.6379},{"step":2000.0,"loss":2.35807,"learning_rate":6.792937399678973e-05,"grad_norm":1.1328,"samples_per_sec":109.77,"gpu_mem_peak_gb":12.64,"gpu_temp_c":58.0,"elapsed_h":0.6541},{"step":2050.0,"loss":2.375,"learning_rate":6.632423756019261e-05,"grad_norm":1.0175,"samples_per_sec":107.63,"gpu_mem_peak_gb":12.64,"gpu_temp_c":56.0,"elapsed_h":0.6794},{"step":2100.0,"loss":2.3736,"learning_rate":6.47191011235955e-05,"grad_norm":1.183,"samples_per_sec":110.49,"gpu_mem_peak_gb":12.64,"gpu_temp_c":58.0,"elapsed_h":0.6955},{"step":2150.0,"loss":2.34896,"learning_rate":6.311396468699839e-05,"grad_norm":1.3689,"samples_per_sec":109.59,"gpu_mem_peak_gb":12.64,"gpu_temp_c":57.0,"elapsed_h":0.7117},{"step":2200.0,"loss":2.35778,"learning_rate":6.150882825040128e-05,"grad_norm":1.0036,"samples_per_sec":110.16,"gpu_mem_peak_gb":12.64,"gpu_temp_c":57.0,"elapsed_h":0.7279},{"step":2250.0,"loss":2.35053,"learning_rate":5.990369181380417e-05,"grad_norm":1.0451,"samples_per_sec":109.84,"gpu_mem_peak_gb":12.64,"gpu_temp_c":57.0,"elapsed_h":0.7441},{"step":2300.0,"loss":2.34054,"learning_rate":5.829855537720706e-05,"grad_norm":1.0166,"samples_per_sec":109.87,"gpu_mem_peak_gb":12.64,"gpu_temp_c":58.0,"elapsed_h":0.7602},{"step":2350.0,"loss":2.34204,"learning_rate":5.669341894060995e-05,"grad_norm":4.3564,"samples_per_sec":109.52,"gpu_mem_peak_gb":12.64,"gpu_temp_c":58.0,"elapsed_h":0.7765},{"step":2400.0,"loss":2.3425,"learning_rate":5.5088282504012844e-05,"grad_norm":1.0274,"samples_per_sec":110.52,"gpu_mem_peak_gb":12.64,"gpu_temp_c":58.0,"elapsed_h":0.7926},{"step":2450.0,"loss":2.34477,"learning_rate":5.3483146067415734e-05,"grad_norm":1.1205,"samples_per_sec":110.38,"gpu_mem_peak_gb":12.64,"gpu_temp_c":58.0,"elapsed_h":0.8087},{"step":2500.0,"loss":2.33758,"learning_rate":5.1878009630818624e-05,"grad_norm":1.1351,"samples_per_sec":110.05,"gpu_mem_peak_gb":12.64,"gpu_temp_c":56.0,"elapsed_h":0.8248},{"step":2550.0,"loss":2.33886,"learning_rate":5.0272873194221515e-05,"grad_norm":1.0392,"samples_per_sec":109.6,"gpu_mem_peak_gb":12.64,"gpu_temp_c":58.0,"elapsed_h":0.841},{"step":2600.0,"loss":2.33661,"learning_rate":4.86677367576244e-05,"grad_norm":1.1482,"samples_per_sec":110.24,"gpu_mem_peak_gb":12.64,"gpu_temp_c":58.0,"elapsed_h":0.8572},{"step":2650.0,"loss":2.34258,"learning_rate":4.706260032102729e-05,"grad_norm":1.2358,"samples_per_sec":109.66,"gpu_mem_peak_gb":12.64,"gpu_temp_c":56.0,"elapsed_h":0.8734},{"step":2700.0,"loss":2.3227,"learning_rate":4.545746388443018e-05,"grad_norm":1.0085,"samples_per_sec":109.72,"gpu_mem_peak_gb":12.64,"gpu_temp_c":58.0,"elapsed_h":0.8896},{"step":2750.0,"loss":2.32405,"learning_rate":4.385232744783307e-05,"grad_norm":0.8886,"samples_per_sec":109.88,"gpu_mem_peak_gb":12.64,"gpu_temp_c":57.0,"elapsed_h":0.9058},{"step":2800.0,"loss":2.32736,"learning_rate":4.224719101123596e-05,"grad_norm":1.068,"samples_per_sec":109.96,"gpu_mem_peak_gb":12.64,"gpu_temp_c":57.0,"elapsed_h":0.9219},{"step":2850.0,"loss":2.31602,"learning_rate":4.064205457463884e-05,"grad_norm":0.8596,"samples_per_sec":109.46,"gpu_mem_peak_gb":12.64,"gpu_temp_c":58.0,"elapsed_h":0.9382},{"step":2900.0,"loss":2.33083,"learning_rate":3.9036918138041733e-05,"grad_norm":1.0287,"samples_per_sec":109.63,"gpu_mem_peak_gb":12.64,"gpu_temp_c":58.0,"elapsed_h":0.9544},{"step":2950.0,"loss":2.31026,"learning_rate":3.7431781701444624e-05,"grad_norm":1.0894,"samples_per_sec":110.1,"gpu_mem_peak_gb":12.64,"gpu_temp_c":58.0,"elapsed_h":0.9705},{"step":3000.0,"loss":2.32127,"learning_rate":3.5826645264847514e-05,"grad_norm":0.9691,"samples_per_sec":110.14,"gpu_mem_peak_gb":12.64,"gpu_temp_c":58.0,"elapsed_h":0.9867},{"step":3050.0,"loss":2.32107,"learning_rate":3.4221508828250404e-05,"grad_norm":1.0474,"samples_per_sec":101.68,"gpu_mem_peak_gb":12.64,"gpu_temp_c":55.0,"elapsed_h":1.0128},{"step":3100.0,"loss":2.30249,"learning_rate":3.2616372391653295e-05,"grad_norm":0.9314,"samples_per_sec":109.66,"gpu_mem_peak_gb":12.64,"gpu_temp_c":57.0,"elapsed_h":1.029},{"step":3150.0,"loss":2.31134,"learning_rate":3.1011235955056185e-05,"grad_norm":1.1259,"samples_per_sec":110.46,"gpu_mem_peak_gb":12.64,"gpu_temp_c":58.0,"elapsed_h":1.0451},{"step":3200.0,"loss":2.31505,"learning_rate":2.940609951845907e-05,"grad_norm":0.9348,"samples_per_sec":110.53,"gpu_mem_peak_gb":12.64,"gpu_temp_c":58.0,"elapsed_h":1.0612},{"step":3250.0,"loss":2.30506,"learning_rate":2.780096308186196e-05,"grad_norm":1.0393,"samples_per_sec":110.22,"gpu_mem_peak_gb":12.64,"gpu_temp_c":57.0,"elapsed_h":1.0773},{"step":3300.0,"loss":2.30753,"learning_rate":2.619582664526485e-05,"grad_norm":0.9504,"samples_per_sec":110.85,"gpu_mem_peak_gb":12.64,"gpu_temp_c":58.0,"elapsed_h":1.0933},{"step":3350.0,"loss":2.31441,"learning_rate":2.459069020866774e-05,"grad_norm":0.946,"samples_per_sec":110.55,"gpu_mem_peak_gb":12.64,"gpu_temp_c":58.0,"elapsed_h":1.1094},{"step":3400.0,"loss":2.30583,"learning_rate":2.2985553772070627e-05,"grad_norm":1.094,"samples_per_sec":110.13,"gpu_mem_peak_gb":12.64,"gpu_temp_c":56.0,"elapsed_h":1.1256},{"step":3450.0,"loss":2.2994,"learning_rate":2.1380417335473517e-05,"grad_norm":1.0968,"samples_per_sec":110.38,"gpu_mem_peak_gb":12.64,"gpu_temp_c":57.0,"elapsed_h":1.1417},{"step":3500.0,"loss":2.3128,"learning_rate":1.9775280898876404e-05,"grad_norm":1.0052,"samples_per_sec":110.62,"gpu_mem_peak_gb":12.64,"gpu_temp_c":58.0,"elapsed_h":1.1577},{"step":3550.0,"loss":2.29925,"learning_rate":1.8170144462279294e-05,"grad_norm":0.9801,"samples_per_sec":110.18,"gpu_mem_peak_gb":12.64,"gpu_temp_c":57.0,"elapsed_h":1.1739},{"step":3600.0,"loss":2.2983,"learning_rate":1.656500802568218e-05,"grad_norm":1.1715,"samples_per_sec":110.46,"gpu_mem_peak_gb":12.64,"gpu_temp_c":58.0,"elapsed_h":1.19},{"step":3650.0,"loss":2.30297,"learning_rate":1.4959871589085073e-05,"grad_norm":1.0233,"samples_per_sec":110.91,"gpu_mem_peak_gb":12.64,"gpu_temp_c":58.0,"elapsed_h":1.206},{"step":3700.0,"loss":2.30696,"learning_rate":1.3354735152487962e-05,"grad_norm":1.2221,"samples_per_sec":110.84,"gpu_mem_peak_gb":12.64,"gpu_temp_c":56.0,"elapsed_h":1.222},{"step":3750.0,"loss":2.30109,"learning_rate":1.174959871589085e-05,"grad_norm":0.9687,"samples_per_sec":110.36,"gpu_mem_peak_gb":12.64,"gpu_temp_c":58.0,"elapsed_h":1.2381},{"step":3800.0,"loss":2.28989,"learning_rate":1.014446227929374e-05,"grad_norm":1.1158,"samples_per_sec":110.39,"gpu_mem_peak_gb":12.64,"gpu_temp_c":58.0,"elapsed_h":1.2542},{"step":3850.0,"loss":2.31056,"learning_rate":8.53932584269663e-06,"grad_norm":0.9262,"samples_per_sec":111.0,"gpu_mem_peak_gb":12.64,"gpu_temp_c":57.0,"elapsed_h":1.2703},{"step":3900.0,"loss":2.30882,"learning_rate":6.934189406099518e-06,"grad_norm":1.0621,"samples_per_sec":110.5,"gpu_mem_peak_gb":12.64,"gpu_temp_c":58.0,"elapsed_h":1.2863},{"step":3950.0,"loss":2.31516,"learning_rate":5.329052969502408e-06,"grad_norm":0.9027,"samples_per_sec":111.16,"gpu_mem_peak_gb":12.64,"gpu_temp_c":56.0,"elapsed_h":1.3023},{"step":4000.0,"loss":2.29136,"learning_rate":3.7239165329052972e-06,"grad_norm":1.0813,"samples_per_sec":110.43,"gpu_mem_peak_gb":12.64,"gpu_temp_c":58.0,"elapsed_h":1.3184},{"step":4050.0,"loss":2.30142,"learning_rate":2.1187800963081863e-06,"grad_norm":1.1565,"samples_per_sec":106.97,"gpu_mem_peak_gb":12.64,"gpu_temp_c":57.0,"elapsed_h":1.345},{"step":4100.0,"loss":2.29786,"learning_rate":5.136436597110755e-07,"grad_norm":0.9705,"samples_per_sec":110.69,"gpu_mem_peak_gb":12.64,"gpu_temp_c":58.0,"elapsed_h":1.361}],"data":{"leakage_removed":{"gazette":30157,"verbis_terms":25,"verbis_defs":0},"gazette_train_after_leakage":239926,"train_clean_pairs":270299,"train_bidirectional":540598,"length_filter_dropped":13894,"train_tokenized":526704,"composition_examples":{"gazette":479852,"verbis_defs":30610,"verbis_terms":30136}},"throughput":{"gazette_test/base/mk_sq":20.1,"gazette_test/base/sq_mk":13.2,"gazette_test/finetuned_hf/mk_sq":28.8,"gazette_test/finetuned_hf/sq_mk":26.0,"gazette_test/finetuned_ct2/mk_sq":2.4,"gazette_test/finetuned_ct2/sq_mk":3.1,"flores/base/mk_sq":53.5,"flores/base/sq_mk":64.6,"flores/finetuned_hf/mk_sq":53.4,"flores/finetuned_hf/sq_mk":37.7,"flores/finetuned_ct2/mk_sq":6.0,"flores/finetuned_ct2/sq_mk":6.0,"ntrex/base/mk_sq":59.3,"ntrex/base/sq_mk":61.3,"ntrex/finetuned_hf/mk_sq":44.1,"ntrex/finetuned_hf/sq_mk":41.0,"ntrex/finetuned_ct2/mk_sq":5.5,"ntrex/finetuned_ct2/sq_mk":5.5}},
+  E02: {"main":{"gazette_test":[{"model":"base","direction":"mk_sq","n_sentences":10174,"bleu":27.74,"chrf":50.3,"bleu_delta_vs_base":0.0,"chrf_delta_vs_base":0.0},{"model":"base","direction":"sq_mk","n_sentences":10174,"bleu":29.63,"chrf":52.46,"bleu_delta_vs_base":0.0,"chrf_delta_vs_base":0.0},{"model":"finetuned_hf","direction":"mk_sq","n_sentences":10174,"bleu":54.28,"chrf":72.42,"bleu_delta_vs_base":26.53,"chrf_delta_vs_base":22.12},{"model":"finetuned_hf","direction":"sq_mk","n_sentences":10174,"bleu":63.8,"chrf":78.6,"bleu_delta_vs_base":34.17,"chrf_delta_vs_base":26.14},{"model":"finetuned_ct2","direction":"mk_sq","n_sentences":10174,"bleu":54.19,"chrf":72.37,"bleu_delta_vs_base":26.45,"chrf_delta_vs_base":22.07},{"model":"finetuned_ct2","direction":"sq_mk","n_sentences":10174,"bleu":63.68,"chrf":78.62,"bleu_delta_vs_base":34.05,"chrf_delta_vs_base":26.16}],"ntrex":[{"model":"base","direction":"mk_sq","n_sentences":1997,"bleu":23.14,"chrf":48.91,"bleu_delta_vs_base":0.0,"chrf_delta_vs_base":0.0},{"model":"base","direction":"sq_mk","n_sentences":1997,"bleu":21.25,"chrf":49.54,"bleu_delta_vs_base":0.0,"chrf_delta_vs_base":0.0},{"model":"finetuned_hf","direction":"mk_sq","n_sentences":1997,"bleu":15.25,"chrf":42.29,"bleu_delta_vs_base":-7.89,"chrf_delta_vs_base":-6.62},{"model":"finetuned_hf","direction":"sq_mk","n_sentences":1997,"bleu":15.89,"chrf":45.44,"bleu_delta_vs_base":-5.36,"chrf_delta_vs_base":-4.1},{"model":"finetuned_ct2","direction":"mk_sq","n_sentences":1997,"bleu":15.64,"chrf":42.18,"bleu_delta_vs_base":-7.5,"chrf_delta_vs_base":-6.73},{"model":"finetuned_ct2","direction":"sq_mk","n_sentences":1997,"bleu":16.33,"chrf":45.69,"bleu_delta_vs_base":-4.92,"chrf_delta_vs_base":-3.85}],"flores":[{"model":"base","direction":"mk_sq","n_sentences":1012,"bleu":22.08,"chrf":48.58,"bleu_delta_vs_base":0.0,"chrf_delta_vs_base":0.0},{"model":"base","direction":"sq_mk","n_sentences":1012,"bleu":21.39,"chrf":49.5,"bleu_delta_vs_base":0.0,"chrf_delta_vs_base":0.0},{"model":"finetuned_hf","direction":"mk_sq","n_sentences":1012,"bleu":15.99,"chrf":43.8,"bleu_delta_vs_base":-6.09,"chrf_delta_vs_base":-4.78},{"model":"finetuned_hf","direction":"sq_mk","n_sentences":1012,"bleu":16.79,"chrf":47.28,"bleu_delta_vs_base":-4.6,"chrf_delta_vs_base":-2.22},{"model":"finetuned_ct2","direction":"mk_sq","n_sentences":1012,"bleu":16.22,"chrf":43.59,"bleu_delta_vs_base":-5.86,"chrf_delta_vs_base":-4.99},{"model":"finetuned_ct2","direction":"sq_mk","n_sentences":1012,"bleu":16.72,"chrf":47.19,"bleu_delta_vs_base":-4.67,"chrf_delta_vs_base":-2.31}]},"dev":[{"step":1000,"bleu_mk_sq":45.911,"chrf_mk_sq":65.542,"bleu_sq_mk":60.888,"chrf_sq_mk":76.104,"chrf_mean":70.823},{"step":2000,"bleu_mk_sq":49.199,"chrf_mk_sq":68.206,"bleu_sq_mk":64.43,"chrf_sq_mk":78.185,"chrf_mean":73.195},{"step":3000,"bleu_mk_sq":49.88,"chrf_mk_sq":68.093,"bleu_sq_mk":65.191,"chrf_sq_mk":79.265,"chrf_mean":73.679}],"commit":"ccd58f9","evaluated":"2026-10-01"},
+};
+
+const SETS = [["gazette_test", "Gazette test", 10174], ["flores", "FLORES+ devtest", 1012], ["ntrex", "NTREX-128", 1997]];
+const DIRS = [["mk_sq", "MK→SQ"], ["sq_mk", "SQ→MK"]];
+const DIRNAME = Object.fromEntries(DIRS);
+const MNAME = { bleu: "BLEU", chrf: "chrF++" };
+const OVCLS = [["exact_template", "Exact template"], ["near_duplicate", "Near-duplicate"], ["novel", "Novel"]];
+const SYS = {
+  base: { name: "Base · E00", cls: "base" },
+  E01: { name: "Gazette + Verbis · E01", cls: "e01" },
+  E02: { name: "Gazette only · E02", cls: "e02" },
+  ct2: { name: "E01 CT2 int8", cls: "ct2" },
+};
+const E01 = RESULTS.E01, E02 = RESULTS.E02;
+let metric = "bleu";
+const has = k => !!(E02 && E02[k]);
+
+const fmt = (v, d = 2) => v == null ? "–" : Number(v).toFixed(d);
+const sgn = (v, d = 2) => (v > 0 ? "+" : v < 0 ? "−" : "±") + Math.abs(v).toFixed(d);
+const int = v => Number(v).toLocaleString("en-US");
+const pfmt = p => p <= 0.001 ? "p ≤ 0.001" : "p = " + p.toFixed(3);
+
+function mainRow(R, model, set, dir) { return R.main[set].find(r => r.model === model && r.direction === dir); }
+function ftSig(R, set, dir) { return R.sig_ft ? R.sig_ft[`${set}/${dir}`] : null; }
+
+// ---------------------------------------------------------------------------
+// SVG helpers
+// ---------------------------------------------------------------------------
+const NS = "http://www.w3.org/2000/svg";
+function S(tag, attrs = {}, parent, text) {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (text != null) e.textContent = text;
+  if (parent) parent.appendChild(e);
+  return e;
+}
+const lin = (d0, d1, r0, r1) => v => r0 + (v - d0) / (d1 - d0) * (r1 - r0);
+function ticks(a, b, step) { const t = []; for (let v = Math.ceil(a / step - 1e-9) * step; v <= b + 1e-9; v += step) t.push(+v.toFixed(6)); return t; }
+function svgFor(el, h) {
+  el.innerHTML = "";
+  const w = Math.max(280, el.clientWidth);
+  const svg = S("svg", { viewBox: `0 0 ${w} ${h}`, width: w, height: h, class: "chart", role: "img" }, el);
+  return [svg, w];
+}
+// horizontal bar from x0 to x1 with a 4px rounded data end, square at the baseline
+function hbar(x0, x1, y, h, r = 4) {
+  const dir = x1 >= x0 ? 1 : -1, len = Math.abs(x1 - x0), rr = Math.min(r, len, h / 2);
+  if (len < 0.5) return `M${x0},${y}h0`;
+  const xe = x1 - dir * rr;
+  return `M${x0},${y} H${xe} A${rr},${rr} 0 0 ${dir > 0 ? 1 : 0} ${x1},${y + rr} V${y + h - rr} A${rr},${rr} 0 0 ${dir > 0 ? 1 : 0} ${xe},${y + h} H${x0} Z`;
+}
+
+// tooltip
+const tip = document.getElementById("tip");
+function moveTip(e) {
+  const pad = 14, r = tip.getBoundingClientRect();
+  let x = e.clientX + pad, y = e.clientY + pad;
+  if (x + r.width > innerWidth - 8) x = e.clientX - r.width - pad;
+  if (y + r.height > innerHeight - 8) y = e.clientY - r.height - pad;
+  tip.style.left = Math.max(8, x) + "px"; tip.style.top = Math.max(8, y) + "px";
+}
+function showTip(e, html) { tip.innerHTML = html; tip.hidden = false; moveTip(e); }
+function bindTip(node, html) {
+  node.addEventListener("pointerenter", e => showTip(e, typeof html === "function" ? html() : html));
+  node.addEventListener("pointermove", moveTip);
+  node.addEventListener("pointerleave", () => { tip.hidden = true; });
+}
+const tr = (cls, label, val) => `<div class="r"><i class="key ${cls} k"></i><span>${label}</span><b style="margin-left:auto;padding-left:12px">${val}</b></div>`;
+
+// ---------------------------------------------------------------------------
+// Chart: dumbbell rows (base → E01 → E02)
+// rows: {label, sub, groupStart, pts: [{sys, v, ci}], delta, p, pendingE02}
+// ---------------------------------------------------------------------------
+function dumbbell(el, rows, { domain, step, deltaHead = "Δ vs base" }) {
+  const rowH = 46, top = 28;
+  const [svg, W] = svgFor(el, top + rows.length * rowH + 6);
+  const narrow = W < 560, labW = narrow ? 100 : 170, dW = narrow ? 70 : 104;
+  const x = lin(domain[0], domain[1], labW + 10, W - dW - 10);
+  for (const t of ticks(domain[0], domain[1], step)) {
+    S("line", { x1: x(t), x2: x(t), y1: top - 4, y2: top + rows.length * rowH, class: "grid" }, svg);
+    S("text", { x: x(t), y: top - 12, class: "tick", "text-anchor": "middle" }, svg, t);
+  }
+  S("text", { x: W, y: top - 12, class: "tick", "text-anchor": "end" }, svg, deltaHead);
+  rows.forEach((r, i) => {
+    const y0 = top + i * rowH, cy = y0 + rowH / 2;
+    if (r.groupStart && i > 0) S("line", { x1: 0, x2: W, y1: y0, y2: y0, class: "sep" }, svg);
+    if (r.label) S("text", { x: 0, y: cy - 3, class: "rlabel" }, svg, r.label);
+    S("text", { x: 0, y: cy + (r.label ? 13 : 4), class: "rsub" }, svg, r.sub);
+    const vs = r.pts.map(p => p.v);
+    S("line", { x1: x(Math.min(...vs)), x2: x(Math.max(...vs)), y1: cy, y2: cy, class: "conn" }, svg);
+    if (r.pendingE02) {
+      const px = x(domain[1]) - 4;
+      S("text", { x: px, y: cy - 12, class: "pending-t", "text-anchor": "end" }, svg, "E02 pending");
+    }
+    const off = r.pts.length > 2 ? { base: 0, E01: -5, E02: 5 } : {};
+    for (const p of r.pts) {
+      const py = cy + (off[p.sys] || 0);
+      S("circle", { cx: x(p.v), cy: py, r: 6, class: `dot f-${SYS[p.sys].cls}` }, svg);
+      const hit = S("circle", { cx: x(p.v), cy: py, r: 11, class: "hit" }, svg);
+      bindTip(hit, `<div class="t">${r.tipTitle || r.label}</div>${tr(SYS[p.sys].cls, SYS[p.sys].name, fmt(p.v))}${p.ci ? `<div class="s">95% CI ${fmt(p.ci[0])} – ${fmt(p.ci[1])}</div>` : ""}`);
+    }
+    const ds = r.deltas || [];
+    ds.forEach((d, k) => {
+      const ty = cy + (ds.length === 1 ? 4 : k === 0 ? -4 : 12);
+      const tx = S("text", { x: W, y: ty, class: "val" + (k === 0 ? " strong" : ""), "text-anchor": "end" }, svg, sgn(d.v));
+      const tw = tx.getComputedTextLength ? tx.getComputedTextLength() : 40;
+      S("circle", { cx: W - tw - 9, cy: ty - 4, r: 3.5, class: "f-" + SYS[d.sys].cls }, svg);
+      const hit = S("rect", { x: W - dW + 8, y: ty - 12, width: dW - 8, height: 15, class: "hit" }, svg);
+      bindTip(hit, `<div class="t">${r.tipTitle || r.label}</div>${tr(SYS[d.sys].cls, SYS[d.sys].name + " − base", sgn(d.v))}${d.p != null ? `<div class="s">${pfmt(d.p)}</div>` : `<div class="s">significance not computed</div>`}`);
+    });
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Chart: diverging horizontal bars around zero
+// rows: {label, sub, groupStart, v, p, cls?}
+// ---------------------------------------------------------------------------
+function divBars(el, rows, { domain, step, digits = 2, tipTitle }) {
+  const rowH = 40, top = 24;
+  const [svg, W] = svgFor(el, top + rows.length * rowH + 6);
+  const narrow = W < 560, labW = narrow ? 100 : 170, valW = 58;
+  const x = lin(domain[0], domain[1], labW + 10 + valW, W - valW);
+  for (const t of ticks(domain[0], domain[1], step)) {
+    S("line", { x1: x(t), x2: x(t), y1: top - 4, y2: top + rows.length * rowH, class: t === 0 ? "axis" : "grid" }, svg);
+    S("text", { x: x(t), y: top - 10, class: "tick", "text-anchor": "middle" }, svg, (t > 0 ? "+" : "") + t);
+  }
+  rows.forEach((r, i) => {
+    const y0 = top + i * rowH, cy = y0 + rowH / 2, bh = 16;
+    if (r.groupStart && i > 0) S("line", { x1: 0, x2: W, y1: y0, y2: y0, class: "sep" }, svg);
+    if (r.label) S("text", { x: 0, y: cy - 3, class: "rlabel" }, svg, r.label);
+    S("text", { x: 0, y: cy + (r.label ? 13 : 4), class: "rsub" }, svg, r.sub);
+    const cls = r.cls || (r.v >= 0 ? "f-gain" : "f-loss");
+    S("path", { d: hbar(x(0), x(r.v), cy - bh / 2, bh), class: cls }, svg);
+    const tx = r.v >= 0 ? x(r.v) + 6 : x(r.v) - 6;
+    const t = S("text", { x: tx, y: cy + 4, class: "val" + (r.sig ? " strong" : ""), "text-anchor": r.v >= 0 ? "start" : "end" }, svg, sgn(r.v, digits) + (r.sig === false ? " ns" : ""));
+    const hit = S("rect", { x: Math.min(x(0), x(r.v)) - 4, y: y0 + 2, width: Math.abs(x(r.v) - x(0)) + 8, height: rowH - 4, class: "hit" }, svg);
+    bindTip(hit, `<div class="t">${r.tip || r.label}</div><div class="r">Δ ${sgn(r.v, digits)}</div>${r.p != null ? `<div class="s">${pfmt(r.p)}${r.sig === false ? " · not significant" : ""}</div>` : ""}`);
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Chart: two bars per row around zero, coloured by system (E01 / E02)
+// rows: {label, sub, groupStart, bars: [{sys, v, p}]}
+// ---------------------------------------------------------------------------
+function pairBars(el, rows, { domain, step, digits = 2 }) {
+  const rowH = 46, top = 24, bh = 12;
+  const [svg, W] = svgFor(el, top + rows.length * rowH + 6);
+  const narrow = W < 560, labW = narrow ? 100 : 170, valW = 58;
+  const x = lin(domain[0], domain[1], labW + 10 + valW, W - valW);
+  for (const t of ticks(domain[0], domain[1], step)) {
+    S("line", { x1: x(t), x2: x(t), y1: top - 4, y2: top + rows.length * rowH, class: t === 0 ? "axis" : "grid" }, svg);
+    S("text", { x: x(t), y: top - 10, class: "tick", "text-anchor": "middle" }, svg, (t > 0 ? "+" : "") + t);
+  }
+  rows.forEach((r, i) => {
+    const y0 = top + i * rowH, cy = y0 + rowH / 2;
+    if (r.groupStart && i > 0) S("line", { x1: 0, x2: W, y1: y0, y2: y0, class: "sep" }, svg);
+    if (r.label) S("text", { x: 0, y: cy - 3, class: "rlabel" }, svg, r.label);
+    S("text", { x: 0, y: cy + (r.label ? 13 : 4), class: "rsub" }, svg, r.sub);
+    const n = r.bars.length, y1 = cy - (n * bh + (n - 1) * 2) / 2;
+    r.bars.forEach((b, k) => {
+      const by = y1 + k * (bh + 2);
+      S("path", { d: hbar(x(0), x(b.v), by, bh, 3), class: "f-" + SYS[b.sys].cls }, svg);
+      S("text", { x: b.v >= 0 ? x(b.v) + 6 : x(b.v) - 6, y: by + bh - 2, class: "val" + (b.sys === "E01" ? " strong" : ""), "text-anchor": b.v >= 0 ? "start" : "end" }, svg, sgn(b.v, digits));
+      const hit = S("rect", { x: Math.min(x(0), x(b.v)) - 4, y: by - 1, width: Math.abs(x(b.v) - x(0)) + 8, height: bh + 2, class: "hit" }, svg);
+      bindTip(hit, `<div class="t">${r.tip}</div>${tr(SYS[b.sys].cls, SYS[b.sys].name + " − base", sgn(b.v, digits))}<div class="s">${b.p != null ? pfmt(b.p) : "significance not computed"}</div>`);
+    });
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Chart: grouped horizontal bars with an optional reference line per group
+// groups: {label, bars: [{sys, v, pending}], ref}
+// ---------------------------------------------------------------------------
+function refBars(el, groups, { domain, step, unit = "", refName = "Human reference" }) {
+  const bh = 14, gap = 5, gHead = 24, gPad = 16, top = 22;
+  const gHeights = groups.map(g => gHead + g.bars.length * (bh + gap) - gap + gPad);
+  const H = top + gHeights.reduce((a, b) => a + b, 0);
+  const [svg, W] = svgFor(el, H);
+  const valW = 64, x = lin(domain[0], domain[1], 0, W - valW);
+  for (const t of ticks(domain[0], domain[1], step)) {
+    S("line", { x1: x(t), x2: x(t), y1: top - 4, y2: H - gPad / 2, class: t === domain[0] ? "axis" : "grid" }, svg);
+    S("text", { x: x(t), y: top - 10, class: "tick", "text-anchor": t === domain[0] ? "start" : "middle" }, svg, t + unit);
+  }
+  let y = top;
+  groups.forEach(g => {
+    S("text", { x: 0, y: y + 15, class: "rlabel" }, svg, g.label);
+    if (g.sub) S("text", { x: W, y: y + 15, class: "rsub", "text-anchor": "end" }, svg, g.sub);
+    let by = y + gHead;
+    const y1 = by;
+    g.bars.forEach(b => {
+      if (b.pending) {
+        S("rect", { x: 0.75, y: by + 0.75, width: Math.max(60, x(domain[0] + (domain[1] - domain[0]) * 0.3)), height: bh - 1.5, rx: 3, class: "pending-box" }, svg);
+        S("text", { x: 8, y: by + bh - 3, class: "pending-t" }, svg, SYS[b.sys].name + " · pending");
+      } else {
+        S("path", { d: hbar(x(domain[0]), x(b.v), by, bh), class: `f-${SYS[b.sys].cls}` }, svg);
+        S("text", { x: x(b.v) + 6, y: by + bh - 3, class: "val" + (b.sys === "E01" ? " strong" : "") }, svg, fmt(b.v, 1) + unit);
+        const hit = S("rect", { x: 0, y: by - 2, width: x(b.v) + 4, height: bh + 4, class: "hit" }, svg);
+        bindTip(hit, `<div class="t">${g.label}</div>${tr(SYS[b.sys].cls, SYS[b.sys].name, fmt(b.v) + unit)}${g.ref != null ? `<div class="s">${refName}: ${fmt(g.ref)}${unit} (${sgn(b.v - g.ref)} pts)</div>` : ""}${b.note ? `<div class="s">${b.note}</div>` : ""}`);
+      }
+      by += bh + gap;
+    });
+    if (g.ref != null) {
+      S("line", { x1: x(g.ref), x2: x(g.ref), y1: y1 - 5, y2: by - gap + 5, class: "ref" }, svg);
+    }
+    y += gHead + g.bars.length * (bh + gap) - gap + gPad;
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Chart: line chart with crosshair tooltip
+// series: {sys, name, pts: [[x, y]], area?}
+// ---------------------------------------------------------------------------
+function lineChart(el, series, { xDomain, yDomain, xStep, yStep, yFmt = v => v, xFmt = v => int(v), shade, marker, h = 210, tipTitle = v => "Step " + int(v), yDigits = 2 }) {
+  const [svg, W] = svgFor(el, h);
+  const m = { l: 38, r: 12, t: 12, b: 26 };
+  const x = lin(xDomain[0], xDomain[1], m.l, W - m.r), y = lin(yDomain[0], yDomain[1], h - m.b, m.t);
+  if (shade) {
+    S("rect", { x: x(shade[0]), y: m.t, width: x(shade[1]) - x(shade[0]), height: h - m.b - m.t, class: "shade" }, svg);
+    S("text", { x: x(shade[0]) + 6, y: m.t + 13, class: "ann" }, svg, shade[2]);
+  }
+  for (const t of ticks(yDomain[0], yDomain[1], yStep)) {
+    S("line", { x1: m.l, x2: W - m.r, y1: y(t), y2: y(t), class: "grid" }, svg);
+    S("text", { x: m.l - 6, y: y(t) + 4, class: "tick", "text-anchor": "end" }, svg, yFmt(t));
+  }
+  const xt = ticks(xDomain[0], xDomain[1], xStep);
+  xt.forEach((t, i) => S("text", { x: x(t), y: h - 8, class: "tick", "text-anchor": i === 0 ? "start" : i === xt.length - 1 && x(t) > W - 30 ? "end" : "middle" }, svg, xFmt(t)));
+  S("line", { x1: m.l, x2: W - m.r, y1: h - m.b, y2: h - m.b, class: "axis" }, svg);
+  for (const s of series) {
+    const d = s.pts.map((p, i) => (i ? "L" : "M") + x(p[0]).toFixed(1) + "," + y(p[1]).toFixed(1)).join("");
+    if (s.area) S("path", { d: d + `L${x(s.pts.at(-1)[0])},${h - m.b}L${x(s.pts[0][0])},${h - m.b}Z`, class: "area-" + SYS[s.sys].cls }, svg);
+    S("path", { d, class: "line l-" + SYS[s.sys].cls }, svg);
+    if (s.dots) s.pts.forEach(p => S("circle", { cx: x(p[0]), cy: y(p[1]), r: 4.5, class: "dot f-" + SYS[s.sys].cls }, svg));
+  }
+  if (marker) {
+    const mx = x(marker.x), my = y(marker.y);
+    S("circle", { cx: mx, cy: my, r: 8, fill: "none", stroke: "var(--ink)", "stroke-width": 1.5 }, svg);
+    S("text", { x: mx - 10, y: my + 22, class: "ann", "text-anchor": "end" }, svg, marker.label);
+  }
+  // crosshair
+  const g = S("g", { visibility: "hidden" }, svg);
+  const vl = S("line", { y1: m.t, y2: h - m.b, class: "cross" }, g);
+  const cdots = series.map(s => S("circle", { r: 4.5, class: "dot f-" + SYS[s.sys].cls }, g));
+  const ov = S("rect", { x: m.l, y: m.t, width: W - m.l - m.r, height: h - m.t - m.b, class: "hit" }, svg);
+  const xs = [...new Set(series.flatMap(s => s.pts.map(p => p[0])))].sort((a, b) => a - b);
+  function nearest(arr, v) { let b = arr[0]; for (const a of arr) if (Math.abs(a - v) < Math.abs(b - v)) b = a; return b; }
+  ov.addEventListener("pointermove", e => {
+    const r = svg.getBoundingClientRect(), px = (e.clientX - r.left) * (W / r.width);
+    const xv = nearest(xs, xDomain[0] + (px - m.l) / (W - m.l - m.r) * (xDomain[1] - xDomain[0]));
+    g.setAttribute("visibility", "visible");
+    vl.setAttribute("x1", x(xv)); vl.setAttribute("x2", x(xv));
+    let html = `<div class="t">${tipTitle(xv)}</div>`;
+    series.forEach((s, i) => {
+      const p = s.pts.find(q => q[0] === xv);
+      if (p) { cdots[i].setAttribute("cx", x(p[0])); cdots[i].setAttribute("cy", y(p[1])); cdots[i].setAttribute("visibility", "visible"); html += tr(SYS[s.sys].cls, s.name, fmt(p[1], yDigits)); }
+      else cdots[i].setAttribute("visibility", "hidden");
+    });
+    showTip(e, html);
+  });
+  ov.addEventListener("pointerleave", () => { g.setAttribute("visibility", "hidden"); tip.hidden = true; });
+}
+
+// ---------------------------------------------------------------------------
+// Chart: 100% stacked bar(s)
+// bars: {label, parts: [{name, v, fill}], pending?}
+// ---------------------------------------------------------------------------
+function stack(el, bars, { unit = "" } = {}) {
+  const bh = 26, top = 4, rowH = el.clientWidth < 560 ? 104 : 86;
+  const [svg, W] = svgFor(el, top + bars.length * rowH);
+  bars.forEach((b, i) => {
+    const y0 = top + i * rowH;
+    S("text", { x: 0, y: y0 + 13, class: "rlabel" }, svg, b.label);
+    const by = y0 + 22;
+    if (b.pending) {
+      S("rect", { x: 0.75, y: by + 0.75, width: W - 1.5, height: bh - 1.5, rx: 4, class: "pending-box" }, svg);
+      S("text", { x: 10, y: by + 17, class: "pending-t" }, svg, b.pending);
+      return;
+    }
+    const tot = b.parts.reduce((a, p) => a + p.v, 0);
+    let cx = 0;
+    const gapPx = 2, avail = W - gapPx * (b.parts.length - 1);
+    b.parts.forEach((p, j) => {
+      const w = avail * p.v / tot;
+      const first = j === 0, last = j === b.parts.length - 1;
+      const rect = S("rect", { x: cx, y: by, width: Math.max(0, w), height: bh, rx: (first || last) ? 4 : 0, style: `fill:${p.fill}` }, svg);
+      if (!first && !last) rect.setAttribute("rx", 0);
+      const pct = 100 * p.v / tot;
+      const label = `${p.name} ${pct.toFixed(1)}%`;
+      const lw = label.length * 6.4 + 16;
+      if (w > lw) S("text", { x: cx + 8, y: by + 17, style: `fill:${p.ink || "#fff"};font-size:12px;font-weight:500` }, svg, label);
+      const hit = S("rect", { x: cx, y: by, width: Math.max(4, w), height: bh, class: "hit" }, svg);
+      bindTip(hit, `<div class="t">${b.label}</div><div class="r"><i class="key k" style="background:${p.fill}"></i><span>${p.name}</span><b style="margin-left:auto;padding-left:12px">${int(p.v)}${unit}</b></div><div class="s">${pct.toFixed(2)}%</div>`);
+      cx += w + gapPx;
+    });
+    // legend row under the bar (always present; wraps to a second line when narrow)
+    let lx = 0, ly = by + bh + 18;
+    b.parts.forEach(p => {
+      const txt = `${p.name} · ${int(p.v)} (${(100 * p.v / tot).toFixed(1)}%)`, tw = txt.length * 6.3 + 30;
+      if (lx > 0 && lx + tw > W) { lx = 0; ly += 18; }
+      S("rect", { x: lx, y: ly - 9, width: 10, height: 10, rx: 2, style: `fill:${p.fill}` }, svg);
+      S("text", { x: lx + 16, y: ly, class: "ann" }, svg, txt);
+      lx += tw;
+    });
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Tables
+// ---------------------------------------------------------------------------
+function table(el, head, rows) {
+  el.innerHTML = `<table><thead><tr>${head.map((h, i) => `<th class="${i === 0 ? "l" : ""}">${h}</th>`).join("")}</tr></thead><tbody>${rows.map(r => `<tr>${r.map((c, i) => c === "pending" ? `<td class="pend">pending</td>` : `<td class="${i < 2 && typeof c === "string" ? "l" : ""}">${c}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+}
+
+// ---------------------------------------------------------------------------
+// Static parts
+// ---------------------------------------------------------------------------
+function renderStatic() {
+  const exps = [
+    ["E00", "base", "Base model", "NLLB-200-distilled-600M, zero-shot. Evaluated inside E01's final evaluation.", "done", "Done"],
+    ["E01", "e01", "Gazette + Verbis", "Gazette corpus plus Verbis term and definition pairs, one bidirectional run.", "done", "Done · 2026-09-22"],
+    ["E02", "e02" + (has("main") ? "" : " pending"), "Gazette only", "Identical to E01 without Verbis training data. Isolates the dictionary's effect.", has("main") ? "done" : "run", has("main") ? "Evaluated · " + E02.evaluated : "Training"],
+  ];
+  document.getElementById("exps").innerHTML = exps.map(([id, k, name, desc, st, stl]) =>
+    `<div class="exp"><div class="row1"><span class="id"><i class="key ${k}"></i>${id}</span><span class="chip ${st}">${stl}</span></div><div class="name">${name}</div><div class="desc">${desc}</div></div>`).join("");
+
+  const g = (set, dir) => ({ b: mainRow(E01, "base", set, dir), f: mainRow(E01, "finetuned_hf", set, dir) });
+  const gm = g("gazette_test", "mk_sq"), gs = g("gazette_test", "sq_mk");
+  const nov = (dir, model) => E01.overlap.find(o => o.class === "novel" && o.direction === dir && o.model === model).bleu;
+  const tsr = (dir, model) => E01.terminology.find(t => t.direction === dir && t.model === model).tsr;
+  const fs = E01.sig_ft;
+  const gen = ["flores/mk_sq", "flores/sq_mk", "ntrex/mk_sq", "ntrex/sq_mk"].map(k => fs[k].bleu.delta);
+  const e2 = (set, dir) => mainRow(E02, "finetuned_hf", set, dir);
+  const gen2 = ["flores", "ntrex"].flatMap(s => DIRS.map(([d]) => e2(s, d).bleu_delta_vs_base));
+  const vgen = ["flores", "ntrex"].flatMap(s => DIRS.map(([d]) => mainRow(E01, "finetuned_hf", s, d).bleu - e2(s, d).bleu));
+  const rng = a => `${sgn(Math.min(...a), 1)}<small> to </small>${sgn(Math.max(...a), 1)}`;
+  const dG = (set, dir) => fs[`${set}/${dir}`].bleu.delta;
+  const k = c => `<i class="key ${c} k"></i>`;
+  document.getElementById("figs").innerHTML = [
+    ["Gazette test BLEU · MK→SQ", `${k("e01")}${fmt(gm.f.bleu)}`, `<span class="sec">${k("e02")}${fmt(e2("gazette_test", "mk_sq").bleu)}</span>base ${fmt(gm.b.bleu)} · E01 <b>${sgn(dG("gazette_test", "mk_sq"))}</b>`],
+    ["Gazette test BLEU · SQ→MK", `${k("e01")}${fmt(gs.f.bleu)}`, `<span class="sec">${k("e02")}${fmt(e2("gazette_test", "sq_mk").bleu)}</span>base ${fmt(gs.b.bleu)} · E01 <b>${sgn(dG("gazette_test", "sq_mk"))}</b>`],
+    ["General-domain BLEU change vs base", `${k("e01")}${rng(gen)}`, `<span class="sec">${k("e02")}${rng(gen2).replace(/<\/?small>/g, "")}</span>FLORES+ and NTREX-128`],
+    ["Verbis effect out of domain · E01 − E02", rng(vgen), `<span class="sec">Gazette test: −0.3 to −0.2</span>BLEU, FLORES+ and NTREX-128`],
+  ].map(([l, v, d]) => `<div class="fig"><div class="lab">${l}</div><div class="val num">${v}</div><div class="delta">${d}</div></div>`).join("");
+
+  document.getElementById("sysLegend").innerHTML =
+    `<span><i class="key base"></i>${SYS.base.name}</span><span><i class="key e01"></i>${SYS.E01.name}</span><span><i class="key e02${has("main") ? "" : " pending"}"></i>${SYS.E02.name}${has("main") ? "" : " (pending)"}</span>`;
+
+  document.querySelectorAll(".legend-sys").forEach(l => {
+    l.innerHTML = `<span><i class="key base"></i>Base</span><span><i class="key e01"></i>E01</span><span><i class="key e02 pending"></i>E02 (pending)</span>` + (l.dataset.ref ? `<span><i class="key ref"></i>Human reference</span>` : "");
+  });
+  // data flow
+  const d = E01.data, lr = d.leakage_removed;
+  const flow = [
+    ["Gazette train pairs", "", 270083],
+    ["Removed: appear in a held-out set", "11.17% of Gazette train", -lr.gazette],
+    ["Verbis term pairs", `15,093 kept, ${lr.verbis_terms} removed as leakage`, 15093 - lr.verbis_terms],
+    ["Verbis definition pairs", "LaBSE ≥ 0.70 (15,305 of 15,822 kept, median 0.939)", 15305],
+    ["Clean training pairs", "", d.train_clean_pairs, true],
+    ["Both directions", "each pair as MK→SQ and SQ→MK", d.train_bidirectional],
+    ["Removed: longer than 192 tokens", "2.57%", -d.length_filter_dropped],
+    ["Tokenised training examples", "4,115 optimizer steps at 128 per step", d.train_tokenized, true],
+  ];
+  document.getElementById("flow").innerHTML = flow.map(([w, s, n, tot]) =>
+    `<div class="st${tot ? " total" : ""}"><div class="what">${w}${s ? `<small>${s}</small>` : ""}</div><div class="n${n < 0 ? " minus" : ""}">${n < 0 ? "−" + int(-n) : int(n)}</div></div>`).join("");
+
+  document.getElementById("e02foot").textContent = has("main") ? `E02 numbers from runs/E02_gazette_only/eval/ ({gazette_test,flores,ntrex}_results.csv and dev_curve.csv), commit ${E02.commit}, evaluated ${E02.evaluated}.` : "E02 results pending.";
+}
+
+// ---------------------------------------------------------------------------
+// Charts (re-rendered on resize and metric change)
+// ---------------------------------------------------------------------------
+const charts = {
+  main(el) {
+    const rows = [];
+    for (const [set, setName, n] of SETS) DIRS.forEach(([dir, dn], j) => {
+      const b = mainRow(E01, "base", set, dir), f = mainRow(E01, "finetuned_hf", set, dir), s = ftSig(E01, set, dir)[metric];
+      const pts = [{ sys: "base", v: b[metric], ci: s.base_ci }, { sys: "E01", v: f[metric], ci: s.sys_ci }];
+      const deltas = [{ sys: "E01", v: s.delta, p: s.p }];
+      if (has("main")) {
+        const e = mainRow(E02, "finetuned_hf", set, dir), es = ftSig(E02, set, dir);
+        pts.push({ sys: "E02", v: e[metric], ci: es ? es[metric].sys_ci : null });
+        deltas.push({ sys: "E02", v: e[metric + "_delta_vs_base"], p: es ? es[metric].p : null });
+      }
+      rows.push({ label: j === 0 ? setName : "", sub: `${dn} · ${int(n)} sentences`, tipTitle: `${setName} · ${dn} · ${MNAME[metric]}`, groupStart: j === 0, pts, deltas, pendingE02: !has("main") && j === 0 && set === "gazette_test" });
+    });
+    dumbbell(this, rows, metric === "bleu" ? { domain: [10, 70], step: 10, deltaHead: "Δ vs base" } : { domain: [40, 85], step: 5, deltaHead: "Δ vs base" });
+  },
+  delta(el) {
+    const rows = [];
+    for (const [set, setName] of SETS) DIRS.forEach(([dir, dn], j) => {
+      const s = ftSig(E01, set, dir)[metric];
+      const bars = [{ sys: "E01", v: s.delta, p: s.p }];
+      if (has("main")) { const es = ftSig(E02, set, dir); bars.push({ sys: "E02", v: mainRow(E02, "finetuned_hf", set, dir)[metric + "_delta_vs_base"], p: es ? es[metric].p : null }); }
+      rows.push({ label: j === 0 ? setName : "", sub: dn, groupStart: j === 0, bars, tip: `${setName} · ${dn} · ${MNAME[metric]}` });
+    });
+    pairBars(this, rows, metric === "bleu" ? { domain: [-10, 40], step: 10 } : { domain: [-10, 30], step: 10 });
+  },
+  verbis(el) {
+    if (!has("main")) { this.innerHTML = `<p class="note">Pending E02 results.</p>`; return; }
+    const rows = [];
+    for (const [set, setName] of SETS) DIRS.forEach(([dir, dn], j) => {
+      const a = mainRow(E01, "finetuned_hf", set, dir)[metric], b = mainRow(E02, "finetuned_hf", set, dir)[metric];
+      rows.push({ label: j === 0 ? setName : "", sub: dn, groupStart: j === 0, v: +(a - b).toFixed(2), tip: `${setName} · ${dn} · ${MNAME[metric]}: E01 ${fmt(a)}, E02 ${fmt(b)}` });
+    });
+    divBars(this, rows, metric === "bleu" ? { domain: [-1, 4], step: 1 } : { domain: [-1, 3], step: 1 });
+  },
+  comp(el) {
+    const n = E01.overlap_summary.n_pairs;
+    stack(this, [{ label: "10,174 test pairs", parts: [
+      { name: "Exact template", v: n.exact_template, fill: "var(--seq-3)", ink: "var(--seq-3-ink)" },
+      { name: "Near-duplicate", v: n.near_duplicate, fill: "var(--seq-2)", ink: "var(--seq-2-ink)" },
+      { name: "Novel", v: n.novel, fill: "var(--seq-1)", ink: "var(--seq-1-ink)" },
+    ] }], { unit: " pairs" });
+  },
+  overlap(el) {
+    const rows = [];
+    const ov = (R, c, m, d) => R.overlap.find(o => o.class === c && o.model === m && o.direction === d);
+    let i0 = 0;
+    OVCLS.forEach(([c, cn]) => DIRS.forEach(([dir, dn], j) => {
+      const b = ov(E01, c, "base", dir), f = ov(E01, c, "finetuned_hf", dir);
+      const pts = [{ sys: "base", v: b[metric] }, { sys: "E01", v: f[metric] }];
+      const deltas = [{ sys: "E01", v: f[metric] - b[metric] }];
+      if (has("overlap")) { const e = ov(E02, c, "finetuned_hf", dir); pts.push({ sys: "E02", v: e[metric] }); deltas.push({ sys: "E02", v: e[metric] - b[metric] }); }
+      rows.push({ label: j === 0 ? cn : "", sub: `${dn} · ${int(b.n_pairs)} pairs`, tipTitle: `${cn} · ${dn} · ${MNAME[metric]}`, groupStart: j === 0, pts, deltas, pendingE02: !has("overlap") && i0++ === 0 });
+    }));
+    dumbbell(this, rows, metric === "bleu" ? { domain: [10, 90], step: 10, deltaHead: "Δ vs base" } : { domain: [40, 95], step: 10, deltaHead: "Δ vs base" });
+  },
+  tsr(el) {
+    const t = (R, m, d) => R.terminology.find(x => x.model === m && x.direction === d);
+    const groups = [];
+    DIRS.forEach(([dir, dn]) => {
+      const ref = t(E01, "reference", dir), base = t(E01, "base", dir), ft = t(E01, "finetuned_hf", dir);
+      const e2 = has("terminology") ? t(E02, "finetuned_hf", dir) : null;
+      groups.push({ label: `${dn} · all terms`, sub: `${int(ref.n_term_occurrences)} occurrences`, ref: ref.tsr,
+        bars: [{ sys: "base", v: base.tsr }, { sys: "E01", v: ft.tsr }, e2 ? { sys: "E02", v: e2.tsr } : { sys: "E02", pending: true }] });
+      groups.push({ label: `${dn} · rare terms`, sub: `${int(ref.n_rare_occurrences)} occurrences`, ref: ref.rare_tsr,
+        bars: [{ sys: "base", v: base.rare_tsr }, { sys: "E01", v: ft.rare_tsr }, e2 ? { sys: "E02", v: e2.rare_tsr } : { sys: "E02", pending: true }] });
+    });
+    refBars(this, groups, { domain: [0, 100], step: 20, unit: "%" });
+  },
+  num(el) {
+    const t = (R, m, d) => R.number.find(x => x.model === m && x.direction === d);
+    const groups = DIRS.map(([dir, dn]) => {
+      const ref = t(E01, "reference", dir), e2 = has("number") ? t(E02, "finetuned_hf", dir) : null;
+      return { label: dn, sub: `${int(ref.n_with_numbers)} sentences with numbers`, ref: ref.match_rate_with_numbers,
+        bars: [{ sys: "base", v: t(E01, "base", dir).match_rate_with_numbers }, { sys: "E01", v: t(E01, "finetuned_hf", dir).match_rate_with_numbers }, e2 ? { sys: "E02", v: e2.match_rate_with_numbers } : { sys: "E02", pending: true }] };
+    });
+    refBars(this, groups, { domain: [0, 100], step: 20, unit: "%" });
+  },
+  loss(el) {
+    const s = [{ sys: "E01", name: "E01", pts: E01.train.map(r => [r.step, r.loss]), area: false }];
+    if (has("train")) s.push({ sys: "E02", name: "E02", pts: E02.train.map(r => [r.step, r.loss]) });
+    lineChart(this, s, { xDomain: [0, 4200], yDomain: [2, 4], xStep: 1000, yStep: 0.5, xFmt: v => v ? v / 1000 + "k" : "0", yFmt: v => v.toFixed(1), shade: [0, 1000, "warm-up"], yDigits: 3 });
+  },
+  devmk(el) { devChart(this, "chrf_mk_sq"); },
+  devsq(el) { devChart(this, "chrf_sq_mk"); },
+  quant(el) {
+    const rows = [];
+    for (const [set, setName] of SETS) DIRS.forEach(([dir, dn], j) => {
+      const s = E01.sig_q[`${set}/${dir}`][metric];
+      rows.push({ label: j === 0 ? setName : "", sub: dn, groupStart: j === 0, v: s.delta, p: s.p, sig: s.p < 0.05, cls: "f-ct2", tip: `${setName} · ${dn} · ${MNAME[metric]} (int8 − bf16)` });
+    });
+    divBars(this, rows, { domain: [-0.3, 0.3], step: 0.1, digits: 2 });
+  },
+  speed(el) {
+    const tp = E01.throughput;
+    refBars(this, DIRS.map(([dir, dn]) => ({ label: dn, bars: [
+      { sys: "base", v: tp[`gazette_test/base/${dir}`], note: "bf16 on the GPU" },
+      { sys: "E01", v: tp[`gazette_test/finetuned_hf/${dir}`], note: "bf16 on the GPU" },
+      { sys: "ct2", v: tp[`gazette_test/finetuned_ct2/${dir}`], note: "int8 on 16 CPU threads" },
+    ] })), { domain: [0, 30], step: 10 });
+  },
+  mix(el) {
+    const c = E01.data.composition_examples;
+    stack(this, [
+      { label: "E01 · 526,704 examples", parts: [
+        { name: "Gazette", v: c.gazette, fill: "var(--s-e01)", ink: "#fff" },
+        { name: "Verbis definitions", v: c.verbis_defs, fill: "var(--seq-2)", ink: "var(--seq-2-ink)" },
+        { name: "Verbis terms", v: c.verbis_terms, fill: "var(--seq-1)", ink: "var(--seq-1-ink)" },
+      ] },
+      has("data") ? { label: `E02 · ${int(E02.data.train_tokenized)} examples`, parts: [{ name: "Gazette", v: E02.data.composition_examples.gazette, fill: "var(--s-e02)", ink: "#fff" }] }
+        : { label: "E02 · Gazette only", pending: "pending · 100% Gazette by design" },
+    ], { unit: " examples" });
+  },
+};
+function devChart(el, key) {
+  const s = [{ sys: "E01", name: "E01", pts: E01.dev.map(r => [r.step, r[key]]), dots: true }];
+  if (has("dev")) s.push({ sys: "E02", name: "E02", pts: E02.dev.map(r => [r.step, r[key]]), dots: true });
+  const best = E01.dev.reduce((a, r) => r[key] > a[key] ? r : a);
+  const lo = key === "chrf_mk_sq" ? 60 : 70;
+  lineChart(el, s, { xDomain: [0, 4200], yDomain: [lo, lo + 12], xStep: 1000, yStep: 3, xFmt: v => v ? v / 1000 + "k" : "0", yFmt: v => v, marker: { x: best.step, y: best[key], label: "peak " + fmt(best[key]) } });
+}
+
+const MOUNT = [["c-main", "main"], ["c-delta", "delta"], ["c-verbis", "verbis"], ["c-comp", "comp"], ["c-overlap", "overlap"], ["c-tsr", "tsr"], ["c-num", "num"],
+  ["c-loss", "loss"], ["c-dev-mk", "devmk"], ["c-dev-sq", "devsq"], ["c-quant", "quant"], ["c-speed", "speed"], ["c-mix", "mix"]];
+function renderCharts(only) {
+  for (const [id, fn] of MOUNT) { if (only && !only.includes(fn)) continue; const el = document.getElementById(id); try { charts[fn].call(el, el); } catch (e) { console.error(fn, e); } }
+}
+function renderTables() {
+  const mrows = [];
+  for (const [set, setName] of SETS) for (const [dir, dn] of DIRS) {
+    const b = mainRow(E01, "base", set, dir), f = mainRow(E01, "finetuned_hf", set, dir), c = mainRow(E01, "finetuned_ct2", set, dir), s = ftSig(E01, set, dir);
+    const e = has("main") ? mainRow(E02, "finetuned_hf", set, dir) : null, ec = has("main") ? mainRow(E02, "finetuned_ct2", set, dir) : null;
+    mrows.push([setName, dn, fmt(b.bleu), fmt(f.bleu), fmt(c.bleu), e ? fmt(e.bleu) : "pending", ec ? fmt(ec.bleu) : "pending", sgn(s.bleu.delta), pfmt(s.bleu.p), e ? sgn(e.bleu_delta_vs_base) : "pending",
+      fmt(b.chrf), fmt(f.chrf), fmt(c.chrf), e ? fmt(e.chrf) : "pending", ec ? fmt(ec.chrf) : "pending", sgn(s.chrf.delta), pfmt(s.chrf.p), e ? sgn(e.chrf_delta_vs_base) : "pending"]);
+  }
+  table(document.getElementById("t-main"), ["Test set", "Dir.", "BLEU base", "BLEU E01", "BLEU E01 int8", "BLEU E02", "BLEU E02 int8", "Δ E01", "p E01", "Δ E02", "chrF++ base", "chrF++ E01", "chrF++ E01 int8", "chrF++ E02", "chrF++ E02 int8", "Δ E01", "p E01", "Δ E02"], mrows);
+
+  if (has("main")) {
+    const vrows = [];
+    for (const [set, setName] of SETS) for (const [dir, dn] of DIRS) {
+      const a = mainRow(E01, "finetuned_hf", set, dir), b = mainRow(E02, "finetuned_hf", set, dir);
+      vrows.push([setName, dn, fmt(a.bleu), fmt(b.bleu), sgn(a.bleu - b.bleu), fmt(a.chrf), fmt(b.chrf), sgn(a.chrf - b.chrf)]);
+    }
+    table(document.getElementById("t-verbis"), ["Test set", "Dir.", "BLEU E01", "BLEU E02", "E01 − E02", "chrF++ E01", "chrF++ E02", "E01 − E02"], vrows);
+  }
+
+  const orows = [];
+  const ov = (R, c, m, d) => R.overlap.find(o => o.class === c && o.model === m && o.direction === d);
+  for (const [c, cn] of OVCLS) for (const [dir, dn] of DIRS) {
+    const b = ov(E01, c, "base", dir), f = ov(E01, c, "finetuned_hf", dir), e = has("overlap") ? ov(E02, c, "finetuned_hf", dir) : null;
+    orows.push([cn, dn, int(b.n_pairs), fmt(b.pct_pairs) + "%", fmt(b.bleu), fmt(f.bleu), e ? fmt(e.bleu) : "pending", sgn(f.bleu - b.bleu), fmt(b.chrf), fmt(f.chrf), e ? fmt(e.chrf) : "pending", sgn(f.chrf - b.chrf)]);
+  }
+  table(document.getElementById("t-overlap"), ["Class", "Dir.", "Pairs", "Share", "BLEU base", "BLEU E01", "BLEU E02", "Δ E01", "chrF++ base", "chrF++ E01", "chrF++ E02", "Δ E01"], orows);
+
+  const label = { reference: "Human reference", base: "Base · E00", finetuned_hf: "E01", finetuned_ct2: "E01 int8" };
+  const trows = E01.terminology.map(t => [label[t.model], DIRNAME[t.direction], int(t.n_term_occurrences), fmt(t.tsr), int(t.n_rare_occurrences), fmt(t.rare_tsr)]);
+  if (!has("terminology")) DIRS.forEach(([, dn]) => trows.push(["E02", dn, "pending", "pending", "pending", "pending"]));
+  else E02.terminology.filter(t => t.model === "finetuned_hf").forEach(t => trows.push(["E02", DIRNAME[t.direction], int(t.n_term_occurrences), fmt(t.tsr), int(t.n_rare_occurrences), fmt(t.rare_tsr)]));
+  table(document.getElementById("t-tsr"), ["System", "Dir.", "Term occurrences", "TSR %", "Rare occurrences", "Rare TSR %"], trows);
+
+  const nrows = E01.number.map(t => [label[t.model], DIRNAME[t.direction], fmt(t.match_rate_all), int(t.n_with_numbers), fmt(t.match_rate_with_numbers)]);
+  if (!has("number")) DIRS.forEach(([, dn]) => nrows.push(["E02", dn, "pending", "pending", "pending"]));
+  else E02.number.filter(t => t.model === "finetuned_hf").forEach(t => nrows.push(["E02", DIRNAME[t.direction], fmt(t.match_rate_all), int(t.n_with_numbers), fmt(t.match_rate_with_numbers)]));
+  table(document.getElementById("t-num"), ["System", "Dir.", "Match, all sentences %", "Sentences with numbers", "Match, with numbers %"], nrows);
+
+  const devRow = (exp, r, sel) => [exp, int(r.step), fmt(r.bleu_mk_sq), fmt(r.chrf_mk_sq), fmt(r.bleu_sq_mk), fmt(r.chrf_sq_mk), (sel ? "<b>" : "") + fmt(r.chrf_mean) + (sel ? "</b> selected" : "")];
+  const drows = E01.dev.map(r => devRow("E01", r, r.step === 4115));
+  if (has("dev")) E02.dev.forEach(r => drows.push(devRow("E02", r, false)));
+  table(document.getElementById("t-dev"), ["Run", "Step", "BLEU MK→SQ", "chrF++ MK→SQ", "BLEU SQ→MK", "chrF++ SQ→MK", "chrF++ mean"], drows);
+}
+
+function setMetric(m) {
+  metric = m;
+  document.querySelectorAll("#metricSeg button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.m === m)));
+  document.getElementById("mainTitle").textContent = `${MNAME[m]} by test set`;
+  document.getElementById("deltaTitle").textContent = `${MNAME[m]} change against the base model`;
+  document.getElementById("ovTitle").textContent = `${MNAME[m]} by overlap class, Gazette test`;
+  document.getElementById("qTitle").textContent = `${MNAME[m]}: int8 minus bf16`;
+  try { localStorage.setItem("mksq-metric", m); } catch (e) {}
+  document.getElementById("vTitle").textContent = `${MNAME[m]}: E01 − E02`;
+  renderCharts(["main", "delta", "verbis", "overlap", "quant"]);
+}
+document.getElementById("metricSeg").addEventListener("click", e => { const b = e.target.closest("button"); if (b) setMetric(b.dataset.m); });
+
+renderStatic();
+renderTables();
+let saved = "bleu"; try { saved = localStorage.getItem("mksq-metric") || "bleu"; } catch (e) {}
+setMetric(saved === "chrf" ? "chrf" : "bleu");
+renderCharts();
+let rt; const ro = new ResizeObserver(() => { clearTimeout(rt); rt = setTimeout(() => renderCharts(), 80); });
+ro.observe(document.querySelector(".wrap"));
+</script>
+</body>
+</html>

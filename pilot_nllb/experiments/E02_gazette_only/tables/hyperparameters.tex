@@ -1,0 +1,28 @@
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{ll}
+\toprule
+Setting & Value \\
+\midrule
+Base model & facebook/nllb-200-distilled-600M@f8d333a \\
+Optimizer & adafactor \\
+Learning rate & 0.0001 \\
+Schedule & linear, warmup 1000 steps \\
+Epochs & 1 \\
+Label smoothing & 0.1 \\
+Weight decay & 0.01 \\
+Max grad norm & 1.0 \\
+Precision & bf16 mixed precision, TF32 matmul \\
+Batch (per device × accumulation) & 8 × 16 = 128 \\
+Gradient checkpointing & False \\
+Seed / data seed & 42 / 42 \\
+Total optimizer steps (E01) & 3,650 (4,115) \\
+Checkpoint selection & eval\_chrf every 1000 steps and at the end \\
+Best step / dev chrF++ mean (E01) & 3650 / 73.73 (4115 / 73.6) \\
+Training time, h (E01) & 1.2148 (1.361) \\
+\bottomrule
+\end{tabular}
+\caption{E02 training configuration as recorded (identical to E01 by config comparison). Source: \texttt{eval/run\_info.json, checkpoints/checkpoint-3650/trainer\_state.json}.}
+\label{tab:e02-hyperparameters}
+\end{table}

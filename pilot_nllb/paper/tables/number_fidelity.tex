@@ -1,0 +1,16 @@
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{llrrrrrr}
+\toprule
+Sentences & Dir. & Reference & E00\_base Base (E00) & E01\_gazette\_verbis\_mix FT HF & E01\_gazette\_verbis\_mix FT CT2 int8 & E02\_gazette\_only FT HF & E02\_gazette\_only FT CT2 int8 \\
+\midrule
+all sentences & MK$\rightarrow$SQ & 70.33 & 78.16 & 83.87 & 83.58 & 84.65 & 84.24 \\
+all sentences & SQ$\rightarrow$MK & 70.33 & 71.21 & 83.70 & 82.97 & 83.27 & 82.77 \\
+with numbers & MK$\rightarrow$SQ & 66.51 & 72.74 & 79.91 & 79.56 & 80.92 & 80.46 \\
+with numbers & SQ$\rightarrow$MK & 64.99 & 64.89 & 80.41 & 79.40 & 79.93 & 79.24 \\
+\bottomrule
+\end{tabular}
+\caption{Number fidelity (\%): sentences whose digit sequences match the source. Generated from \texttt{paper/results\_registry.csv}.}
+\label{tab:number-fidelity}
+\end{table}

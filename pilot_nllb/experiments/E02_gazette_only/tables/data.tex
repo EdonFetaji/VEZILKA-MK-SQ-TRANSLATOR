@@ -1,0 +1,19 @@
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{ll}
+\toprule
+Quantity & Value \\
+\midrule
+Gazette train / dev / test (pairs) & 270,083 / 13,355 / 10,174 \\
+Gazette pairs removed as leakage & 30,157 \\
+Clean training pairs & 239,926 \\
+Bidirectional examples & 479,852 \\
+Dropped by length filter (> 192 tokens) & 12,758 (2.66\%) \\
+Tokenised training examples (E01) & 467,094 (526,704) \\
+Gazette examples, E02 = E01 & True \\
+\bottomrule
+\end{tabular}
+\caption{E02 training data: the Gazette part of E01's mixture, without Verbis. Source: \texttt{eval/run\_info.json (dataset\_sizes) of both experiments}.}
+\label{tab:e02-data}
+\end{table}

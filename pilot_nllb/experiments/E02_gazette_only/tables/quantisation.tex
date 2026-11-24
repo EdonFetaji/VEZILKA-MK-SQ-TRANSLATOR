@@ -1,0 +1,18 @@
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{llrrrrrrrr}
+\toprule
+Test set & Dir. & BLEU HF & BLEU CT2 & $\Delta$BLEU & p & chrF++ HF & chrF++ CT2 & $\Delta$chrF++ & p \\
+\midrule
+Gazette test & MK$\rightarrow$SQ & 54.28 & 54.19 & -0.09 & 0.059 & 72.42 & 72.37 & -0.05 & 0.077 \\
+Gazette test & SQ$\rightarrow$MK & 63.80 & 63.68 & -0.12 & 0.007 & 78.60 & 78.62 & 0.01 & 0.309 \\
+FLORES+ devtest & MK$\rightarrow$SQ & 15.99 & 16.22 & 0.23 & 0.150 & 43.80 & 43.59 & -0.21 & 0.131 \\
+FLORES+ devtest & SQ$\rightarrow$MK & 16.79 & 16.72 & -0.07 & 0.295 & 47.28 & 47.19 & -0.09 & 0.208 \\
+NTREX-128 & MK$\rightarrow$SQ & 15.25 & 15.64 & 0.39 & 0.014 & 42.29 & 42.18 & -0.11 & 0.113 \\
+NTREX-128 & SQ$\rightarrow$MK & 15.89 & 16.33 & 0.44 & 0.007 & 45.44 & 45.69 & 0.25 & 0.017 \\
+\bottomrule
+\end{tabular}
+\caption{E02 quantisation: HF bf16 (GPU) vs CTranslate2 int8 (CPU); $\Delta$ = CT2 -- HF; paired bootstrap p-values. Source: \texttt{eval/*\_results.csv, eval/translations\_*.parquet; results.json\#significance}.}
+\label{tab:e02-quantisation}
+\end{table}

@@ -1,0 +1,13 @@
+extends: _arms.yaml
+run_id: TG-31-s1
+group: TG-31
+description: Fresh parallel sentences. Same tokens as TG-33's word task, spent on unseen Gazette issues.
+seed: 1
+
+data:
+  mixture:
+    - {name: L_FRESH, loader: gazette, split: train, select: {slice: L_FRESH, max_rows: 28161}, task: translation, directions: both}
+
+output:
+  local_dir: runs/TG-31-s1
+  hub_repo: EdonFetaji/translategemma-mk-sq-TG-31-s1

@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TranslateGemma MK–SQ Experiment Plan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,500;7..72,650&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* VOICE: a research plan a mentor reads once and the team works from: calm, exact, no decoration.
+   IDEA: a run registry, the way an experiment notebook lists runs, data and what each one decides.
+   PICTURE: the checkpoint tree (TG-10, TG-20, then the TG-30 arms), backed by data-allocation bars and a GPU-time line.
+   COLOUR and TYPE: neutral paper, blue for the core comparison, orange for optional runs, data colours by source family;
+   Literata headings, Public Sans text, IBM Plex Mono for tags.
+   LAYOUT: one reading column (~1040px) of numbered sections; wide tables and the tree scroll sideways inside their panels. */
+:root {
+  --bg: #f5f6f8; --surface: #ffffff; --ink: #12161c; --ink-2: #4a5260; --muted: #737b88;
+  --line: #e2e5ea; --line-strong: #c9ced6; --accent: #2a78d6; --wash: rgba(42,120,214,.08);
+  --opt: #c4581f; --opt-wash: #fff1e6; --opt-ink: #9a4a14; --ok-wash: #e6f4ec; --ok-ink: #1d6b3f;
+  --c-human: #1f5fae; --c-nllb: #4f86cf; --c-hplt: #8fb0dc; --c-dial: #c6d6ec; --c-replay: #5b84bd;
+  --c-legal: #1f7a55; --c-legal2: #4fa27e; --c-fresh: #9fd4b8; --c-lex: #7a4cc2; --c-wgen: #c98d1f;
+  --c-eval: #7c8490; --c-drop: #d5d9df;
+  --c-p0: #9aa3ae; --c-p1: #2a78d6; --c-p1b: #6ea2e4; --c-p2: #d9773c; --c-p3: #f0b98c; --c-p4: #12161c;
+  --f-display: "Literata", "Iowan Old Style", Georgia, serif;
+  --f-body: "Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111317; --surface: #191c21; --ink: #f1f3f6; --ink-2: #b8bfca; --muted: #8b929e;
+    --line: #2a2e35; --line-strong: #3a3f48; --accent: #3987e5; --wash: rgba(57,135,229,.14);
+    --opt: #e27a45; --opt-wash: #3a2210; --opt-ink: #f3b17f; --ok-wash: #16301f; --ok-ink: #8fd3a8;
+    --c-human: #6aa6ee; --c-nllb: #4d86d4; --c-hplt: #3b6699; --c-dial: #2b4566; --c-replay: #5a8bd0;
+    --c-legal: #3fb589; --c-legal2: #2c8a65; --c-fresh: #a8e0c4; --c-lex: #a687e6; --c-wgen: #e3b155;
+    --c-eval: #8a929e; --c-drop: #3a3f48;
+    --c-p0: #6b7380; --c-p1: #3987e5; --c-p1b: #2f6bb5; --c-p2: #e27a45; --c-p3: #9a5a30; --c-p4: #f1f3f6;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111317; --surface: #191c21; --ink: #f1f3f6; --ink-2: #b8bfca; --muted: #8b929e;
+  --line: #2a2e35; --line-strong: #3a3f48; --accent: #3987e5; --wash: rgba(57,135,229,.14);
+  --opt: #e27a45; --opt-wash: #3a2210; --opt-ink: #f3b17f; --ok-wash: #16301f; --ok-ink: #8fd3a8;
+  --c-human: #6aa6ee; --c-nllb: #4d86d4; --c-hplt: #3b6699; --c-dial: #2b4566; --c-replay: #5a8bd0;
+  --c-legal: #3fb589; --c-legal2: #2c8a65; --c-fresh: #a8e0c4; --c-lex: #a687e6; --c-wgen: #e3b155;
+  --c-eval: #8a929e; --c-drop: #3a3f48;
+  --c-p0: #6b7380; --c-p1: #3987e5; --c-p1b: #2f6bb5; --c-p2: #e27a45; --c-p3: #9a5a30; --c-p4: #f1f3f6;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 15px/1.6 var(--f-body); margin: 0; overflow-x: clip; }
+.wrap { max-width: 1040px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 40px 72px; }
+h1, h2, h3 { font-family: var(--f-display); font-weight: 650; text-wrap: balance; margin: 0; letter-spacing: -.01em; }
+h1 { font-size: clamp(1.9rem, 4.6vw, 2.75rem); line-height: 1.12; }
+h2 { font-size: 1.5rem; line-height: 1.25; }
+h3 { font-family: var(--f-body); font-size: 1.02rem; font-weight: 600; letter-spacing: 0; line-height: 1.35; }
+p { margin: 0; max-width: 70ch; }
+a { color: var(--accent); }
+code { font-family: var(--f-mono); font-size: .9em; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
+.muted { color: var(--muted); }
+.eyebrow { font: 500 .78rem/1.4 var(--f-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+header.top { display: grid; gap: 14px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+.bilingual { font-family: var(--f-display); font-weight: 500; color: var(--ink-2); font-size: 1.05rem; }
+.bilingual span { color: var(--muted); font-family: var(--f-body); font-size: .9rem; padding-inline: 6px; }
+.lede { color: var(--ink-2); font-size: 1.05rem; }
+.figs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; margin-top: 10px; }
+.fig { background: var(--surface); padding: 14px 16px; display: grid; gap: 2px; align-content: start; min-width: 0; }
+.fig .val { font: 600 1.7rem/1.15 var(--f-body); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.fig .lab { font-size: .84rem; color: var(--ink-2); }
+nav.toc { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: .86rem; padding-top: 16px; }
+nav.toc a { color: var(--ink-2); text-decoration: none; border-bottom: 1px solid var(--line-strong); }
+nav.toc a:hover { color: var(--accent); border-color: var(--accent); }
+section { padding-top: 52px; display: grid; gap: 16px; scroll-margin-top: 16px; }
+.sec-head { display: grid; gap: 8px; }
+.sec-head .no { font: 500 .78rem var(--f-mono); color: var(--muted); letter-spacing: .06em; }
+.sec-head p { color: var(--ink-2); }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 18px; display: grid; gap: 14px; min-width: 0; }
+.note { font-size: .84rem; color: var(--muted); }
+td .note { font-size: .8rem; }
+.tag { font: 600 .8rem/1 var(--f-mono); color: var(--ink); background: var(--bg); border: 1px solid var(--line-strong); border-radius: 4px; padding: 4px 6px; white-space: nowrap; display: inline-block; }
+.tag.core { border-color: var(--accent); color: var(--accent); background: var(--wash); }
+.tag.opt { border-color: var(--opt); color: var(--opt-ink); background: var(--opt-wash); border-style: dashed; }
+.chip { font: 500 .72rem/1 var(--f-mono); padding: 5px 8px; border-radius: 999px; white-space: nowrap; letter-spacing: .02em; display: inline-block; }
+.chip.once { background: var(--ink); color: var(--surface); }
+.chip.core { background: var(--wash); color: var(--accent); }
+.chip.opt { background: var(--opt-wash); color: var(--opt-ink); }
+.chip.plain { border: 1px solid var(--line-strong); color: var(--ink-2); }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.dtag { font: 500 .78rem/1.1 var(--f-mono); color: var(--ink-2); background: var(--bg); border: 1px solid var(--line); border-radius: 3px; padding: 2px 5px; white-space: nowrap; display: inline-block; }
+.vs { color: var(--muted); font-size: .8rem; padding-inline: 2px; }
+.tscroll, .tree-scroll { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: .88rem; }
+th, td { text-align: left; padding: 9px 12px 9px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-weight: 600; color: var(--ink-2); font-size: .78rem; letter-spacing: .02em; }
+td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+td.rq { font: 600 .84rem var(--f-mono); white-space: nowrap; }
+td.mk { font-family: var(--f-display); }
+table.wide { min-width: 720px; }
+tr:last-child td { border-bottom: 0; }
+tr.tot td { border-top: 1px solid var(--line-strong); }
+tr.grp td { font: 500 .72rem var(--f-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); padding-top: 18px; border-bottom-color: var(--line-strong); }
+tr.grp:first-child td { padding-top: 6px; }
+/* tree */
+svg.tree { display: block; width: 100%; min-width: 860px; height: auto; font-family: var(--f-body); }
+svg .box { fill: var(--surface); stroke: var(--line-strong); stroke-width: 1.25; }
+svg .box.once { stroke: var(--ink); stroke-width: 1.75; }
+svg .box.core { fill: var(--wash); stroke: var(--accent); stroke-width: 1.75; }
+svg .box.opt { stroke: var(--opt); stroke-width: 1.4; stroke-dasharray: 5 4; }
+svg .t-tag { font-family: var(--f-mono); font-size: 12.5px; font-weight: 600; fill: var(--ink); }
+svg .t-tag.core { fill: var(--accent); }
+svg .t-tag.opt { fill: var(--opt-ink); }
+svg .t-name { font-size: 13.5px; font-weight: 600; fill: var(--ink); }
+svg .t-sub { font-size: 12px; fill: var(--muted); }
+svg .t-ann { font-size: 11.5px; fill: var(--ink-2); }
+svg .t-ann.q { fill: var(--muted); }
+svg .edge { fill: none; stroke: var(--line-strong); stroke-width: 1.5; }
+svg .edge.dash { stroke-dasharray: 5 4; }
+svg .ah { fill: var(--muted); }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: .84rem; color: var(--ink-2); }
+.legend span { display: inline-flex; align-items: center; gap: 8px; }
+.sw { width: 22px; height: 14px; border-radius: 3px; background: var(--surface); border: 1.25px solid var(--line-strong); display: inline-block; flex: none; }
+.sw.once { border: 1.75px solid var(--ink); }
+.sw.core { border: 1.75px solid var(--accent); background: var(--wash); }
+.sw.opt { border: 1.4px dashed var(--opt); }
+/* data bars */
+.bar { display: flex; gap: 2px; height: 18px; border-radius: 4px; overflow: hidden; }
+.bar i { display: block; min-width: 2px; }
+.bar.big { height: 30px; }
+.bar.tl { height: 34px; }
+.share { display: flex; align-items: center; gap: 8px; min-width: 150px; }
+.share .track { flex: 1; height: 8px; background: var(--line); border-radius: 4px; overflow: hidden; display: block; }
+.share .track i { display: block; height: 100%; }
+.share .pct { font: 500 .8rem var(--f-mono); min-width: 3.6em; text-align: right; font-variant-numeric: tabular-nums; }
+.keys { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: .84rem; color: var(--ink-2); }
+.key { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
+.key i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; flex: none; }
+.mixcell { width: 52%; min-width: 260px; vertical-align: middle; }
+.c-human { background: var(--c-human); } .c-nllb { background: var(--c-nllb); } .c-hplt { background: var(--c-hplt); }
+.c-dial { background: var(--c-dial); } .c-replay { background: var(--c-replay); } .c-legal { background: var(--c-legal); }
+.c-legal2 { background: var(--c-legal2); } .c-fresh { background: var(--c-fresh); } .c-lex { background: var(--c-lex); }
+.c-wgen { background: var(--c-wgen); } .c-eval { background: var(--c-eval); } .c-drop { background: var(--c-drop); }
+.c-p0 { background: var(--c-p0); } .c-p1 { background: var(--c-p1); } .c-p1b { background: var(--c-p1b); }
+.c-p2 { background: var(--c-p2); } .c-p3 { background: var(--c-p3); } .c-p4 { background: var(--c-p4); }
+/* learning-rate figure */
+svg.lr { display: block; width: 100%; min-width: 620px; height: auto; font-family: var(--f-body); }
+svg.lr text { font-size: 11.5px; fill: var(--ink-2); }
+svg.lr text.k { fill: var(--ink); font-weight: 600; }
+svg.lr .ax { stroke: var(--line-strong); stroke-width: 1; }
+svg.lr .main { fill: none; stroke: var(--accent); stroke-width: 2.25; }
+svg.lr .br { fill: none; stroke: var(--opt); stroke-width: 2; stroke-dasharray: 5 4; }
+svg.lr .ck { fill: var(--surface); stroke: var(--ink-2); stroke-width: 1.5; }
+svg.lr .ep { fill: var(--ink); }
+.ln { width: 24px; height: 0; border-top: 2.25px solid var(--accent); display: inline-block; flex: none; }
+.ln.dash { border-top: 2px dashed var(--opt); }
+.dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex: none; }
+.dot.ck { border: 1.5px solid var(--ink-2); background: var(--surface); }
+.dot.ep { background: var(--ink); }
+/* timeline */
+.tl-wrap { display: grid; gap: 6px; }
+.tl-scale { position: relative; height: 18px; font: 500 .72rem var(--f-mono); color: var(--muted); }
+.tl-scale span { position: absolute; top: 2px; transform: translateX(-50%); white-space: nowrap; }
+.tl-scale span::before { content: ""; position: absolute; left: 50%; top: -8px; height: 6px; border-left: 1px solid var(--line-strong); }
+.tl-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-flow: column; grid-template-rows: repeat(5, auto); gap: 0 28px; font-size: .88rem; }
+.tl-list li { display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); padding-block: 6px; }
+.tl-list .hrs { font-variant-numeric: tabular-nums; color: var(--ink-2); white-space: nowrap; }
+/* registry */
+.stage-head { display: grid; gap: 4px; padding-bottom: 6px; }
+.stage-head .no { font: 500 .74rem var(--f-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.stage-head p { color: var(--ink-2); font-size: .92rem; }
+.exp { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 12px 28px; padding-block: 18px; border-top: 1px solid var(--line); }
+.exp-id { display: grid; gap: 8px; align-content: start; min-width: 0; }
+.exp-id .runs { font: 500 .8rem var(--f-mono); color: var(--muted); }
+.exp dl { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 6px 18px; margin: 0; font-size: .9rem; min-width: 0; }
+.exp dt { color: var(--muted); }
+.exp dd { margin: 0; min-width: 0; }
+ul.plain { margin: 0; padding-left: 1.2em; display: grid; gap: 8px; max-width: 74ch; color: var(--ink-2); }
+ul.plain b { color: var(--ink); font-weight: 600; }
+.cols2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.cols2 > div { background: var(--surface); padding: 14px 16px; display: grid; gap: 4px; min-width: 0; }
+.cols2 .k { font: 500 .74rem var(--f-mono); letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+.src { font-size: .82rem; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 14px; }
+footer { margin-top: 60px; padding-top: 18px; border-top: 1px solid var(--line); color: var(--muted); font-size: .82rem; display: grid; gap: 6px; }
+@media (max-width: 760px) {
+  .figs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .exp, .cols2, .tl-list { grid-template-columns: minmax(0, 1fr); }
+  .tl-list { grid-auto-flow: row; grid-template-rows: none; }
+}
+@media (max-width: 420px) {
+  .exp dl { grid-template-columns: minmax(0, 1fr); gap: 2px 0; }
+  .exp dd { margin-bottom: 8px; }
+  .fig .val { font-size: 1.4rem; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="eyebrow">Experiment plan · TranslateGemma-12B · Macedonian ↔ Albanian · final, 23 November 2026</div>
+    <h1>Does learning a term's definition help a model translate it?</h1>
+    <div class="bilingual">Службен весник <span>↔</span> Gazeta Zyrtare <span>+</span> VERBIS</div>
+    <p class="lede">TranslateGemma-12B is trained in three steps, full-weight on two A100 80GB cards. TG-10 learns direct Macedonian–Albanian from about a third of the deduplicated OPUS set and checks on the way whether that much helps, TG-20 learns legal language from the Gazette, and both are saved as endpoints. The TG-30 arms then branch from TG-20 to test one idea: does a model taught legal terms with their definitions translate better than one taught the terms alone, or one given the same GPU time of plain parallel text?</p>
+    <div class="figs">
+      <div class="fig"><div class="val">36%</div><div class="lab">of the deduplicated OPUS set trains TG-10 (1,523,490 rows)</div></div>
+      <div class="fig"><div class="val">68 / 16 / 16</div><div class="lab">Gazette training split: TG-20, arms, fresh text</div></div>
+      <div class="fig"><div class="val">9</div><div class="lab">core comparison runs: 3 arms × 3 seeds</div></div>
+      <div class="fig"><div class="val">3.5 days</div><div class="lab">core GPU time; 5.0 with every optional run</div></div>
+    </div>
+    <nav class="toc" aria-label="Sections">
+      <a href="#plan">Plan</a><a href="#questions">Questions</a><a href="#idea">Example</a><a href="#pilot">NLLB pilot</a><a href="#setup">Setup</a><a href="#data">Data</a><a href="#order">Order of work</a><a href="#experiments">Experiments</a><a href="#fair">Fairness</a><a href="#scoring">Scoring</a><a href="#open">Open items</a>
+    </nav>
+  </header>
+
+  <section id="plan">
+    <div class="sec-head">
+      <div class="no">01 · THE PLAN AT A GLANCE</div>
+      <h2>Train the shared steps once, then branch</h2>
+      <p>Read left to right. Each box is one experiment; its tag is the name used in both CSV files. TG-10 and TG-20 are trained once, saved, and reused by everything to their right.</p>
+    </div>
+    <div class="panel">
+      <div class="tree-scroll">
+        <svg class="tree" viewBox="0 0 1040 520" role="img" aria-labelledby="tree-title tree-desc">
+          <title id="tree-title">Experiment pipeline</title>
+          <desc id="tree-desc">The original TranslateGemma is adapted once on general OPUS text (TG-10, which checks its own data size on the way), then once on Gazette legal text with general replay (TG-20); both are saved. Six TG-30 arms branch from TG-20: fresh Gazette sentences, term pairs, term pairs with definitions, and three optional arms. A Gazette-only diagnostic branches from TG-10. The final model starts from TG-20 and takes its recipe from the arm results.</desc>
+          <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="ah"/></marker></defs>
+          <path class="edge" d="M162 246 H198" marker-end="url(#ah)"/>
+          <path class="edge" d="M370 246 H406" marker-end="url(#ah)"/>
+          <path class="edge" d="M285 282 V378" marker-end="url(#ah)"/>
+          <path class="edge" d="M578 246 H612 M612 52 V382"/>
+          <path class="edge" d="M612 52 H644" marker-end="url(#ah)"/>
+          <path class="edge" d="M612 118 H644" marker-end="url(#ah)"/>
+          <path class="edge" d="M612 184 H644" marker-end="url(#ah)"/>
+          <path class="edge" d="M612 250 H644" marker-end="url(#ah)"/>
+          <path class="edge" d="M612 316 H644" marker-end="url(#ah)"/>
+          <path class="edge" d="M612 382 H644" marker-end="url(#ah)"/>
+          <path class="edge dash" d="M886 52 H900 M886 118 H900 M886 184 H900 M886 250 H900 M886 316 H900 M886 382 H900 M900 52 V382"/>
+          <path class="edge dash" d="M900 246 H914" marker-end="url(#ah)"/>
+          <path class="edge" d="M493 282 V488 H974 V286" marker-end="url(#ah)"/>
+          <text class="t-ann" x="285" y="172" text-anchor="middle">OPUS · 1,523,490 rows</text>
+          <text class="t-ann q" x="285" y="190" text-anchor="middle">228M tokens · ≈25 h + size check</text>
+          <text class="t-ann" x="493" y="172" text-anchor="middle">Gazette L_MAIN + 70% replay</text>
+          <text class="t-ann q" x="493" y="190" text-anchor="middle">170M tokens · ≈19 h</text>
+          <text class="t-ann" x="646" y="16">TG-30 arms · L_ARMS + replay + one addition</text>
+          <text class="t-ann q" x="974" y="306" text-anchor="middle">results set</text>
+          <text class="t-ann q" x="974" y="322" text-anchor="middle">its recipe</text>
+          <text class="t-ann q" x="733" y="480" text-anchor="middle">weights start from TG-20; trains the held-back Gazette and every lexicon entry</text>
+          <rect class="box" x="12" y="210" width="150" height="72" rx="8"/>
+          <text class="t-tag" x="26" y="234">TG-00 · BASE</text>
+          <text class="t-name" x="26" y="254">Original model</text>
+          <text class="t-sub" x="26" y="271">scored only</text>
+          <rect class="box once" x="200" y="210" width="170" height="72" rx="8"/>
+          <text class="t-tag" x="214" y="234">TG-10 · GEN</text>
+          <text class="t-name" x="214" y="254">General MK–SQ</text>
+          <text class="t-sub" x="214" y="271">saved endpoint</text>
+          <rect class="box opt" x="200" y="380" width="170" height="64" rx="8"/>
+          <text class="t-tag opt" x="214" y="403">TG-21 · GAZ</text>
+          <text class="t-name" x="214" y="421">Gazette only</text>
+          <text class="t-sub" x="214" y="436">optional diagnostic</text>
+          <rect class="box once" x="408" y="210" width="170" height="72" rx="8"/>
+          <text class="t-tag" x="422" y="234">TG-20 · LEG</text>
+          <text class="t-name" x="422" y="254">Shared legal</text>
+          <text class="t-sub" x="422" y="271">saved endpoint</text>
+          <rect class="box" x="646" y="26" width="240" height="52" rx="8"/>
+          <text class="t-tag" x="660" y="47">TG-31 · REPLAY</text>
+          <text class="t-sub" x="660" y="65">Fresh Gazette text · ×3 seeds</text>
+          <rect class="box core" x="646" y="92" width="240" height="52" rx="8"/>
+          <text class="t-tag core" x="660" y="113">TG-32 · TERMS</text>
+          <text class="t-sub" x="660" y="131">Term pairs · ×3 seeds</text>
+          <rect class="box core" x="646" y="158" width="240" height="52" rx="8"/>
+          <text class="t-tag core" x="660" y="179">TG-33 · TERMS-DEF</text>
+          <text class="t-sub" x="660" y="197">Terms + definitions · ×3 seeds</text>
+          <rect class="box opt" x="646" y="224" width="240" height="52" rx="8"/>
+          <text class="t-tag opt" x="660" y="245">TG-34 · DEF-TRANS</text>
+          <text class="t-sub" x="660" y="263">Definition translation · optional</text>
+          <rect class="box opt" x="646" y="290" width="240" height="52" rx="8"/>
+          <text class="t-tag opt" x="660" y="311">TG-35 · SHUF-DEF</text>
+          <text class="t-sub" x="660" y="329">Shuffled definitions · optional</text>
+          <rect class="box opt" x="646" y="356" width="240" height="52" rx="8"/>
+          <text class="t-tag opt" x="660" y="377">TG-36 · GEN-LEX</text>
+          <text class="t-sub" x="660" y="395">General word pairs · optional</text>
+          <rect class="box once" x="916" y="210" width="116" height="72" rx="8"/>
+          <text class="t-tag" x="928" y="234">TG-90 · FINAL</text>
+          <text class="t-name" x="928" y="254">Final model</text>
+          <text class="t-sub" x="928" y="271">after results</text>
+        </svg>
+      </div>
+      <div class="legend">
+        <span><i class="sw once"></i>Trained once, saved</span>
+        <span><i class="sw core"></i>Central comparison: TG-32 vs TG-33</span>
+        <span><i class="sw"></i>Core run</span>
+        <span><i class="sw opt"></i>Optional run</span>
+      </div>
+    </div>
+    <div class="cols2">
+      <div><span class="k">Trained once</span><p>General adaptation (TG-10) and legal adaptation (TG-20) each run a single time and are saved. Every arm loads TG-20's weights, so the nine core arm runs repeat none of that work.</p></div>
+      <div><span class="k">Kept apart on purpose</span><p>TG-20 trains on 68% of the Gazette training issues. The rest stays unseen, so the arms learn from new legal text and the replay arm gets parallel sentences no model has met.</p></div>
+    </div>
+  </section>
+
+  <section id="questions">
+    <div class="sec-head">
+      <div class="no">02 · RESEARCH QUESTIONS</div>
+      <h2>Which comparison answers which question</h2>
+      <p>Each question is settled by comparing runs that differ in one thing. RQ3 and RQ4 need no extra training: they're read from the same TG-32 and TG-33 translations.</p>
+    </div>
+    <div class="panel tscroll">
+      <table class="wide">
+        <thead><tr><th>Question</th><th>In plain words</th><th>Decided by</th><th>Measured on</th></tr></thead>
+        <tbody>
+          <tr><td class="rq">Central (a)</td><td>Do definitions help the model use trained terms correctly in new sentences?</td><td><div class="tags"><span class="tag core">TG-33</span><span class="vs">vs</span><span class="tag core">TG-32</span></div><div class="note">TG-35 checks why</div></td><td>Term success on reference-confirmed legal terms</td></tr>
+          <tr><td class="rq">Central (b)</td><td>Do definitions make translation better overall?</td><td><div class="tags"><span class="tag core">TG-33</span><span class="vs">vs</span><span class="tag core">TG-32</span></div><div class="note">both also vs TG-31</div></td><td>chrF++ and BLEU on Gazette test, FLORES+ and NTREX-128</td></tr>
+          <tr><td class="rq">RQ1</td><td>Is dictionary training worth more than the same GPU time spent on plain parallel sentences?</td><td><div class="tags"><span class="tag core">TG-33</span><span class="vs">vs</span><span class="tag">TG-31</span></div><div class="tags"><span class="tag core">TG-32</span><span class="vs">vs</span><span class="tag">TG-31</span></div></td><td>Term success and legal chrF++</td></tr>
+          <tr><td class="rq">RQ2</td><td>Does general quality survive each step, and what protects it?</td><td><div class="tags"><span class="tag">TG-10</span><span class="vs">vs</span><span class="tag">TG-00</span></div><div class="tags"><span class="tag">TG-20</span><span class="vs">vs</span><span class="tag">TG-10</span></div><div class="tags"><span class="tag opt">TG-21</span><span class="vs">vs</span><span class="tag">TG-20</span></div><div class="tags"><span class="tag opt">TG-34</span><span class="vs">vs</span><span class="tag">TG-31</span></div></td><td>FLORES+ and NTREX-128 chrF++; arms may fall at most 1 point below TG-20</td></tr>
+          <tr><td class="rq">RQ3</td><td>Which terms gain the most from definitions?</td><td><div class="tags"><span class="tag core">TG-33</span><span class="vs">minus</span><span class="tag core">TG-32</span></div><div class="note">split by term group</div></td><td>Term success by frequency, word count and spelling similarity</td></tr>
+          <tr><td class="rq">RQ4</td><td>Does the effect hold outside law?</td><td><div class="tags"><span class="tag core">TG-33</span><span class="vs">vs</span><span class="tag core">TG-32</span></div><div class="note">non-legal entries only</div></td><td>Term success per domain: finance, the fourth VERBIS domain, general, media literacy</td></tr>
+          <tr><td class="rq">RQ5</td><td>Do general word and phrase pairs, with no definitions, help general translation?</td><td><div class="tags"><span class="tag opt">TG-36</span><span class="vs">vs</span><span class="tag core">TG-32</span></div><div class="note">optional arm</div></td><td>FLORES+ and NTREX-128 chrF++; term success on general words</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="idea">
+    <div class="sec-head">
+      <div class="no">03 · THE IDEA IN ONE EXAMPLE</div>
+      <h2>One term, three ways to spend the same GPU time</h2>
+      <p>Macedonian <i>застареност</i> means statute of limitations; the Albanian legal term is <i>parashkrim</i>. The two words share nothing, so the model can't guess one from the other. (The pair is illustrative and hasn't been checked against VERBIS.)</p>
+    </div>
+    <div class="panel tscroll">
+      <table>
+        <thead><tr><th>Arm</th><th>On top of the shared stream, the model sees</th><th>It must output</th></tr></thead>
+        <tbody>
+          <tr><td><span class="tag">TG-31</span></td><td>New Gazette sentence pairs, as many tokens as TG-33's word task</td><td>Their translations</td></tr>
+          <tr><td><span class="tag core">TG-32</span></td><td class="mk">застареност</td><td class="mk">parashkrim</td></tr>
+          <tr><td><span class="tag core">TG-33</span></td><td><span class="mk">застареност</span> plus its Macedonian VERBIS definition</td><td class="mk">parashkrim</td></tr>
+          <tr><td><span class="chip plain">Test, every model</span></td><td class="mk">Барањето е одбиено поради застареност.</td><td class="mk">Kërkesa është refuzuar për shkak të parashkrimit.</td></tr>
+        </tbody>
+      </table>
+      <p class="note">At test time no model gets a dictionary or a hint. The correct output uses the inflected form <i>parashkrimit</i>, which the automatic term check accepts because it matches the opening characters <i>parashkr</i>.</p>
+    </div>
+  </section>
+
+  <section id="pilot">
+    <div class="sec-head">
+      <div class="no">04 · WHY THIS DESIGN</div>
+      <h2>What the NLLB pilot already showed</h2>
+      <p>A first round on NLLB-200-distilled-600M compared the base model (E00), Gazette plus VERBIS terms and definitions (E01), and Gazette alone (E02), one seed each.</p>
+    </div>
+    <div class="panel tscroll">
+      <table>
+        <thead><tr><th>BLEU, MK→SQ</th><th class="n">E00 base</th><th class="n">E01 Gazette + VERBIS</th><th class="n">E02 Gazette only</th></tr></thead>
+        <tbody>
+          <tr><td>Gazette test</td><td class="n">27.74</td><td class="n">54.02</td><td class="n">54.28</td></tr>
+          <tr><td>FLORES+ devtest</td><td class="n">22.08</td><td class="n"><b>19.45</b></td><td class="n">15.99</td></tr>
+          <tr><td>NTREX-128</td><td class="n">23.14</td><td class="n"><b>18.13</b></td><td class="n">15.25</td></tr>
+        </tbody>
+      </table>
+      <p class="note">SQ→MK shows the same pattern: E01 stays 2.1 BLEU ahead of E02 on both general sets.</p>
+    </div>
+    <ul class="plain">
+      <li><b>VERBIS protected general quality.</b> Legal BLEU roughly doubled either way, but the run with VERBIS kept 2.1 to 3.5 BLEU more of its general quality.</li>
+      <li><b>The pilot can't say why.</b> E01 added term pairs and definition translation at once, so either could be responsible, or simply having non-Gazette text in the mix.</li>
+      <li><b>So this design pulls the parts apart.</b> TG-31 tests more parallel legal text, TG-32 term pairs, TG-33 definitions as context, and TG-34 definition translation on its own. General replay in TG-20 and the arms guards against the forgetting the pilot showed.</li>
+    </ul>
+  </section>
+
+  <section id="setup">
+    <div class="sec-head">
+      <div class="no">05 · TRAINING SETUP</div>
+      <h2>Full-weight training, TranslateGemma's own recipe</h2>
+      <p>Every training run uses the same configuration. Only the data and the starting checkpoint change.</p>
+    </div>
+    <div class="panel tscroll">
+      <table>
+        <tbody>
+          <tr><td><b>Hardware</b></td><td>2× A100 80GB</td></tr>
+          <tr><td><b>What trains</b></td><td>All weights except the token embeddings (the output layer shares them) and the vision encoder, as in TranslateGemma's SFT: about 10.8B of 12.2B parameters</td></tr>
+          <tr><td><b>Optimizer</b></td><td>Adafactor without momentum, fp32 master weights, bf16 compute</td></tr>
+          <tr><td><b>Memory</b></td><td>≈90 GB for weights, gradients and optimizer, ≈45 GB per GPU when sharded, plus activations</td></tr>
+          <tr><td><b>Sharding</b></td><td>FSDP2, which keeps 2-D weight shapes so Adafactor stays factored; gradient checkpointing; fused cross-entropy</td></tr>
+          <tr><td><b>Batches</b></td><td>Examples up to 2,048 tokens, packed; ≈64k tokens per optimizer step: micro-batches of 8k tokens per GPU, 4 accumulation steps</td></tr>
+          <tr><td><b>Prompt and loss</b></td><td>TranslateGemma's native translation prompt (≈80 tokens) for every sentence pair; a short separate instruction for word tasks; loss on target tokens only</td></tr>
+          <tr><td><b>Learning rate</b></td><td>1e-5, fixed for every run, below TranslateGemma's own 1e-4 because training continues from an already tuned model. TG-10: warm-up over 3% of steps, then constant, then a (1−sqrt) cooldown over the final ≈15%. Every other run: warm-up over 3%, cosine decay to 10%</td></tr>
+          <tr><td><b>Speed assumed</b></td><td>≈2,500 tokens per second, 9M an hour. TG-10's training log gives the real figure; every hour on this page scales with it</td></tr>
+          <tr><td><b>Saved</b></td><td>TG-10 and TG-20 as endpoints (bf16 weights ≈24 GB, plus resumable state until the next step is checked); TG-10's constant-rate checkpoints at ≈0.6M, ≈1.0M and ≈1.48M examples with optimizer state, kept until the size check is settled; every other run as bf16 weights; ≈0.7 TB in all</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="data">
+    <div class="sec-head">
+      <div class="no">06 · DATA</div>
+      <h2>What each step trains on</h2>
+      <p>Runs train on named dataset tags, never on raw corpora. TG-D0 builds and freezes every tag before GPU work starts, and <code>tg_datasets.csv</code> lists each one source by source. Token counts assume typical segment lengths; <code>count_tokens.py</code> replaces them with measured ones.</p>
+    </div>
+
+    <div class="panel">
+      <h3>General step: 35.7% of the deduplicated OPUS set</h3>
+      <div class="tscroll">
+      <table class="wide">
+        <thead><tr><th>Source</th><th class="n">Rows in TG-10</th><th>Directions</th><th>Rule</th><th>Share of TG-10 examples</th><th class="n">Tokens</th></tr></thead>
+        <tbody>
+<tr><td><b>SETIMES</b> <span class="muted">v2</span><div class="note">human translation, Balkan news</div></td><td class="n">197,316</td><td>both</td><td>all rows</td><td><div class="share"><span class="track"><i class="c-human" style="width:22.61%"></i></span><span class="pct">22.6%</span></div></td><td class="n">55.2M</td></tr>
+<tr><td><b>TED2020</b> <span class="muted">v1</span><div class="note">human translation of TED talks</div></td><td class="n">15,970</td><td>both</td><td>all rows</td><td><div class="share"><span class="track"><i class="c-human" style="width:1.83%"></i></span><span class="pct">1.8%</span></div></td><td class="n">3.8M</td></tr>
+<tr><td><b>ELRC-5067-SciPar</b> <span class="muted">v1</span> <span class="chip plain">new</span><div class="note">scientific abstracts</div></td><td class="n">3,704</td><td>both</td><td>all rows</td><td><div class="share"><span class="track"><i class="c-human" style="width:0.42%"></i></span><span class="pct">0.4%</span></div></td><td class="n">1.0M</td></tr>
+<tr><td><b>GlobalVoices</b> <span class="muted">v2018q4</span><div class="note">human translation, citizen media</div></td><td class="n">1,737</td><td>both</td><td>all rows</td><td><div class="share"><span class="track"><i class="c-human" style="width:0.20%"></i></span><span class="pct">0.2%</span></div></td><td class="n">0.5M</td></tr>
+<tr><td><b>EUbookshop</b> <span class="muted">v2</span> <span class="chip plain">new</span><div class="note">EU publications</div></td><td class="n">1,674</td><td>both</td><td>all rows</td><td><div class="share"><span class="track"><i class="c-human" style="width:0.19%"></i></span><span class="pct">0.2%</span></div></td><td class="n">0.5M</td></tr>
+<tr><td><b>NeuLab-TedTalks</b> <span class="muted">v1</span> <span class="chip plain">new</span><div class="note">TED talk transcripts</div></td><td class="n">1,130</td><td>both</td><td>all rows</td><td><div class="share"><span class="track"><i class="c-human" style="width:0.13%"></i></span><span class="pct">0.1%</span></div></td><td class="n">0.3M</td></tr>
+<tr><td><b>Tatoeba, ELRC-wikipedia_health</b> <span class="muted"></span><div class="note">short sentences</div></td><td class="n">13</td><td>both</td><td>all rows</td><td><div class="share"><span class="track"><i class="c-human" style="width:0.00%"></i></span><span class="pct">0.0%</span></div></td><td class="n">0.0M</td></tr>
+<tr><td><b>OpenSubtitles</b> <span class="muted">v2024</span><div class="note">film and TV subtitles; the repository has no short-row flag</div></td><td class="n">100,000</td><td>one each</td><td>random sample, preferring rows of 3+ words</td><td><div class="share"><span class="track"><i class="c-dial" style="width:5.73%"></i></span><span class="pct">5.7%</span></div></td><td class="n">10.5M</td></tr>
+<tr><td><b>NLLB (= CCMatrix)</b> <span class="muted">v1</span><div class="note">mined directly (LASER)</div></td><td class="n">900,000</td><td>one each</td><td>top by LaBSE score, floor 0.80</td><td><div class="share"><span class="track"><i class="c-nllb" style="width:51.57%"></i></span><span class="pct">51.6%</span></div></td><td class="n">117.0M</td></tr>
+<tr><td><b>MultiHPLT</b> <span class="muted">v3</span><div class="note">web text joined through English</div></td><td class="n">300,000</td><td>one each</td><td>top by LaBSE score, floor 0.80</td><td><div class="share"><span class="track"><i class="c-hplt" style="width:17.19%"></i></span><span class="pct">17.2%</span></div></td><td class="n">39.0M</td></tr>
+<tr><td><b>MultiMaCoCu</b> <span class="muted">v2</span><div class="note">web text joined through English</div></td><td class="n">1,946</td><td>one each</td><td>all rows at or above the floor (at most 1,946)</td><td><div class="share"><span class="track"><i class="c-hplt" style="width:0.11%"></i></span><span class="pct">0.1%</span></div></td><td class="n">0.3M</td></tr>
+<tr class="tot"><td><b>TG-10 set <span class="dtag">G</span></b><div class="note">35.7% of 4,268,571 repository rows</div></td><td class="n"><b>1,523,490</b></td><td colspan="2">1,745,034 examples, shuffled once</td><td></td><td class="n"><b>228M</b></td></tr>
+<tr class="grp"><td colspan="6">Not in TG-10 · 2,745,081 rows go to G_REST, a pool for TG-90</td></tr>
+<tr><td><b>QED</b> <span class="muted">v2.0a</span></td><td class="n">0</td><td colspan="4">research-only licence</td></tr>
+<tr><td><b>WikiMatrix</b> <span class="muted">v1</span></td><td class="n">0</td><td colspan="4">Wikipedia-derived; kept away from FLORES+</td></tr>
+<tr><td><b>wikimedia</b> <span class="muted"></span></td><td class="n">0</td><td colspan="4">Wikipedia-derived; kept away from FLORES+</td></tr>
+<tr><td><b>MultiCCAligned</b> <span class="muted">v1.1</span></td><td class="n">0</td><td colspan="4">built on CCAligned and joined through English; lowest-priority mined pool</td></tr>
+<tr><td><b>GNOME</b> <span class="muted"></span></td><td class="n">0</td><td colspan="4">110 UI strings</td></tr>
+<tr><td><b>NLLB (= CCMatrix)</b> <span class="muted">v1</span></td><td class="n">0</td><td colspan="4">rows ranked below the top 900,000 or under the 0.80 floor</td></tr>
+<tr><td><b>MultiHPLT</b> <span class="muted">v3</span></td><td class="n">0</td><td colspan="4">rows ranked below the top 300,000 or under the 0.80 floor</td></tr>
+<tr><td><b>OpenSubtitles</b> <span class="muted">v2024</span></td><td class="n">0</td><td colspan="4">rows outside the 100,000 sample</td></tr>
+<tr><td><b>MultiMaCoCu</b> <span class="muted">v2</span></td><td class="n">0</td><td colspan="4">rows under the 0.80 floor, if any</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <ul class="plain">
+        <li><b>All human-translated text, in both directions.</b> SETIMES, TED2020, SciPar, GlobalVoices, EUbookshop, NeuLab-TedTalks, Tatoeba and ELRC-wikipedia_health: 221,544 rows, 25.4% of TG-10's examples. SciPar, EUbookshop and NeuLab-TedTalks are new.</li>
+        <li><b>Mined text once per row, best first.</b> The top 900,000 NLLB pairs and the top 300,000 MultiHPLT pairs by LaBSE score, never below 0.80, plus every MultiMaCoCu pair that clears it. If fewer rows clear the floor, TG-10 takes fewer; the floor isn't lowered. NLLB (51.6%) is mined directly; MultiHPLT and MultiMaCoCu (17.3%) are joined through English, so they rank lower.</li>
+        <li><b>Some conversation.</b> 100,000 OpenSubtitles lines (5.7%), sampled at random and preferring lines of three words or more, one direction each.</li>
+        <li><b>Left out.</b> QED is research-only, and every later model inherits TG-10. WikiMatrix and wikimedia are Wikipedia text, kept away from FLORES+. MultiCCAligned is CCAligned joined through English, the weakest mined pool. GNOME is 110 interface strings.</li>
+        <li><b>One shuffle.</b> TG-D0 shuffles all 1.75M examples once with a fixed seed, so a checkpoint at any point has seen the same mix as the full run.</li>
+      </ul>
+      <p class="note">Row counts are the repository's own deduplicated counts (opus-mk-sq-clean-dedup, default config, selected by source_id), not OPUS catalogue figures. NLLB v1 repeats CCMatrix for this pair, so the two count as one source. Mined counts are targets; TG-D0 records how many rows clear 0.80.</p>
+    </div>
+
+    <div class="panel" id="size">
+      <h3>Is 1.75M examples the right amount? TG-10 checks</h3>
+      <p>More data can make an already-tuned model worse, so TG-10 measures its own curve instead of assuming one. It trains at a constant learning rate and saves checkpoints at ≈0.6M and ≈1.0M examples. A short cooldown branched from each gives two smaller finished models for ≈3 extra GPU hours, and all three are scored side by side.</p>
+      <div class="tscroll"><svg class="lr" viewBox="0 0 760 222" role="img" aria-label="TG-10 learning-rate schedule with two cooldown branches"><line class="ax" x1="70" y1="168" x2="728" y2="168"/><line class="ax" x1="70" y1="44" x2="70" y2="168"/><line class="ax" x1="70.0" y1="168" x2="70.0" y2="173"/><text x="70.0" y="187" text-anchor="middle">0</text><line class="ax" x1="258.5" y1="168" x2="258.5" y2="173"/><text x="258.5" y="187" text-anchor="middle">0.5M</text><line class="ax" x1="447.1" y1="168" x2="447.1" y2="173"/><text x="447.1" y="187" text-anchor="middle">1.0M</text><line class="ax" x1="635.6" y1="168" x2="635.6" y2="173"/><text x="635.6" y="187" text-anchor="middle">1.5M</text><text x="728" y="187" text-anchor="end" class="k">1.75M</text><text x="399" y="210" text-anchor="middle">training examples seen</text><text x="62" y="62" text-anchor="end">peak</text><text x="62" y="172" text-anchor="end">0</text><path class="main" d="M70.0 168 L89.7 58 L629.3 58 L632.8 78.8 L636.4 87.4 L639.9 94.0 L643.4 99.6 L646.9 104.5 L650.4 108.9 L654.0 113.0 L657.5 116.8 L661.0 120.4 L664.5 123.7 L668.1 126.9 L671.6 130.0 L675.1 133.0 L678.6 135.8 L682.2 138.5 L685.7 141.2 L689.2 143.7 L692.8 146.2 L696.3 148.6 L699.8 151.0 L703.3 153.3 L706.9 155.5 L710.4 157.7 L713.9 159.8 L717.4 161.9 L720.9 164.0 L724.5 166.0 L728.0 168.0"/><path class="br" d="M296.2 58 L297.1 78.8 L297.9 87.4 L298.7 94.0 L299.5 99.6 L300.3 104.5 L301.1 108.9 L301.9 113.0 L302.7 116.8 L303.5 120.4 L304.3 123.7 L305.1 126.9 L305.9 130.0 L306.7 133.0 L307.6 135.8 L308.4 138.5 L309.2 141.2 L310.0 143.7 L310.8 146.2 L311.6 148.6 L312.4 151.0 L313.2 153.3 L314.0 155.5 L314.8 157.7 L315.6 159.8 L316.4 161.9 L317.3 164.0 L318.1 166.0 L318.9 168.0"/><circle class="ck" cx="296.2" cy="58" r="4.5"/><circle class="ep" cx="318.9" cy="168" r="4.5"/><text x="296.2" y="46" text-anchor="middle" class="k">0.6M</text><path class="br" d="M447.1 58 L448.4 78.8 L449.8 87.4 L451.1 94.0 L452.5 99.6 L453.8 104.5 L455.2 108.9 L456.5 113.0 L457.8 116.8 L459.2 120.4 L460.5 123.7 L461.9 126.9 L463.2 130.0 L464.6 133.0 L465.9 135.8 L467.3 138.5 L468.6 141.2 L470.0 143.7 L471.3 146.2 L472.7 148.6 L474.0 151.0 L475.4 153.3 L476.7 155.5 L478.0 157.7 L479.4 159.8 L480.7 161.9 L482.1 164.0 L483.4 166.0 L484.8 168.0"/><circle class="ck" cx="447.1" cy="58" r="4.5"/><circle class="ep" cx="484.8" cy="168" r="4.5"/><text x="447.1" y="46" text-anchor="middle" class="k">1.0M</text><circle class="ck" cx="629.3" cy="58" r="4.5"/><text x="629.3" y="46" text-anchor="middle">cooldown starts</text><circle class="ep" cx="728.0" cy="168" r="4.5"/><text x="168.7" y="46" text-anchor="middle">constant rate (1e-5)</text></svg></div>
+      <div class="legend"><span><i class="ln"></i>TG-10: warm-up, constant rate, cooldown</span><span><i class="ln dash"></i>cooldown branch, 10% of the steps so far</span><span><i class="dot ck"></i>saved constant-rate checkpoint</span><span><i class="dot ep"></i>scored endpoint</span></div>
+      <div class="tscroll">
+      <table class="wide">
+        <thead><tr><th>Development result</th><th>TG-10 endpoint</th><th>What happens next</th></tr></thead>
+        <tbody>
+          <tr><td>The full run is best, or tied with the 1.0M branch inside the interval</td><td><b>Full run</b>, 1.75M examples</td><td>G stays as frozen</td></tr>
+          <tr><td>The 1.0M branch beats the full run beyond the interval, in either direction</td><td><b>1.0M branch</b></td><td>Unused rows return to G_REST; the paper reports it as dilution</td></tr>
+          <tr><td>The full run beats 1.0M beyond the interval and the curve still climbs steeply</td><td><b>Optional TG&#8209;10&#8209;EXT</b></td><td>Resume at constant rate from the cooldown start, add next-ranked NLLB pairs above 0.80 up to ≈2.2M examples, cool down again: ≈11 h, not in the totals</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p class="note">Scored on FLORES_DEV in both directions with chrF++, BLEU and COMET-22 or MetricX-24, 95% paired bootstrap; copy rate, wrong-language rate (OpenLID) and output-to-source length drift are logged as failure checks. Development data only. The chosen size and composition are frozen in the manifest before TG-20 starts.</p>
+      <ul class="plain">
+        <li><b>Full-weight tuning suits this much data.</b> Zhang et al. (2024) conclude: “For million-scale datasets, FMT would be good.” <a href="https://arxiv.org/abs/2402.17193">arXiv 2402.17193</a></li>
+        <li><b>But more can hurt.</b> In ALMA (en→ru), LLaMA-2-7B “peaks with 10K and 100K training data before experiencing a decline” in COMET, while BLEU kept rising. <a href="https://arxiv.org/abs/2309.11674">arXiv 2309.11674</a></li>
+        <li><b>Mined data needs a filter.</b> Adding an unfiltered web-crawled corpus cut an NMT system from 27.2 to 17.3 BLEU (−9.9) in Khayrallah and Koehn (2018). <a href="https://aclanthology.org/W18-2709/">W18-2709</a></li>
+        <li><b>A cooldown can start late.</b> Constant rate plus cooldown matches cosine and lets runs of different lengths reuse one trajectory; (1−sqrt) beats a linear cooldown (Hägele et al., 2024). <a href="https://arxiv.org/abs/2405.18392">arXiv 2405.18392</a></li>
+      </ul>
+    </div>
+
+    <div class="panel">
+      <h3>Legal steps: the Gazette training pool split three ways</h3>
+      <p>The replay arm has to train on Gazette text no model has seen, or it would only be a second pass over TG-20's data. So the pool is split by whole issues, stratified by year, before TG-20 starts.</p>
+      <div class="bar big"><i class="c-eval" style="flex:13200" title="GAZ_DEV: 13,200 rows"></i><i class="c-eval" style="flex:10000" title="GAZ_TEST: 10,000 rows"></i><i class="c-drop" style="flex:16800" title="removed: 16,800 rows"></i><i class="c-legal" style="flex:170000" title="L_MAIN: 170,000 rows"></i><i class="c-legal2" style="flex:40000" title="L_ARMS: 40,000 rows"></i><i class="c-fresh" style="flex:40000" title="L_FRESH: 40,000 rows"></i></div>
+      <div class="tscroll">
+      <table class="wide">
+        <thead><tr><th>Slice</th><th class="n">Rows</th><th class="n">Of 290,000</th><th class="n">Of training pool</th><th>Used by</th><th>Purpose</th></tr></thead>
+        <tbody>
+<tr><td><span class="key"><i class="c-eval"></i><span class="dtag">GAZ_DEV</span></span></td><td class="n">13,200</td><td class="n">4.6%</td><td class="n">—</td><td>selection in every run</td><td>Issue-disjoint validation split</td></tr>
+<tr><td><span class="key"><i class="c-eval"></i><span class="dtag">GAZ_TEST</span></span></td><td class="n">10,000</td><td class="n">3.4%</td><td class="n">—</td><td>scoring every model</td><td>Issue-disjoint test split</td></tr>
+<tr><td><span class="key"><i class="c-drop"></i>Removed</span></td><td class="n">16,800</td><td class="n">5.8%</td><td class="n">—</td><td>nothing</td><td>Training pairs that repeat a dev or test sentence</td></tr>
+<tr><td><span class="key"><i class="c-legal"></i><span class="dtag">L_MAIN</span></span></td><td class="n">170,000</td><td class="n">58.6%</td><td class="n">68%</td><td>TG-20, TG-21</td><td>Legal learning, trained once</td></tr>
+<tr><td><span class="key"><i class="c-legal2"></i><span class="dtag">L_ARMS</span></span></td><td class="n">40,000</td><td class="n">13.8%</td><td class="n">16%</td><td>every TG-30 arm; TG-90</td><td>Shared legal stream of the arms</td></tr>
+<tr><td><span class="key"><i class="c-fresh"></i><span class="dtag">L_FRESH</span></span></td><td class="n">40,000</td><td class="n">13.8%</td><td class="n">16%</td><td>TG-31 (matched amount); TG-90</td><td>New parallel sentences for the replay arm</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p class="note">Rows are planned shares of slvesnik-mk-sq-clean, assuming its issue-disjoint dev and test splits keep their earlier sizes; TG-D0 records the real counts. By TG-90 every training row has been used: L_MAIN in TG-20, the rest in TG-90.</p>
+    </div>
+
+    <div class="panel">
+      <h3>Word lists</h3>
+      <div class="tscroll">
+      <table class="wide">
+        <thead><tr><th>Source</th><th>Format</th><th class="n">Entries</th><th>Licence</th><th>Goes into</th></tr></thead>
+        <tbody>
+          <tr><td><b>VERBIS termbase</b><div class="note">private repo</div></td><td>Term + definition, both languages; four domains</td><td class="n">15,925</td><td>Redistribution restricted</td><td><span class="dtag">V_*</span> tasks, all arms</td></tr>
+          <tr><td><b>Media Literacy Dictionary</b><div class="note">local</div></td><td>Term + definition, both languages</td><td class="n">1,081 valid</td><td>No licence found; treated as copyrighted</td><td><span class="dtag">V_*</span> tasks, fifth domain</td></tr>
+          <tr><td><b>MUSE dictionary</b><div class="note">EdonFetaji/mk-sq-dictionary-muse</div></td><td>Word pairs built through English</td><td class="n">7,388</td><td>CC BY-NC 4.0</td><td><span class="dtag">W_GEN</span>, TG-36</td></tr>
+          <tr><td><b>Goethe Verlag phrasebook</b><div class="note">local</div></td><td>Conversational phrase pairs</td><td class="n">1,779 unique</td><td>All rights reserved; scraping prohibited</td><td><span class="dtag">W_GEN</span>, TG-36, research only</td></tr>
+          <tr><td><b>Articles and notices</b><div class="note">local, 500k rows</div></td><td>Legal text mapped to articles and notices</td><td class="n">500,000</td><td>Own scrape</td><td><span class="dtag">A_NOTICES</span>, TG-90 only if it's paired</td></tr>
+          <tr><td><b>Shqipopedia; Goethe thematic vocabulary</b></td><td>Glossary rows; word lists</td><td class="n">696 · 1,904</td><td>—</td><td>Not used</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p class="note">Before any word task, 1,701 of the 17,006 definition-lexicon entries (10% of concepts, all senses and both directions together) go into <span class="dtag">V_HOLDOUT</span>, which no model trains on before TG-90.</p>
+    </div>
+
+    <div class="panel">
+      <h3>What each run trains on</h3>
+      <div class="keys"><span class="key"><i class="c-human"></i>General · human translation</span><span class="key"><i class="c-nllb"></i>General · NLLB</span><span class="key"><i class="c-hplt"></i>General · via English</span><span class="key"><i class="c-dial"></i>General · subtitles</span><span class="key"><i class="c-replay"></i>General replay</span><span class="key"><i class="c-legal"></i>Gazette</span><span class="key"><i class="c-fresh"></i>Fresh Gazette</span><span class="key"><i class="c-lex"></i>Word task</span><span class="key"><i class="c-wgen"></i>General word pairs</span></div>
+      <div class="tscroll">
+      <table class="wide">
+        <thead><tr><th>Run</th><th>Token mix</th><th class="n">Tokens</th><th class="n">Training</th></tr></thead>
+        <tbody>
+<tr><td><span class="tag">TG-10</span><div class="note">General MK–SQ</div></td><td class="mixcell"><div class="bar"><i class="c-human" style="flex:61.35" title="General · human translation: 61.3M tokens"></i><i class="c-nllb" style="flex:117.00" title="General · NLLB: 117.0M tokens"></i><i class="c-hplt" style="flex:39.25" title="General · via English: 39.3M tokens"></i><i class="c-dial" style="flex:10.50" title="General · subtitles: 10.5M tokens"></i></div></td><td class="n">228M</td><td class="n">25 h</td></tr>
+<tr><td><span class="tag">TG-20</span><div class="note">Shared legal</div></td><td class="mixcell"><div class="bar"><i class="c-legal" style="flex:51.00" title="Gazette: 51.0M tokens"></i><i class="c-replay" style="flex:119.00" title="General replay: 119.0M tokens"></i></div></td><td class="n">170M</td><td class="n">19 h</td></tr>
+<tr><td><span class="tag opt">TG-21</span><div class="note">Gazette only</div></td><td class="mixcell"><div class="bar"><i class="c-legal" style="flex:51.00" title="Gazette: 51.0M tokens"></i></div></td><td class="n">51M</td><td class="n">5.7 h</td></tr>
+<tr><td><span class="tag">TG-31</span><div class="note">Fresh parallel sentences</div></td><td class="mixcell"><div class="bar"><i class="c-legal" style="flex:12.00" title="Gazette: 12.0M tokens"></i><i class="c-replay" style="flex:12.00" title="General replay: 12.0M tokens"></i><i class="c-fresh" style="flex:8.45" title="Fresh Gazette: 8.4M tokens"></i></div></td><td class="n">32M</td><td class="n">3.6 h</td></tr>
+<tr><td><span class="tag core">TG-32</span><div class="note">Term pairs</div></td><td class="mixcell"><div class="bar"><i class="c-legal" style="flex:12.00" title="Gazette: 12.0M tokens"></i><i class="c-replay" style="flex:12.00" title="General replay: 12.0M tokens"></i><i class="c-lex" style="flex:4.32" title="Word task: 4.3M tokens"></i></div></td><td class="n">28M</td><td class="n">3.1 h</td></tr>
+<tr><td><span class="tag core">TG-33</span><div class="note">Term pairs + definitions</div></td><td class="mixcell"><div class="bar"><i class="c-legal" style="flex:12.00" title="Gazette: 12.0M tokens"></i><i class="c-replay" style="flex:12.00" title="General replay: 12.0M tokens"></i><i class="c-lex" style="flex:8.45" title="Word task: 8.4M tokens"></i></div></td><td class="n">32M</td><td class="n">3.6 h</td></tr>
+<tr><td><span class="tag opt">TG-34</span><div class="note">Definition translation</div></td><td class="mixcell"><div class="bar"><i class="c-legal" style="flex:12.00" title="Gazette: 12.0M tokens"></i><i class="c-replay" style="flex:12.00" title="General replay: 12.0M tokens"></i><i class="c-lex" style="flex:8.45" title="Word task: 8.4M tokens"></i></div></td><td class="n">32M</td><td class="n">3.6 h</td></tr>
+<tr><td><span class="tag opt">TG-35</span><div class="note">Shuffled definitions</div></td><td class="mixcell"><div class="bar"><i class="c-legal" style="flex:12.00" title="Gazette: 12.0M tokens"></i><i class="c-replay" style="flex:12.00" title="General replay: 12.0M tokens"></i><i class="c-lex" style="flex:8.45" title="Word task: 8.4M tokens"></i></div></td><td class="n">32M</td><td class="n">3.6 h</td></tr>
+<tr><td><span class="tag opt">TG-36</span><div class="note">General word pairs</div></td><td class="mixcell"><div class="bar"><i class="c-legal" style="flex:12.00" title="Gazette: 12.0M tokens"></i><i class="c-replay" style="flex:12.00" title="General replay: 12.0M tokens"></i><i class="c-lex" style="flex:4.32" title="Word task: 4.3M tokens"></i><i class="c-wgen" style="flex:3.02" title="General word pairs: 3.0M tokens"></i></div></td><td class="n">31M</td><td class="n">3.5 h</td></tr>
+<tr><td><span class="tag">TG-90</span><div class="note">Final, minimum</div></td><td class="mixcell"><div class="bar"><i class="c-fresh" style="flex:24.00" title="Fresh Gazette: 24.0M tokens"></i><i class="c-lex" style="flex:9.39" title="Word task: 9.4M tokens"></i><i class="c-wgen" style="flex:3.02" title="General word pairs: 3.0M tokens"></i><i class="c-replay" style="flex:36.41" title="General replay: 36.4M tokens"></i></div></td><td class="n">73M</td><td class="n">8.1 h</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p class="note">Every arm's shared stream is L_ARMS plus an equal amount of general replay, 24M tokens. TG-90 is shown at its minimum; adding G_REST takes ≈40 h more.</p>
+    </div>
+
+    <div class="panel">
+      <h3>Dataset tags</h3>
+      <div class="tscroll">
+      <table class="wide">
+        <thead><tr><th>Tag</th><th>Built from</th><th class="n">Size</th><th>Used by</th></tr></thead>
+        <tbody>
+          <tr class="grp"><td colspan="4">General</td></tr>
+          <tr><td><span class="dtag">G</span></td><td>Every human-translated row, both directions; NLLB top 900k and MultiHPLT top 300k by LaBSE (≥ 0.80); MultiMaCoCu above the floor; OpenSubtitles 100k. Shuffled once</td><td class="n">1,523,490 rows</td><td>TG-10</td></tr>
+          <tr><td><span class="dtag">G_REPLAY</span></td><td>Examples resampled from G in its source proportions, fixed per seed; TG-20's replay is ≈52% of G</td><td class="n">119M in TG-20</td><td>TG-20, every arm, TG-90</td></tr>
+          <tr><td><span class="dtag">G_REST</span></td><td>Every repository row not in G: QED, WikiMatrix, wikimedia, MultiCCAligned, GNOME, lower-ranked NLLB and MultiHPLT, the rest of OpenSubtitles</td><td class="n">2,745,081 rows</td><td>TG-90, optional</td></tr>
+          <tr class="grp"><td colspan="4">Legal</td></tr>
+          <tr><td><span class="dtag">L_MAIN</span></td><td>68% of the Gazette training issues</td><td class="n">170,000 rows</td><td>TG-20, TG-21</td></tr>
+          <tr><td><span class="dtag">L_ARMS</span></td><td>16% of the issues, unseen by TG-20</td><td class="n">40,000 rows</td><td>Every arm; TG-90</td></tr>
+          <tr><td><span class="dtag">L_FRESH</span></td><td>16% of the issues, unseen by any model until TG-31</td><td class="n">40,000 rows</td><td>TG-31 (28,161 rows); TG-90</td></tr>
+          <tr><td><span class="dtag">A_NOTICES</span></td><td>Articles-and-notices corpus, dev and test issues removed</td><td class="n">500,000 rows</td><td>TG-90, if paired</td></tr>
+          <tr class="grp"><td colspan="4">Word tasks · VERBIS + Media Literacy, 15,305 training entries, 3 presentations per direction</td></tr>
+          <tr><td><span class="dtag">V_TERM</span></td><td>Source term → target term</td><td class="n">91,830 examples</td><td>TG-32, TG-36</td></tr>
+          <tr><td><span class="dtag">V_DEF_CTX</span></td><td>Source term + source-language definition → target term</td><td class="n">91,830 examples</td><td>TG-33</td></tr>
+          <tr><td><span class="dtag">V_DEF_PAR</span></td><td>Definition → definition in the other language, LaBSE ≥ 0.70</td><td class="n">14,716 pairs</td><td>TG-34</td></tr>
+          <tr><td><span class="dtag">V_DEF_SHUF</span></td><td>V_DEF_CTX with definitions swapped between similar-length entries of one domain</td><td class="n">91,830 examples</td><td>TG-35</td></tr>
+          <tr><td><span class="dtag">V_HOLDOUT</span></td><td>10% of concepts, never trained before TG-90</td><td class="n">1,701 entries</td><td>Scored as TERM_HOLDOUT</td></tr>
+          <tr><td><span class="dtag">V_ALL</span></td><td>Every entry, hold-out included, in the winning task format</td><td class="n">17,006 entries</td><td>TG-90</td></tr>
+          <tr><td><span class="dtag">W_GEN</span></td><td>MUSE word pairs and Goethe phrases, no definitions</td><td class="n">7,388 + 1,779</td><td>TG-36; TG-90 if TG-36 helped</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="order">
+    <div class="sec-head">
+      <div class="no">07 · ORDER OF WORK</div>
+      <h2>What runs first, and what waits for results</h2>
+      <p>Runs go in priority order on the two GPUs. Priority 1 answers the central question; priority 2 explains it; priority 3 extends it; TG-90 waits for all of them. The core study needs about 85 hours, 3.5 days of continuous GPU time, including the ≈3 h size check.</p>
+    </div>
+    <div class="panel">
+      <div class="tl-wrap">
+        <div class="bar tl"><i class="c-p0" style="flex:1.5" title="Data freeze and baseline: 2 h"></i><i class="c-p1" style="flex:25.8" title="TG-10 general: 26 h"></i><i class="c-p1b" style="flex:3.0" title="TG-10 size check: 3 h"></i><i class="c-p1" style="flex:19.4" title="TG-20 legal: 19 h"></i><i class="c-p1b" style="flex:11.8" title="Arms, seed 1: 12 h"></i><i class="c-p1b" style="flex:23.6" title="Arms, seeds 2 and 3: 24 h"></i><i class="c-p2" style="flex:14.4" title="Priority 2: TG-34, TG-21, TG-35: 14 h"></i><i class="c-p3" style="flex:20.2" title="Priority 3: TG-36 and extra seeds: 20 h"></i><i class="c-p4" style="flex:8.6" title="TG-90 final (minimum): 9 h"></i></div>
+        <div class="tl-scale"><span style="left:18.71%">day 1</span><span style="left:37.41%">day 2</span><span style="left:56.12%">day 3</span><span style="left:74.82%">day 4</span><span style="left:93.53%">day 5</span></div>
+      </div>
+      <ul class="tl-list"><li><span class="key"><i class="c-p0"></i>Data freeze and baseline</span><span class="hrs">2 h</span></li><li><span class="key"><i class="c-p1"></i>TG-10 general</span><span class="hrs">26 h</span></li><li><span class="key"><i class="c-p1b"></i>TG-10 size check</span><span class="hrs">3 h</span></li><li><span class="key"><i class="c-p1"></i>TG-20 legal</span><span class="hrs">19 h</span></li><li><span class="key"><i class="c-p1b"></i>Arms, seed 1</span><span class="hrs">12 h</span></li><li><span class="key"><i class="c-p1b"></i>Arms, seeds 2 and 3</span><span class="hrs">24 h</span></li><li><span class="key"><i class="c-p2"></i>Priority 2: TG-34, TG-21, TG-35</span><span class="hrs">14 h</span></li><li><span class="key"><i class="c-p3"></i>Priority 3: TG-36 and extra seeds</span><span class="hrs">20 h</span></li><li><span class="key"><i class="c-p4"></i>TG-90 final (minimum)</span><span class="hrs">9 h</span></li></ul>
+      <p class="note">Hours include scoring each model (≈0.5 h with vLLM and greedy decoding). Restarts, checkpoint saves and debugging usually add 30–50% of calendar time.</p>
+    </div>
+    <div class="panel tscroll">
+      <table class="wide">
+        <thead><tr><th class="n">#</th><th>Run</th><th>Priority</th><th>Starts after, or condition</th><th class="n">Hours</th><th class="n">Running total</th></tr></thead>
+        <tbody>
+<tr><td class="n">1</td><td><span class="tag">TG-D0</span></td><td><span class="chip plain">Setup</span></td><td>first</td><td class="n">1.0</td><td class="n">1 h · day 0.0</td></tr>
+<tr><td class="n">2</td><td><span class="tag">TG-00</span></td><td><span class="chip plain">Setup</span></td><td>after TG-D0</td><td class="n">0.5</td><td class="n">2 h · day 0.1</td></tr>
+<tr><td class="n">3</td><td><span class="tag">TG-10</span></td><td><span class="chip core">1 · core</span></td><td>after TG-D0</td><td class="n">25.8</td><td class="n">27 h · day 1.1</td></tr>
+<tr><td class="n">4</td><td><span class="tag">TG-10-CD06</span></td><td><span class="chip core">1 · core</span></td><td>after TG-10</td><td class="n">1.2</td><td class="n">28 h · day 1.2</td></tr>
+<tr><td class="n">5</td><td><span class="tag">TG-10-CD10</span></td><td><span class="chip core">1 · core</span></td><td>after TG-10</td><td class="n">1.8</td><td class="n">30 h · day 1.3</td></tr>
+<tr><td class="n">6</td><td><span class="tag opt">TG-10-EXT</span></td><td><span class="chip core">1 · core</span></td><td>only if the full run beats the 1.0M branch beyond the interval and the curve still climbs steeply; not counted in totals</td><td class="n">10.7</td><td class="n">not counted</td></tr>
+<tr><td class="n">7</td><td><span class="tag">TG-20</span></td><td><span class="chip core">1 · core</span></td><td>after TG-10, TG-10-CD06, TG-10-CD10</td><td class="n">19.4</td><td class="n">50 h · day 2.1</td></tr>
+<tr><td class="n">8</td><td><span class="tag">TG-31-s1</span></td><td><span class="chip core">1 · core</span></td><td>after TG-20</td><td class="n">4.1</td><td class="n">54 h · day 2.2</td></tr>
+<tr><td class="n">9</td><td><span class="tag core">TG-32-s1</span></td><td><span class="chip core">1 · core</span></td><td>after TG-20</td><td class="n">3.6</td><td class="n">57 h · day 2.4</td></tr>
+<tr><td class="n">10</td><td><span class="tag core">TG-33-s1</span></td><td><span class="chip core">1 · core</span></td><td>after TG-20</td><td class="n">4.1</td><td class="n">62 h · day 2.6</td></tr>
+<tr><td class="n">11</td><td><span class="tag">TG-31-s2</span></td><td><span class="chip core">1 · core</span></td><td>after TG-20</td><td class="n">4.1</td><td class="n">66 h · day 2.7</td></tr>
+<tr><td class="n">12</td><td><span class="tag core">TG-32-s2</span></td><td><span class="chip core">1 · core</span></td><td>after TG-20</td><td class="n">3.6</td><td class="n">69 h · day 2.9</td></tr>
+<tr><td class="n">13</td><td><span class="tag core">TG-33-s2</span></td><td><span class="chip core">1 · core</span></td><td>after TG-20</td><td class="n">4.1</td><td class="n">73 h · day 3.1</td></tr>
+<tr><td class="n">14</td><td><span class="tag">TG-31-s3</span></td><td><span class="chip core">1 · core</span></td><td>after TG-20</td><td class="n">4.1</td><td class="n">77 h · day 3.2</td></tr>
+<tr><td class="n">15</td><td><span class="tag core">TG-32-s3</span></td><td><span class="chip core">1 · core</span></td><td>after TG-20</td><td class="n">3.6</td><td class="n">81 h · day 3.4</td></tr>
+<tr><td class="n">16</td><td><span class="tag core">TG-33-s3</span></td><td><span class="chip core">1 · core</span></td><td>after TG-20</td><td class="n">4.1</td><td class="n">85 h · day 3.5</td></tr>
+<tr><td class="n">17</td><td><span class="tag opt">TG-34-s1</span></td><td><span class="chip opt">2 · interpret</span></td><td>after TG-20</td><td class="n">4.1</td><td class="n">89 h · day 3.7</td></tr>
+<tr><td class="n">18</td><td><span class="tag opt">TG-21</span></td><td><span class="chip opt">2 · interpret</span></td><td>after TG-10</td><td class="n">6.2</td><td class="n">95 h · day 4.0</td></tr>
+<tr><td class="n">19</td><td><span class="tag opt">TG-35-s1</span></td><td><span class="chip opt">2 · interpret</span></td><td>only if TG-33 beats TG-32 on reference-confirmed legal term success, mean of 3 seeds</td><td class="n">4.1</td><td class="n">100 h · day 4.1</td></tr>
+<tr><td class="n">20</td><td><span class="tag opt">TG-36-s1</span></td><td><span class="chip opt">3 · extend</span></td><td>after TG-20</td><td class="n">4.0</td><td class="n">104 h · day 4.3</td></tr>
+<tr><td class="n">21</td><td><span class="tag opt">TG-34-s2</span></td><td><span class="chip opt">3 · extend</span></td><td>only if seed 1 differs from TG-31 by more than the seed-to-seed spread of the core arms</td><td class="n">4.1</td><td class="n">108 h · day 4.5</td></tr>
+<tr><td class="n">22</td><td><span class="tag opt">TG-34-s3</span></td><td><span class="chip opt">3 · extend</span></td><td>only if seed 1 differs from TG-31 by more than the seed-to-seed spread of the core arms</td><td class="n">4.1</td><td class="n">112 h · day 4.7</td></tr>
+<tr><td class="n">23</td><td><span class="tag opt">TG-36-s2</span></td><td><span class="chip opt">3 · extend</span></td><td>only if seed 1 differs from TG-32 by more than the seed-to-seed spread of the core arms</td><td class="n">4.0</td><td class="n">116 h · day 4.8</td></tr>
+<tr><td class="n">24</td><td><span class="tag opt">TG-36-s3</span></td><td><span class="chip opt">3 · extend</span></td><td>only if seed 1 differs from TG-32 by more than the seed-to-seed spread of the core arms</td><td class="n">4.0</td><td class="n">120 h · day 5.0</td></tr>
+<tr><td class="n">25</td><td><span class="tag">TG-90</span></td><td><span class="chip once">Final</span></td><td>after every core run is scored; recipe follows the results</td><td class="n">8.6</td><td class="n">128 h · day 5.3</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="experiments">
+    <div class="sec-head">
+      <div class="no">08 · EXPERIMENTS</div>
+      <h2>Every run, step by step</h2>
+      <p>Nothing in a later step may change a decision frozen in an earlier one.</p>
+    </div>
+
+    <div class="panel">
+      <div class="stage-head"><span class="no">Step 0 · Setup</span><h3>Freeze the data, score the baseline</h3></div>
+      <article class="exp">
+        <div class="exp-id"><span class="tag">TG-D0 · DATA</span><h3>Freeze the data</h3><div class="tags"><span class="chip plain">Setup</span></div><span class="runs">CPU + ≈1 GPU hour</span></div>
+        <dl>
+          <dt>Produces</dt><dd>Every dataset tag in section 06, each with a manifest and file hash.</dd>
+          <dt>Steps</dt><dd>Select G by source_id; LaBSE-score every NLLB, MultiHPLT and MultiMaCoCu pair (none has an embedding filter yet) and store the score and an english_mediated flag; record how many pass 0.80; check the release scope of SciPar and EUbookshop; shuffle TG-10's examples once with a fixed seed; LaBSE-score definition pairs; split the Gazette training pool by issue into L_MAIN, L_ARMS and L_FRESH; remove training pairs that repeat a dev or test sentence; hold out 10% of lexicon concepts; mask definitions that contain the target term; build the terminology test subsets.</dd>
+          <dt>Why</dt><dd>Every later run reads the same frozen files, and no test sentence can leak into training.</dd>
+        </dl>
+      </article>
+      <article class="exp">
+        <div class="exp-id"><span class="tag">TG-00 · BASE</span><h3>Original TranslateGemma</h3><div class="tags"><span class="chip plain">Scored only</span></div><span class="runs">≈0.5 h</span></div>
+        <dl>
+          <dt>Why</dt><dd>The reference for every gain and loss. TranslateGemma's report lists English↔Macedonian and English↔Albanian but not the direct pair, so direct MK–SQ quality is measured, not assumed.</dd>
+        </dl>
+      </article>
+    </div>
+
+    <div class="panel">
+      <div class="stage-head"><span class="no">Step 1 · General</span><h3>Teach direct Macedonian ↔ Albanian</h3></div>
+      <article class="exp">
+        <div class="exp-id"><span class="tag">TG-10 · GEN</span><h3>General MK–SQ</h3><div class="tags"><span class="chip once">Saved endpoint</span><span class="chip core">Priority 1</span></div><span class="runs">1 run · ≈25 h + ≈3 h size check</span></div>
+        <dl>
+          <dt>Starts from</dt><dd>TG-00</dd>
+          <dt>Trains on</dt><dd><span class="dtag">G</span>: every human-translated row in both directions (221,544), plus the top 900,000 NLLB and 300,000 MultiHPLT pairs by LaBSE (≥ 0.80), MultiMaCoCu pairs above the floor and 100,000 OpenSubtitles lines, one direction each</dd>
+          <dt>Size</dt><dd>1,523,490 rows (35.7% of the deduplicated set), 1.75M examples, 228M tokens</dd>
+          <dt>Schedule</dt><dd>Constant rate after warm-up, (1−sqrt) cooldown over the final ≈15%; constant-rate checkpoints at ≈0.6M, ≈1.0M and the cooldown start (≈1.48M)</dd>
+          <dt>Decides</dt><dd>Its own endpoint, by the <a href="#size">size check</a>, frozen before TG-20</dd>
+          <dt>Why</dt><dd>Teaches the direct pair once. Its general scores are the reference for RQ2.</dd>
+        </dl>
+      </article>
+      <article class="exp">
+        <div class="exp-id"><span class="tag">TG-10-CD06 · CD10</span><h3>Size-check branches</h3><div class="tags"><span class="chip core">Priority 1</span><span class="chip opt">EXT conditional</span></div><span class="runs">2 short runs · ≈3 h</span></div>
+        <dl>
+          <dt>Starts from</dt><dd>TG-10's constant-rate checkpoints at ≈0.6M and ≈1.0M examples</dd>
+          <dt>Trains on</dt><dd>The next 10% of TG-10's own shuffled stream, cooling the rate to zero</dd>
+          <dt>Compares</dt><dd>Endpoints at ≈0.66M, ≈1.1M and 1.75M examples on FLORES_DEV, both directions</dd>
+          <dt>Optional</dt><dd>TG-10-EXT continues past 1.75M with next-ranked NLLB pairs, only under the third rule in the <a href="#size">size check</a> (≈11 h, outside the totals)</dd>
+        </dl>
+      </article>
+    </div>
+
+    <div class="panel">
+      <div class="stage-head"><span class="no">Step 2 · Legal</span><h3>Teach legal language once</h3></div>
+      <article class="exp">
+        <div class="exp-id"><span class="tag">TG-20 · LEG</span><h3>Shared legal</h3><div class="tags"><span class="chip once">Saved endpoint</span><span class="chip core">Priority 1</span></div><span class="runs">1 run · ≈19 h</span></div>
+        <dl>
+          <dt>Starts from</dt><dd>TG-10, at the endpoint the size check picks</dd>
+          <dt>Trains on</dt><dd><span class="dtag">L_MAIN</span>, 170,000 Gazette rows in both directions (51M tokens, 30%), and <span class="dtag">G_REPLAY</span> from G (119M, 70%, about 52% of G)</dd>
+          <dt>Why</dt><dd>Legal learning happens once, and every arm branches from here. L_ARMS and L_FRESH stay unseen.</dd>
+          <dt>Answers</dt><dd><span class="chip plain">RQ2</span> TG-20 vs TG-10 shows the general cost of legal training</dd>
+        </dl>
+      </article>
+      <article class="exp">
+        <div class="exp-id"><span class="tag opt">TG-21 · GAZ</span><h3>Gazette-only diagnostic</h3><div class="tags"><span class="chip opt">Priority 2</span></div><span class="runs">1 run · ≈6 h</span></div>
+        <dl>
+          <dt>Starts from</dt><dd>TG-10</dd>
+          <dt>Trains on</dt><dd><span class="dtag">L_MAIN</span> alone: TG-20's legal data without replay</dd>
+          <dt>Why</dt><dd>Repeats the NLLB E02 setting at 12B. TG-21 vs TG-20 shows how much replay protects.</dd>
+          <dt>Answers</dt><dd><span class="chip plain">RQ2</span></dd>
+        </dl>
+      </article>
+    </div>
+
+    <div class="panel">
+      <div class="stage-head"><span class="no">Step 3 · TG-30 arms</span><h3>Compare ways of spending the same GPU time</h3><p>Every arm starts from TG-20 and trains on the same shared stream: <span class="dtag">L_ARMS</span> in both directions plus as much general replay, 24M tokens in all, in the same order for a given seed. Each arm then adds one thing. Seed 1 of every core arm runs first.</p></div>
+      <article class="exp">
+        <div class="exp-id"><span class="tag">TG-31 · REPLAY</span><h3>Fresh parallel sentences</h3><div class="tags"><span class="chip core">Priority 1</span></div><span class="runs">3 seeds · ≈3.6 h each</span></div>
+        <dl>
+          <dt>Adds</dt><dd>28,161 new rows from <span class="dtag">L_FRESH</span> in both directions, 8.4M tokens: exactly the compute of TG-33's word task</dd>
+          <dt>Why</dt><dd>Plain parallel-corpus training, the realistic alternative to building a dictionary. The word-task arms have to beat this run, not TG-20.</dd>
+          <dt>Answers</dt><dd><div class="tags"><span class="chip plain">RQ1</span><span class="chip plain">Central (b)</span><span class="chip plain">RQ2</span></div></dd>
+        </dl>
+      </article>
+      <article class="exp">
+        <div class="exp-id"><span class="tag core">TG-32 · TERMS</span><h3>Term pairs</h3><div class="tags"><span class="chip core">Priority 1</span></div><span class="runs">3 seeds · ≈3.1 h each</span></div>
+        <dl>
+          <dt>Adds</dt><dd><span class="dtag">V_TERM</span>: 15,305 entries from the four VERBIS domains and the Media Literacy Dictionary, each shown 3 times in each direction (91,830 examples, 4.3M tokens)</dd>
+          <dt>Why</dt><dd>Tests whether knowing the term pairs helps, and is the baseline the definitions arm must beat.</dd>
+          <dt>Answers</dt><dd><div class="tags"><span class="chip plain">RQ1</span><span class="chip plain">Central (a)</span><span class="chip plain">Central (b)</span><span class="chip plain">RQ3</span><span class="chip plain">RQ4</span></div></dd>
+        </dl>
+      </article>
+      <article class="exp">
+        <div class="exp-id"><span class="tag core">TG-33 · TERMS-DEF</span><h3>Term pairs with definitions</h3><div class="tags"><span class="chip core">Priority 1</span></div><span class="runs">3 seeds · ≈3.6 h each</span></div>
+        <dl>
+          <dt>Adds</dt><dd><span class="dtag">V_DEF_CTX</span>: TG-32's entries and presentations, with the source-language definition added to each input. The output is still just the target term. 8.4M tokens.</dd>
+          <dt>Why</dt><dd>The central test. Everything except the definition matches TG-32.</dd>
+          <dt>Answers</dt><dd><div class="tags"><span class="chip plain">Central (a)</span><span class="chip plain">Central (b)</span><span class="chip plain">RQ1</span><span class="chip plain">RQ3</span><span class="chip plain">RQ4</span></div></dd>
+        </dl>
+      </article>
+      <article class="exp">
+        <div class="exp-id"><span class="tag opt">TG-34 · DEF-TRANS</span><h3>Definition translation</h3><div class="tags"><span class="chip opt">Priority 2</span></div><span class="runs">seed 1; seeds 2–3 if warranted</span></div>
+        <dl>
+          <dt>Adds</dt><dd><span class="dtag">V_DEF_PAR</span>: 14,716 definition pairs with LaBSE ≥ 0.70, translated both ways (1.7 passes), matched to TG-33's 8.4M tokens</dd>
+          <dt>Why</dt><dd>Isolates the definition-translation half of the NLLB E01 recipe, the part that may have protected general quality.</dd>
+          <dt>Answers</dt><dd><div class="tags"><span class="chip plain">RQ2</span><span class="chip plain">Central (b)</span></div></dd>
+        </dl>
+      </article>
+      <article class="exp">
+        <div class="exp-id"><span class="tag opt">TG-35 · SHUF-DEF</span><h3>Shuffled definitions</h3><div class="tags"><span class="chip opt">Priority 2</span></div><span class="runs">1 seed, conditional</span></div>
+        <dl>
+          <dt>Runs if</dt><dd>TG-33 beats TG-32 on reference-confirmed legal term success, averaged over three seeds</dd>
+          <dt>Adds</dt><dd><span class="dtag">V_DEF_SHUF</span>: TG-33's entries, each given the definition of another entry of similar length</dd>
+          <dt>Why</dt><dd>Shows whether the definition's meaning mattered or only the extra input text.</dd>
+        </dl>
+      </article>
+      <article class="exp">
+        <div class="exp-id"><span class="tag opt">TG-36 · GEN-LEX</span><h3>General word pairs</h3><div class="tags"><span class="chip opt">Priority 3</span></div><span class="runs">seed 1; seeds 2–3 if warranted</span></div>
+        <dl>
+          <dt>Adds</dt><dd>TG-32's <span class="dtag">V_TERM</span> plus <span class="dtag">W_GEN</span>: 7,388 MUSE pairs and 1,779 Goethe phrases, 3 times each direction (3.0M tokens)</dd>
+          <dt>Why</dt><dd>Tests whether everyday word knowledge without definitions helps general translation. Its research-only data stays out of the shared checkpoints and the core results.</dd>
+          <dt>Answers</dt><dd><div class="tags"><span class="chip plain">RQ5</span><span class="chip plain">Central (b)</span></div></dd>
+        </dl>
+      </article>
+    </div>
+
+    <div class="panel">
+      <div class="stage-head"><span class="no">Step 4 · Final</span><h3>Build the strongest model the evidence supports</h3></div>
+      <article class="exp">
+        <div class="exp-id"><span class="tag">TG-90 · FINAL</span><h3>All-data model</h3><div class="tags"><span class="chip once">After results</span></div><span class="runs">1 run · ≈9 h minimum</span></div>
+        <dl>
+          <dt>Starts from</dt><dd>TG-20</dd>
+          <dt>Trains on</dt><dd><span class="dtag">L_ARMS</span> and <span class="dtag">L_FRESH</span> in both directions, so the whole Gazette training pool is used; <span class="dtag">V_ALL</span> in the winning task format; <span class="dtag">W_GEN</span> only if TG-36 beat TG-32; general replay equal to the rest</dd>
+          <dt>Options</dt><dd><span class="dtag">G_REST</span>, the 2,745,081 repository rows not in TG-10 (≈40 h), and <span class="dtag">A_NOTICES</span> if it's paired (≈27 h per direction)</dd>
+          <dt>Release</dt><dd>A public checkpoint inherits everything TG-10 and TG-20 trained on, so TED2020, NeuLab-TedTalks, SciPar, EUbookshop, NLLB and OpenSubtitles need their licences checked, VERBIS needs a permission basis, and Goethe and the Media Literacy Dictionary stay out. Its scores show the model is good; they don't answer the research questions.</dd>
+        </dl>
+      </article>
+    </div>
+  </section>
+
+  <section id="fair">
+    <div class="sec-head">
+      <div class="no">09 · FAIRNESS</div>
+      <h2>What stays equal across the arms</h2>
+    </div>
+    <ul class="plain">
+      <li><b>Same start.</b> Every arm loads TG-20 and uses the same optimizer, learning rate, schedule and batch size.</li>
+      <li><b>Same shared stream.</b> L_ARMS and the same general replay, in the same order for a given seed.</li>
+      <li><b>Same entries.</b> TG-32, TG-33 and TG-35 show the same 15,305 entries 3 times in each direction. Only the input differs.</li>
+      <li><b>Same GPU time where it matters.</b> TG-31, TG-34 and TG-35 process exactly as many tokens as TG-33, so plain parallel training gets the same compute as the definitions arm. TG-32 processes fewer, because bare terms are short; that only favours its rivals.</li>
+      <li><b>Really new legal text.</b> L_FRESH comes from Gazette issues no model has seen, so TG-31 tests more parallel data, not a second pass.</li>
+      <li><b>A real hold-out.</b> 1,701 lexicon entries (<span class="dtag">V_HOLDOUT</span>) never appear in any word task, which shows whether word training helps or hurts terms it never saw.</li>
+      <li><b>No peeking.</b> Settings and checkpoints are chosen on development data only. The extra input tokens in TG-33 are reported as compute cost.</li>
+    </ul>
+  </section>
+
+  <section id="scoring">
+    <div class="sec-head">
+      <div class="no">10 · SCORING</div>
+      <h2>How every model is scored</h2>
+      <p>No human reviewers are available, so every measure is automatic and reproducible. Each model's translations are generated once, and every metric reads those same outputs.</p>
+    </div>
+    <div class="panel tscroll">
+      <table class="wide">
+        <thead><tr><th>Tag</th><th>Built from</th><th class="n">Size</th><th>Used for</th></tr></thead>
+        <tbody>
+          <tr class="grp"><td colspan="4">Development · selection only</td></tr>
+          <tr><td><span class="dtag">GAZ_DEV</span></td><td>Gazette validation split, issue-disjoint</td><td class="n">≈13,200</td><td>Checkpoint selection</td></tr>
+          <tr><td><span class="dtag">FLORES_DEV</span></td><td>FLORES+ dev, mkd_Cyrl–als_Latn</td><td class="n">997</td><td>Selection and the retention rule</td></tr>
+          <tr><td><span class="dtag">TERM_DEV</span></td><td>GAZ_DEV sentences with V_TERM terms, reference-confirmed</td><td class="n">counted at TG-D0</td><td>Spot checks during the arms</td></tr>
+          <tr class="grp"><td colspan="4">Test · reported results</td></tr>
+          <tr><td><span class="dtag">GAZ_TEST</span></td><td>Gazette test split, issue-disjoint</td><td class="n">≈10,000</td><td>Legal quality</td></tr>
+          <tr><td><span class="dtag">GAZ_TEST_NOVEL</span></td><td>GAZ_TEST minus templates and near-duplicates of training sentences</td><td class="n">counted at TG-D0</td><td>Legal quality without template inflation</td></tr>
+          <tr><td><span class="dtag">FLORES_DEVTEST</span></td><td>FLORES+ devtest, mkd_Cyrl–als_Latn</td><td class="n">1,012</td><td>General quality, primary</td></tr>
+          <tr><td><span class="dtag">NTREX</span></td><td>NTREX-128 Macedonian and Albanian references</td><td class="n">1,997</td><td>General quality, continuity with the pilot</td></tr>
+          <tr><td><span class="dtag">TERM_LEG</span></td><td>GAZ_TEST sentences with legal V_TERM terms</td><td class="n">counted at TG-D0</td><td>Central (a), RQ1, RQ3</td></tr>
+          <tr><td><span class="dtag">TERM_NONLEG</span></td><td>Test sentences with non-legal and media-literacy terms</td><td class="n">counted at TG-D0</td><td>RQ4</td></tr>
+          <tr><td><span class="dtag">TERM_GEN</span></td><td>FLORES+ and NTREX sentences with W_GEN words</td><td class="n">counted at TG-D0</td><td>RQ5</td></tr>
+          <tr><td><span class="dtag">TERM_HOLDOUT</span></td><td>Test sentences with V_HOLDOUT terms</td><td class="n">counted at TG-D0</td><td>Untrained terms; not reported for TG-90</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <ul class="plain">
+      <li><b>Term success.</b> A term counts as correct when the output contains the listed target, matched on its first max(4, length − 2) characters, which accepts inflected forms. The headline figure uses only occurrences where the human reference itself uses that target.</li>
+      <li><b>Translation quality.</b> chrF++ and BLEU through sacreBLEU with exact signatures, plus number fidelity and a negation check.</li>
+      <li><b>Uncertainty.</b> Paired bootstrap with 10,000 resamples by document, 95% intervals, and seed variation reported separately.</li>
+    </ul>
+  </section>
+
+  <section id="open">
+    <div class="sec-head">
+      <div class="no">11 · OPEN ITEMS</div>
+      <h2>To settle before TG-D0 finishes</h2>
+    </div>
+    <ul class="plain">
+      <li><b>Articles and notices (500k rows):</b> paired Macedonian–Albanian text, or one language? It stays out of TG-10 to TG-30 either way. If it comes from the same Gazette issues, dev and test issues are removed before any use.</li>
+      <li><b>SciPar and EUbookshop release scope:</b> both are new in TG-10, and TG-D0 checks their release_scope. If either turns out research-only, the rule that keeps QED out of TG-10 would apply to it too.</li>
+      <li><b>Gazette splits:</b> confirm that slvesnik-mk-sq-clean keeps the issue-disjoint dev and test splits (about 13,000 and 10,000 rows) that the numbers here assume.</li>
+      <li><b>Fourth VERBIS domain:</b> the earlier count names it health (2,059 entries); the latest inventory says judicial. RQ4 reports by domain, so the label matters.</li>
+      <li><b>GPU link:</b> with NVLink, FSDP's weight exchanges cost little; over PCIe, keep micro-batches near 8k tokens per GPU.</li>
+    </ul>
+  </section>
+
+  <footer>
+    <div>Machine-readable twins: <code>tg_experiment_plan.csv</code> (25 runs, in run order, with priority, data spec, tokens and hours) and <code>tg_datasets.csv</code> (54 rows, one per source inside each dataset tag). Both use the tags on this page.</div>
+    <div>NLLB pilot figures from the E00–E02 experiment report. TranslateGemma results are prospective; token counts and hours are estimates until count_tokens.py and TG-10's training log measure them.</div>
+  </footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,20 @@
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{llrrrrrrrrrr}
+\toprule
+Class & Dir. & Pairs & \% pairs & BLEU E00 & BLEU E01 & BLEU E02 & $\Delta$BLEU & chrF++ E00 & chrF++ E01 & chrF++ E02 & $\Delta$chrF++ \\
+\midrule
+exact template & MK$\rightarrow$SQ & 1856 & 18.24 & 32.67 & 71.03 & 71.72 & 0.69 & 51.88 & 81.65 & 82.03 & 0.38 \\
+exact template & SQ$\rightarrow$MK & 1856 & 18.24 & 21.17 & 78.11 & 78.50 & 0.39 & 50.45 & 86.66 & 86.91 & 0.25 \\
+near duplicate & MK$\rightarrow$SQ & 3087 & 30.34 & 28.50 & 57.90 & 58.12 & 0.22 & 50.59 & 75.25 & 75.36 & 0.11 \\
+near duplicate & SQ$\rightarrow$MK & 3087 & 30.34 & 31.25 & 68.06 & 68.39 & 0.33 & 53.09 & 81.78 & 81.89 & 0.11 \\
+novel & MK$\rightarrow$SQ & 5231 & 51.42 & 26.46 & 48.83 & 49.04 & 0.21 & 49.88 & 69.07 & 69.19 & 0.12 \\
+novel & SQ$\rightarrow$MK & 5231 & 51.42 & 29.93 & 58.59 & 58.61 & 0.02 & 52.45 & 75.38 & 75.37 & -0.01 \\
+all & MK$\rightarrow$SQ & 10174 & 100.00 & 27.74 & 54.02 & 54.28 & 0.26 & 50.30 & 72.28 & 72.42 & 0.14 \\
+all & SQ$\rightarrow$MK & 10174 & 100.00 & 29.63 & 63.64 & 63.80 & 0.16 & 52.46 & 78.55 & 78.60 & 0.05 \\
+\bottomrule
+\end{tabular}
+\caption{Gazette test by overlap with the Gazette training sentences (same classes as E01: normalised, near duplicate = character 5-gram Jaccard ≥ 0.8). $\Delta$ = E02 -- E01; not significance-tested. Source: \texttt{eval/gazette\_test\_overlap\_results.csv (E02), experiments/E01\_gazette\_verbis\_mix/analysis/}.}
+\label{tab:e02-overlap}
+\end{table}

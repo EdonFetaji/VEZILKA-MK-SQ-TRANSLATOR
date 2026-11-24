@@ -1,0 +1,18 @@
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lllll}
+\toprule
+Started & Kind & Commit & Outcome & Notes \\
+\midrule
+2026-10-01 08:57:00 & smoke test (--quick) & 8a2978e & completed &  \\
+2026-10-01 09:01:07 & smoke test (--quick) & a912aa1 & completed &  \\
+2026-10-01 09:53:05 & full run & 5673db1 & failed & Fatal: data check failed: gazette\_test = <sha256>, config data.expected says 10174 \\
+2026-10-01 09:55:36 & full run & bd3c440 & failed & trained to step 2000; ComputeError: schema lengths differ \\
+2026-10-01 14:51:21 & full run & ccd58f9 & failed & Fatal: the Hugging Face token (from cached login) was rejected: Invalid user token \\
+2026-10-01 14:54:18 & full run & ccd58f9 & failed & resumed at step 1000; trained to step 3650; TypeError: 'pyarrow.lib.Table' object is not callable \\
+\bottomrule
+\end{tabular}
+\caption{Invocations of the training script for E02 (times as logged). Source: \texttt{progress.log}.}
+\label{tab:e02-invocations}
+\end{table}

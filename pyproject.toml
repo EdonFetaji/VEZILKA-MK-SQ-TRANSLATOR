@@ -1,36 +1,30 @@
 [project]
-name = "mksq"
-version = "0.1.0"
-description = "Lexicon-aware domain adaptation for low-resource Macedonian-Albanian legal MT"
+name = "mksq-translategemma"
+version = "0.2.0"
+description = "Does learning a term's definition help a model translate it? TranslateGemma-12B, Macedonian <-> Albanian"
 requires-python = ">=3.12,<3.13"
 dependencies = [
-    # Pinned hard: Colab upgrades pyarrow underneath you (conventions, §11).
-    "pyarrow==17.0.0",
-    "pandas==2.2.3",
-    "numpy==1.26.4",
-    "pyyaml==6.0.2",
-    "datasketch==1.6.5",
-    "tqdm==4.66.5",
-    "huggingface-hub>=0.25",
-    "gradio>=5.0,<6.0",
-    "ctranslate2>=4.4",
-    "transformers>=4.40",
-    "sentencepiece>=0.2.0",
-    "protobuf>=5.28.0",
-    "polars>=1.44.2",
+    "torch>=2.6",
+    "transformers>=4.56",
+    "trl>=0.21",
+    "accelerate>=1.8",
+    "datasets>=3.6",
+    "huggingface-hub>=0.30",
+    "pyyaml>=6.0",
     "sacrebleu>=2.4",
+    "sentencepiece>=0.2.0",
 ]
 
 [project.optional-dependencies]
-tokenize = [
-    "transformers==4.44.2",
-    "sentencepiece==0.2.0",
-    "protobuf==5.28.0",
-]
+dev = ["ruff>=0.6"]
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/mksq"]
+packages = ["src"]
+
+[tool.ruff]
+line-length = 110
+extend-exclude = ["pilot_nllb", "notebooks", "demo"]

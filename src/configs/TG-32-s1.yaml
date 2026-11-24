@@ -1,0 +1,14 @@
+extends: _arms.yaml
+run_id: TG-32-s1
+group: TG-32
+description: Term pairs (V_TERM). Source term in, target term out. The baseline TG-33 must beat.
+seed: 1
+
+data:
+  mixture:
+    - {name: V_TERM/verbis,         loader: verbis,         split: train, select: {exclude: V_HOLDOUT}, task: term_pair, directions: both, repeats: 3}
+    - {name: V_TERM/media_literacy, loader: media_literacy, split: train, select: {exclude: V_HOLDOUT}, task: term_pair, directions: both, repeats: 3}
+
+output:
+  local_dir: runs/TG-32-s1
+  hub_repo: EdonFetaji/translategemma-mk-sq-TG-32-s1

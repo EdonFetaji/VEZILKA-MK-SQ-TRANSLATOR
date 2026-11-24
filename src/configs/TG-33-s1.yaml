@@ -1,0 +1,14 @@
+extends: _arms.yaml
+run_id: TG-33-s1
+group: TG-33
+description: Term pairs with definitions (V_DEF_CTX), the central test. Identical to TG-32 except the definition.
+seed: 1
+
+data:
+  mixture:
+    - {name: V_DEF_CTX/verbis,         loader: verbis,         split: train, select: {exclude: V_HOLDOUT}, task: term_definition, directions: both, repeats: 3}
+    - {name: V_DEF_CTX/media_literacy, loader: media_literacy, split: train, select: {exclude: V_HOLDOUT}, task: term_definition, directions: both, repeats: 3}
+
+output:
+  local_dir: runs/TG-33-s1
+  hub_repo: EdonFetaji/translategemma-mk-sq-TG-33-s1

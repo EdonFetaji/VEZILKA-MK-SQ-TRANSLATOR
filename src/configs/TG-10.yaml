@@ -1,0 +1,30 @@
+extends: _base.yaml
+run_id: TG-10
+group: TG-10
+description: General MK-SQ adaptation on G (1.75M examples), with a built-in size check.
+
+data:
+  mixture:                  # tag G, one shuffle (seed 42) over both parts
+    - name: G/human           # human translation: both directions
+      loader: opus
+      split: train
+      select: {tag: G, source_ids: [SETIMES, TED2020, ELRC-5067-SciPar, GlobalVoices, EUbookshop, NeuLab-TedTalks, Tatoeba, ELRC-wikipedia_health]}
+      task: translation
+      directions: both
+    - name: G/mined_subs      # NLLB top 900k, MultiHPLT top 300k (LaBSE >= 0.80), MultiMaCoCu, OpenSubtitles 100k: one direction each
+      loader: opus
+      split: train
+      select: {tag: G, source_ids: [NLLB, MultiHPLT, MultiMaCoCu, OpenSubtitles]}
+      task: translation
+      directions: alternating
+  eval:
+    - {name: FLORES_DEV, loader: flores, split: dev, task: translation, directions: both}
+
+training:
+  lr_schedule: {type: wsd, warmup_ratio: 0.03, cooldown_ratio: 0.15, cooldown: 1-sqrt}
+  eval: {select_on: [FLORES_DEV], metric: chrf++}
+  save: {at_examples: [600000, 1000000, 1483279], with_optimizer: true}
+
+output:
+  local_dir: runs/TG-10
+  hub_repo: EdonFetaji/translategemma-mk-sq-TG-10

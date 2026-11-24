@@ -1,0 +1,15 @@
+# Shared setup of every TG-30 arm (research_plan §08 step 3, §09 fairness). Not a run itself.
+# Each arm extends this file and adds its treatment under data.mixture.
+extends: _base.yaml
+
+model:
+  init_from: EdonFetaji/translategemma-mk-sq-TG-20
+  revision: null            # pin to TG-20's frozen revision
+
+data:
+  shared:                   # 24M tokens, same order for a given seed in every arm
+    - {name: L_ARMS,   loader: gazette, split: train, select: {slice: L_ARMS}, task: translation, directions: both}
+    - {name: G_REPLAY, loader: opus,    split: train, select: {tag: G_REPLAY}, task: translation, directions: alternating, tokens_m: 12.0}
+
+training:
+  eval: {select_on: [GAZ_DEV, FLORES_DEV], metric: chrf++, retention: {set: FLORES_DEV, max_drop_vs: TG-20, points: 1.0}}

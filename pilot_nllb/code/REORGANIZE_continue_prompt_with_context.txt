@@ -1,0 +1,39 @@
+---
+name: reorg-handoff-2026-09-22
+description: "Exact state of the in-progress traceability reorganisation (E00/E01/E02 registry, config-driven training) — resume from here"
+metadata: 
+  node_type: memory
+  type: project
+  originSessionId: d5bc6f7a-e217-4140-a38e-2ee79cbb3992
+  modified: 2026-09-22T11:23:20.599Z
+---
+
+# Traceability reorganisation — handoff (2026-09-22, session limit)
+
+Plan file: /Users/edon/.claude/plans/pasted-content-id-adc1-write-a-drifting-rabbit.md (approved).
+User rules: see [[no-git-writes]], [[demo-untracked]], [[flores-ntrex-hashes-untracked]].
+
+## DONE (on disk in /Users/edon/vezilka/MK-SQ-TRANLATOR, nothing staged/committed)
+- Moves (plain `mv`): scripts/data/{verbis_harvest,build_opus_mk_sq_dataset,prepare_corpus,prune_columns,repair_corpus,redact_corpus,publish_hf}.py + requirements-opus.txt; scripts/train/{train_nllb_gazette_verbis_ct2,smoke_test_nllb_run}.py + requirements-train.txt (pyyaml added); scripts/eval/analyze_gazette_results.py. parents[1]→parents[2] fixed; usage paths updated. OPUS builder NOT yet marked "ARCHIVED" in its docstring (TODO).
+- src/mksq/experiment.py: ROOT, load_config, registry_row(s), git_head, uncommitted(scripts,configs,data/manifests,src), provenance()/provenance_columns(), content_sha256, hf_repo_for, recorded(), redact_log_examples().
+- data/manifests/{gazette,verbis,flores_plus,ntrex}.json built by scripts/registry/build_manifests.py (pinned: gazette 07af5bb, flores 5fec6c1, ntrex 468c6b6; verbis storage rev 3fad45be; FLORES/NTREX sha256 = "UNTRACKED"; work/ processed files NOT RECORDED).
+- configs/E00_base.yaml, E01_gazette_verbis_mix.yaml (frozen record), E02_gazette_only.yaml (= E01 except data.verbis.use_for_training:false; `comparison:` block lists allowed diffs).
+- experiments/registry.csv (E00 done, E01 done, E02 planned; "pending" for E02 not-yet values).
+- Training script refactored: one arg <EXP_ID>, configure(exp_id, for_run) from YAML, refuses status done / dirty tree, runs/<ID>/, pinned revisions + verify_hf_manifest + expect() (E01 row counts, gazette_test & dev_eval_ids content sha), Verbis only for eval when use_for_training false, provenance in CSV cols/JSON/parquet metadata/PNG/provenance.json dirs/log/DONE, step12b analysis, step13 export_small_artifacts → experiments/<ID>/ (progress.log redacted). Ruff-clean but NOT yet end-to-end tested on CPU.
+- analyze script: one arg <EXP_ID>, run(exp_id, work_dir, provenance), refuses done experiments.
+- smoke test: `smoke_test_nllb_run.py <ID> [--quick]`, uses m.configure(for_run=False) and m._set_paths; SMOKE_EXP env for child roles.
+- scripts/registry/import_hf_artifacts.py: ran for E01 (11 files, progress.log redacted: 25 example records, Verbis scan passed) and E00 (base rows derived) → experiments/*/SOURCES.json.
+- scripts/registry/rebuild_results_registry.py: ran → paper/results_registry.csv (208 rows, 0 dup keys), paper/tables/*.tex (4), paper/figures/{main_results,terminology}.png. Last edit (read_registry for tables) not yet re-run.
+
+## TODO (in order)
+1. scripts/registry/check_traceability.py (+ `--staged` for hook): registry exps have config/manifests/results/report (planned exempt); registry rows == re-derived from source + sha match; manifest sha vs local/HF-cache files (skip UNTRACKED/NOT RECORDED); forbidden paths in tracked + untracked-not-ignored files (weights, checkpoints, tokenized, *.parquet, *.arrow, "verbis" except scripts/data/verbis_*.py, data/manifests/verbis.json, paths with registered IDs, scripts/train/train_nllb_gazette_verbis_ct2.py); E01 vs E02 config diff ⊆ declared; optional Verbis content scan when cached.
+2. scripts/registry/hash_work_dir.py (read-only sha256 of GPU-box work/).
+3. .githooks/pre-commit (`python3 scripts/registry/check_traceability.py --staged`); .gitignore append: runs/, weights (*.safetensors *.bin *.pt *.pth *.ckpt), checkpoints/, tokenized/ — keep user's /demo line.
+4. Docs: README.md, EXPERIMENTS.md, CLAUDE.md (layout, E{NN}_{name}, paper numbers only from paper/results_registry.csv), docs/decisions.md (dated from git: cf49acc 2026-09-21 initial; c165d6f 2026-09-21 train script: Gazette+Verbis only/OPUS dropped, LaBSE>=0.70, dev only ckpt selection, test only final, full Gazette test, CT2 int8 demo, leakage removal, private repo; 540e36c 2026-09-22 00:19 +0200 transformers 5; 1fec5bb 2026-09-22 overlap audit; 2026-09-22 bootstrap report + reorg), docs/data.md; experiments/E00_base/README.md, E02_gazette_only/README.md (planned).
+5. Update experiments/E01_gazette_verbis_mix/build_report.py LOCAL_FILES to new script paths (do NOT regenerate its outputs). Mark OPUS script ARCHIVED.
+6. CPU end-to-end test of refactored training script (scratch venv /private/tmp/claude-501/-Users-edon-vezilka-MK-SQ-TRANLATOR/<session>/scratchpad/v5 may be gone; recreate: uv venv + transformers==5.17.0 ctranslate2 etc., tiny M2M100 model, CPUArgs patch, fake-hub DryRunUploader from smoke test) incl. one-arg CLI, dirty-tree and done refusals.
+7. Run rebuild + checker (must pass); negative test on a temp copy.
+8. Report back: 2-level tree, registry.csv, checker output, NOT RECORDED list, user's git commands (logical commits; `git tag -a E01_gazette_verbis_mix 540e36c`; push with tags; `git config core.hooksPath .githooks`), E02 launch: `cd ~/VEZILKA-MK-SQ-TRANSLATOR && git pull && python3 scripts/train/smoke_test_nllb_run.py E02_gazette_only --quick && mkdir -p runs/E02_gazette_only && nohup python3 scripts/train/train_nllb_gazette_verbis_ct2.py E02_gazette_only > runs/E02_gazette_only/nohup.out 2>&1 &`.
+
+## Key facts
+E01: commit 540e36c (clean), HF repo EdonFetaji/mk-sq-nllb600m-gazette-verbis @ 3fad45be, started 2026-09-21T19:46:49Z, DONE 2026-09-22T02:50:59Z, base snapshot f8d333a0. E02 repo: EdonFetaji/mk-sq-nllb600m-e02-gazette-only. Missing scripts: verbis_dataset.py = verbis_harvest.py; verbis_audit.py none (step 4 of train script); interpolate_and_eval.py never created → no E01b.

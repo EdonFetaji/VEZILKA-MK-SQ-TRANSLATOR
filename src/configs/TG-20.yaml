@@ -1,0 +1,17 @@
+extends: _base.yaml
+run_id: TG-20
+group: TG-20
+description: Shared legal adaptation. L_MAIN (30%) + G_REPLAY (70%). Every arm branches from here.
+
+model:
+  init_from: EdonFetaji/translategemma-mk-sq-TG-10   # the endpoint the size check picks
+  revision: null
+
+data:
+  mixture:
+    - {name: L_MAIN,   loader: gazette, split: train, select: {slice: L_MAIN}, task: translation, directions: both}
+    - {name: G_REPLAY, loader: opus,    split: train, select: {tag: G_REPLAY}, task: translation, directions: alternating, tokens_m: 119.0}
+
+output:
+  local_dir: runs/TG-20
+  hub_repo: EdonFetaji/translategemma-mk-sq-TG-20

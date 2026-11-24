@@ -1,0 +1,45 @@
+# Shared recipe for every TranslateGemma run (research_plan §05). Not a run itself.
+# Run files say `extends: _base.yaml` (or `_arms.yaml`) and override only what differs.
+# Mappings merge deeply (child wins); lists are replaced whole.
+
+seed: 42
+
+model:
+  init_from: google/translategemma-12b-it
+  revision: null            # pin before launching
+  dtype: bfloat16
+  freeze:                   # token embeddings (shared with the output layer) + vision encoder
+    - "*embed_tokens*"
+    - "*vision_tower*"
+    - "*multi_modal_projector*"   # TODO confirm against TranslateGemma's SFT recipe
+
+data:
+  max_length: 2048
+  packing: true
+  eval:                     # development data only; test sets are scored separately
+    - {name: GAZ_DEV,    loader: gazette, split: validation, task: translation, directions: both}
+    - {name: FLORES_DEV, loader: flores,  split: dev,        task: translation, directions: both}
+
+training:
+  epochs: 1
+  learning_rate: 1.0e-5
+  optimizer: {name: adafactor, beta1: null, factored: true}
+  lr_schedule: {type: cosine, warmup_ratio: 0.03, min_lr_ratio: 0.1}
+  tokens_per_step: 65536    # = micro_batch_tokens × grad_accum × num_gpus
+  micro_batch_tokens: 8192
+  grad_accum: 4
+  gradient_checkpointing: true
+  bf16: true
+  eval: {select_on: [GAZ_DEV, FLORES_DEV], metric: chrf++}
+  save: {strategy: end}
+  logging: {report_to: [tensorboard], every_steps: 10}
+
+distributed:
+  strategy: fsdp2
+  num_gpus: 2
+  fsdp: {reshard_after_forward: true, fused_cross_entropy: true}
+
+output:
+  local_dir: runs/UNSET
+  private: true
+  push: end
