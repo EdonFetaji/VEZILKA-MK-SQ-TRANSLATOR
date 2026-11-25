@@ -2,15 +2,31 @@
 
 from __future__ import annotations
 
+import json
 from typing import Any, ClassVar
 
-from src.datasets.base import DatasetLoader, RecordKind
+from src.datasets.base import DatasetLoader, RecordKind, hub_files, parquet_batches
 from src.pipeline.registry import register_loader
+
+#: Repository columns carried into ``meta`` (``pair_id`` becomes ``doc_id``).
+META_COLUMNS = (
+    "unit_type",
+    "domain",
+    "translation_origin",
+    "pairing_method",
+    "english_mediated",
+    "release_scope",
+    "flags",
+)
 
 
 @register_loader("opus")
 class OpusLoader(DatasetLoader):
     """``EdonFetaji/opus-mk-sq-clean-dedup``, default config. Rows are selected by ``source_id``.
+
+    ``source_id`` is the OPUS corpus name (``SETIMES``, ``NLLB``, …; the repository's
+    ``opus:<corpus>:<version>`` without prefix and version). The default config has no document
+    ids, so ``doc_id`` is the row's ``pair_id`` (row-level bootstrap units).
 
     Selection rules (see ``research_plan/tg_datasets.csv``, tag G):
 
@@ -34,9 +50,20 @@ class OpusLoader(DatasetLoader):
         "stream_to",
     )
     repo = "EdonFetaji/opus-mk-sq-clean-dedup"
+    revision = "0920a1440aa07997eea26582ef23a0bd41c9b8df"
 
-    def load(self, split: str):
-        raise NotImplementedError("OpusLoader.load")
+    def _read(self, split: str):
+        paths, sha = hub_files(self.opt("repo"), self.opt("revision"), prefix="data/train-")
+        self._source = {"repo": self.opt("repo"), "revision": sha, "config": "default"}
+        for c in parquet_batches(paths, columns=["pair_id", "source_id", "mk", "sq", *META_COLUMNS]):
+            meta = zip(*(c[k] for k in META_COLUMNS))
+            yield {
+                "mk": c["mk"],
+                "sq": c["sq"],
+                "source_id": [s.split(":")[1] for s in c["source_id"]],
+                "doc_id": c["pair_id"],
+                "meta": [json.dumps(dict(zip(META_COLUMNS, m)), ensure_ascii=False) for m in meta],
+            }
 
     def select(self, ds, **rules: Any):
         raise NotImplementedError("OpusLoader.select")
