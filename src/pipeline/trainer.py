@@ -306,6 +306,7 @@ def build_trainer(
     train_ds: Any,
     eval_sets: dict[str, Any],
     run_dir: str | Path | None = None,
+    continue_parent_stream: bool = True,
 ):
     """TRL ``SFTTrainer`` for the single-device recipe. ``tokenizer`` is the processor (or a tokenizer)."""
     from accelerate.utils import AutocastKwargs
@@ -322,6 +323,8 @@ def build_trainer(
         liger = False
 
     # transformers 5.2x renamed gradient_checkpointing* to activation_checkpointing* (old names still alias)
+    # The frozen TG-D0 stream is already shuffled once: read it in order (no per-run reshuffle)
+    sequential = {"train_sampling_strategy": "sequential"} if hasattr(SFTConfig, "train_sampling_strategy") else {}
     ck = "activation_checkpointing" if hasattr(SFTConfig, "activation_checkpointing") else "gradient_checkpointing"
     checkpointing = {ck: t.gradient_checkpointing,
                      f"{ck}_kwargs": {"use_reentrant": False} if t.gradient_checkpointing else None}
@@ -351,6 +354,7 @@ def build_trainer(
         use_cpu=not cuda,
         dataloader_num_workers=0,
         **checkpointing,
+        **sequential,
     )
     optimizer = build_optimizer(cfg, model)
     scheduler = build_scheduler(cfg, optimizer)
@@ -359,10 +363,14 @@ def build_trainer(
         args=args,
         train_dataset=train_ds,
         eval_dataset=eval_sets or None,
-        processing_class=tokenizer,
+        processing_class=getattr(tokenizer, "tokenizer", tokenizer),  # text only: the tokenizer, not the VLM processor
         optimizers=(optimizer, scheduler),
         callbacks=_callbacks(cfg, rd),
     )
+    trainer.full_processor = tokenizer  # saved with the final weights (chat template, image processor)
+    skip = continue_stream(cfg, trainer) if continue_parent_stream else 0
+    if skip:
+        log.info("branch: continuing %s's stream after %d packed rows", t.resume["from_run"], skip)
     for cb in trainer.callback_handler.callbacks:  # parameter counts + init for the W&B run config
         if hasattr(cb, "extra"):
             cb.extra.update(
@@ -385,6 +393,20 @@ def build_trainer(
     return trainer
 
 
+def continue_stream(cfg: RunConfig, trainer: Any) -> int:
+    """Branch runs (TG-10-CD06/CD10) train on the parent's stream *after* its kept step: drop the packed
+    rows the parent consumed (start_global_step × micro_batch_rows × grad_accum, same packing)."""
+    t = cfg.training
+    if not t.resume.get("from_run"):
+        return 0
+    skip = int(t.resume.get("start_global_step") or 0) * t.micro_batch_rows * t.grad_accum
+    ds = trainer.train_dataset
+    if skip >= len(ds):
+        raise ValueError(f"branch skip {skip} >= {len(ds)} packed rows")
+    trainer.train_dataset = ds.select(range(skip, len(ds)))
+    return skip
+
+
 def latest_checkpoint(cfg: RunConfig, run_dir: str | Path | None = None) -> str | None:
     """The newest ``checkpoint-N`` in ``runs/<id>/checkpoints`` (crash restart), or None."""
     from transformers.trainer_utils import get_last_checkpoint
@@ -405,7 +427,8 @@ def save_final(cfg: RunConfig, trainer: Any, run_dir: str | Path | None = None) 
     out = run_dir_for(cfg, run_dir) / "model"
     model = trainer.accelerator.unwrap_model(trainer.model)
     model.to(torch.bfloat16).save_pretrained(out)
-    if trainer.processing_class is not None:
-        trainer.processing_class.save_pretrained(out)
+    proc = getattr(trainer, "full_processor", None) or trainer.processing_class
+    if proc is not None:
+        proc.save_pretrained(out)
     log.info("saved bf16 model to %s", out)
     return out

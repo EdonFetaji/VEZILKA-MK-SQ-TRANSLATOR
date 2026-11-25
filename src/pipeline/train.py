@@ -105,7 +105,9 @@ def run(cfg: RunConfig, run_dir: Path, smoke: bool = False) -> int:
             eval_sets = mixture.build_eval_sets(cfg, processor)
             (run_dir / "manifest.json").parent.mkdir(parents=True, exist_ok=True)
             (run_dir / "manifest.json").write_text(json.dumps(manifest, indent=2, default=str) + "\n")
-        hf_trainer = tr.build_trainer(cfg, model, processor, train_ds, eval_sets, run_dir)
+        # smoke data is not the parent's stream, so a smoke branch does not skip the parent's rows
+        hf_trainer = tr.build_trainer(cfg, model, processor, train_ds, eval_sets, run_dir,
+                                      continue_parent_stream=not smoke)
         tr.train(hf_trainer, cfg, run_dir)
         tr.save_final(cfg, hf_trainer, run_dir)
     except BaseException as e:  # noqa: BLE001 (Ctrl-C and OOM also leave a "failed" status)

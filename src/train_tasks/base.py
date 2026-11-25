@@ -9,7 +9,9 @@ The trainer computes loss on the completion only ("loss on target tokens only", 
 Directions
 ----------
 ``mk-sq`` and ``sq-mk`` give one example per record; ``both`` gives one per direction;
-``alternating`` gives one per record, flipping direction by row index (mined and subtitle rows in G).
+``alternating`` gives one per record, flipping direction by row index (mined and subtitle rows in G);
+``frozen`` uses the record's own ``direction`` column (a frozen TG-D0 tag such as G, where TG-D0
+already assigned and shuffled the directions).
 """
 
 from __future__ import annotations
@@ -21,7 +23,7 @@ from src.datasets.base import RecordKind
 
 Direction = Literal["mk-sq", "sq-mk"]
 Directions = Literal["mk-sq", "sq-mk", "both", "alternating"]
-DIRECTIONS: tuple[str, ...] = ("mk-sq", "sq-mk", "both", "alternating")
+DIRECTIONS: tuple[str, ...] = ("mk-sq", "sq-mk", "both", "alternating", "frozen")
 
 #: Language codes as TranslateGemma's chat template expects them.
 LANG_CODE = {"mk": "mk", "sq": "sq"}
@@ -53,9 +55,13 @@ class TrainTask(ABC):
             return ["mk-sq" if index % 2 == 0 else "sq-mk"]
         if directions in ("mk-sq", "sq-mk"):
             return [directions]
+        if directions == "frozen":
+            raise ValueError("directions 'frozen' come from the record's 'direction' column; use examples()")
         raise ValueError(f"unknown directions {directions!r}; expected one of {DIRECTIONS}")
 
     def examples(
         self, record: dict[str, Any], directions: Directions, index: int = 0
     ) -> list[dict[str, Any]]:
+        if directions == "frozen":
+            return [self.format(record, record["direction"])]
         return [self.format(record, d) for d in self.directions_for(directions, index)]

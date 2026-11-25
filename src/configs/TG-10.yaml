@@ -13,19 +13,9 @@ model:
   init_from: google/translategemma-12b-it
 
 data:
-  mixture:                  # tag G, one shuffle (seed 42) over both parts
-    - name: G/human           # human translation: both directions
-      loader: opus
-      split: train
-      select: {tag: G, source_ids: [SETIMES, TED2020, ELRC-5067-SciPar, GlobalVoices, EUbookshop, NeuLab-TedTalks, Tatoeba, ELRC-wikipedia_health]}
-      task: translation
-      directions: both
-    - name: G/mined_subs      # NLLB top 900k, MultiHPLT top 300k (LaBSE >= 0.80), MultiMaCoCu, OpenSubtitles 100k: one direction each
-      loader: opus
-      split: train
-      select: {tag: G, source_ids: [NLLB, MultiHPLT, MultiMaCoCu, OpenSubtitles]}
-      task: translation
-      directions: alternating
+  mixture:                  # tag G, frozen by `training_pipeline.py freeze G` (TG-D0): membership,
+                            # directions (human both, mined/subs one each) and the one shuffle (seed 1)
+    - {name: G, loader: opus, split: train, select: {tag: G}, task: translation, directions: frozen}
   eval:
     - {name: FLORES_DEV, loader: flores, split: dev, task: translation, directions: both}
 

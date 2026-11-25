@@ -1,6 +1,7 @@
 """Orchestrate the TranslateGemma runs: CSV -> configs, plan, run, decide, push.
 
     python training_pipeline.py configs [--check]        # tg_hyperparameters.csv -> src/configs/TG-*.yaml
+    python training_pipeline.py freeze G                 # TG-D0 for TG-10: LaBSE-score, select, shuffle once
     python training_pipeline.py plan                     # order, status, parents, repos, private budget
     python training_pipeline.py run TG-10 [--wandb online|offline|disabled] [-- <train.py args>]
     python training_pipeline.py run --next | --all [--priority 1]
@@ -22,6 +23,7 @@ from __future__ import annotations
 import argparse
 import csv
 import difflib
+import json
 import os
 import re
 import shutil
@@ -531,8 +533,18 @@ def preflight(
             used = sum(hub.repo_files(api, repo).values())
             if not hub.fits_budget(used, hub.BF16_MODEL_BYTES_EST):
                 print(f"WARNING private repo at {hub.gb(used)}: weights will not fit the budget")
+    from src.pipeline import registry
+
+    for e in (*cfg.data.shared, *cfg.data.mixture):
+        frozen = getattr(registry.get_loader(e.loader), "frozen_path", None)
+        if frozen is not None and e.select.get("tag"):
+            f = frozen(registry.get_loader(e.loader)(**e.options), e.select["tag"],
+                       int(e.select.get("seed", 1))) / "train.arrow"
+            if not f.exists():
+                raise hub.HubError(f"{e.name}: tag {e.select['tag']} not frozen ({f}); run "
+                                   f"`python training_pipeline.py freeze {e.select['tag']}` first")
+            print(f"  frozen {e.select['tag']}: {f}")
     if not args.skip_download:
-        from src.pipeline import registry
 
         for e in (*cfg.data.shared, *cfg.data.mixture, *cfg.data.eval):
             path = registry.get_loader(e.loader)(**e.options).download(e.split)
@@ -596,6 +608,23 @@ def cmd_run(args: argparse.Namespace) -> int:
         if args.next or args.dry_run:
             return 0
     print("nothing ready to run" + ("" if args.next else " (all remaining runs are done or blocked)"))
+    return 0
+
+
+def cmd_freeze(args: argparse.Namespace) -> int:
+    """TG-D0 for one tag. Only G (TG-10 and its size-check branches) is implemented."""
+    from src.datasets.opus import freeze_g
+    from src.pipeline import registry
+
+    if args.tag != "G":
+        raise SystemExit(f"freeze {args.tag}: only G is implemented")
+    loader = registry.get_loader("opus")()
+    path = freeze_g(loader, seed=args.seed, batch_size=args.batch_size,
+                    allow_missing_eval=args.allow_missing_eval, force=args.force)
+    side = json.loads(path.with_suffix(".json").read_text())
+    print(json.dumps({k: side[k] for k in ("rows", "examples", "seed", "sha256")}, indent=2))
+    for src, st in side["sources"].items():
+        print(f"  {src}: {st}")
     return 0
 
 
@@ -772,6 +801,15 @@ def main(argv: list[str] | None = None) -> int:
     )
     p.epilog = "Arguments after `--` go to src.pipeline.train, e.g. `run TG-10 -- --max-steps 3`."
     p.set_defaults(fn=cmd_run)
+
+    p = sub.add_parser("freeze", help="TG-D0: build and freeze a dataset tag (G: LaBSE, select, shuffle)")
+    p.add_argument("tag", choices=("G",))
+    p.add_argument("--seed", type=int, default=1, help="selection / direction / shuffle seed (CSV: 1)")
+    p.add_argument("--batch-size", type=int, default=512, help="LaBSE encode batch size")
+    p.add_argument("--allow-missing-eval", action="store_true",
+                   help="continue if a dev/test set for the overlap check cannot be loaded (warns)")
+    p.add_argument("--force", action="store_true", help="rebuild even if the frozen file exists")
+    p.set_defaults(fn=cmd_freeze)
 
     p = sub.add_parser("decide", help="record the outcome of a run's 'only if' condition")
     p.add_argument("run")

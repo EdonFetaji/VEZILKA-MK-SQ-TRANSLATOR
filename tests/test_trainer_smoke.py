@@ -153,7 +153,8 @@ def test_branch_from_keep(model_dir, tmp_path):
     fresh = dict(AutoModelForImageTextToText.from_pretrained(model_dir).named_parameters())
     name, p = next((n, p) for n, p in model.named_parameters() if p.requires_grad)
     assert torch.equal(p.detach(), kept[name].detach()) and not torch.equal(p.detach(), fresh[name].detach())
-    trainer = tr.build_trainer(branch, model, proc, smoke_dataset(16), {}, runs / "BRANCH")
+    trainer = tr.build_trainer(branch, model, proc, smoke_dataset(16), {}, runs / "BRANCH",
+                               continue_parent_stream=False)  # stream skip: tests/test_opus_g.py
     assert trainer.optimizer.state, "optimizer state was not loaded from keep/optimizer.pt"
     assert trainer.lr_scheduler.get_last_lr()[0] == pytest.approx(1e-3)
     tr.train(trainer, branch, runs / "BRANCH")

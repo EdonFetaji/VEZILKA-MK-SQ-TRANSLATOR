@@ -9,12 +9,14 @@ dependencies = [
     "trl>=1.18",            # tested with 1.18.2 (fused LM head, padding_free, completion_only_loss)
     "accelerate>=1.8",
     "datasets>=3.6",
+    "numpy>=2",             # pyarrow>=21 refuses NumPy 1.x (the old uv.lock pinned 1.26.4)
     "pyarrow>=21",          # datasets 5 needs pa.json_ (pyarrow 17 in the old lock breaks `import datasets`)
     "huggingface-hub>=0.30",
     "hf_xet>=1.1",           # fast large-file uploads to the Hub
     "liger-kernel>=0.6; sys_platform == 'linux'",  # needs triton (no macOS wheels)
     "pyyaml>=6.0",
-    "wandb>=0.21",          # live experiment tracking (src/pipeline/tracking.py)
+    "wandb>=0.21",
+    "sentence-transformers>=3.0",  # LaBSE scoring of mined pairs when freezing tag G (TG-D0)          # live experiment tracking (src/pipeline/tracking.py)
     "sacrebleu>=2.4",
     "sentencepiece>=0.2.0",
 ]
