@@ -149,6 +149,31 @@ def _resolve_init(cfg: RunConfig) -> tuple[str, str | None, str | None]:
     return hub.resolve_init(cfg, hub.load_state())
 
 
+def allow_text_only_flash_attention(attn: str | None) -> list[str]:
+    """Let Gemma3's multimodal classes run Flash Attention for text-only training.
+
+    transformers marks ``Gemma3Model`` / ``Gemma3ForConditionalGeneration`` ``_supports_flash_attn = False``
+    because Flash Attention cannot apply the bidirectional mask *between image tokens*. Our training and dev
+    batches are text only (no ``pixel_values``, no image tokens), so that mask never exists and the causal +
+    sliding-window attention Flash Attention computes is exactly the text model's. The text classes
+    (``Gemma3TextModel``, ``Gemma3ForCausalLM``) support it already. Only touched when a flash implementation
+    is requested; returns the classes it changed.
+    """
+    if not attn or "flash" not in attn:
+        return []
+    from transformers.models.gemma3 import modeling_gemma3 as g
+
+    changed = []
+    for cls in (g.Gemma3Model, g.Gemma3ForConditionalGeneration):
+        if not cls._supports_flash_attn:
+            cls._supports_flash_attn = True
+            changed.append(cls.__name__)
+    if changed:
+        log.warning("attention: %s allowed for %s (text-only training: no image tokens, so the image "
+                    "bidirectional mask that blocks it does not apply)", attn, ", ".join(changed))
+    return changed
+
+
 def load_model_and_tokenizer(cfg: RunConfig, run_dir: str | Path | None = None) -> tuple[Any, Any]:
     """fp32 model + processor, frozen per ``cfg.model.freeze``; branches load the parent's kept step."""
     from transformers import AutoModelForImageTextToText, AutoProcessor, AutoTokenizer
@@ -164,6 +189,7 @@ def load_model_and_tokenizer(cfg: RunConfig, run_dir: str | Path | None = None) 
 
     cuda = torch.cuda.is_available()
     attn = cfg.model.attn_implementation if cuda else "sdpa"
+    allow_text_only_flash_attention(attn)
     model = AutoModelForImageTextToText.from_pretrained(
         path,
         dtype=getattr(torch, cfg.model.dtype),
