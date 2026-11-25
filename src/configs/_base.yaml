@@ -14,7 +14,9 @@ model:
   init_from: google/translategemma-12b-it
   revision: null            # pin before launching
   dtype: float32            # master weights; never load trainable weights in bf16
-  attn_implementation: flash_attention_2   # TG-P1 decides the fallback if FA2 fails on sm_121
+  attn_implementation: kernels-community/flash-attn2   # FA2 via the kernel hub (v4: cu132 aarch64 build, checked on the GB10).
+                                                       # The name "flash_attention_2" is refused for Gemma3ForConditionalGeneration
+                                                       # (image-token mask); text-only training never has image tokens. Fallback: sdpa
   freeze:                   # token embeddings (shared with the output layer) + vision encoder
     - "*embed_tokens*"
     - "*vision_tower*"

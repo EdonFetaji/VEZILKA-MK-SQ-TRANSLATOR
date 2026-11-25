@@ -16,6 +16,9 @@ dependencies = [
     "liger-kernel>=0.6; sys_platform == 'linux'",  # needs triton (no macOS wheels)
     "pyyaml>=6.0",
     "wandb>=0.21",
+    "kernels>=0.18.2,<0.19; sys_platform == 'linux'",  # FA2 from the HF kernel hub (transformers 5.24 accepts <0.19); cu132 aarch64 build
+    "pillow>=10",           # AutoProcessor for translategemma loads Gemma3ImageProcessorPil (needs Pillow)
+    "tensorboard>=2.17",    # report_to: [tensorboard] (configs); event files go to runs/<id>/metrics/tensorboard
     "sentence-transformers>=3.0",  # LaBSE scoring of mined pairs when freezing tag G (TG-D0)          # live experiment tracking (src/pipeline/tracking.py)
     "sacrebleu>=2.4",
     "sentencepiece>=0.2.0",

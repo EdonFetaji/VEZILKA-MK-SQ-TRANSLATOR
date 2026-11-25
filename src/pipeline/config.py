@@ -72,7 +72,7 @@ class ModelConfig:
     revision: str | None = None
     #: Master-weight dtype. fp32: the forward runs under bf16 autocast (``training.bf16``).
     dtype: str = "float32"
-    attn_implementation: str | None = "flash_attention_2"
+    attn_implementation: str | None = "sdpa"
     #: Parameter-name patterns (fnmatch) kept frozen.
     freeze: list[str] = field(default_factory=list)
 

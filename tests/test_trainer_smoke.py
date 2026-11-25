@@ -69,7 +69,7 @@ def make_cfg(model_dir: Path, run_dir: Path, **training) -> config_mod.RunConfig
             "lr_schedule": {"type": "wsd", "peak": 1e-3, "min": 1e-4, "warmup_start": 1e-4,
                             "warmup_steps": 1, "constant_end_step": 3, "cooldown_steps": 2},
             "save": {"every_steps": 2, "keep_steps": [3], "with_optimizer": True},
-            "logging": {"every_steps": 1},
+            "logging": {"every_steps": 1, "report_to": ["tensorboard"]},
             **training,
         },
         "output": {"local_dir": str(run_dir)},
@@ -107,6 +107,7 @@ def test_train_keep_resume_and_reload(model_dir, tmp_path):
 
     # 1) a 3-step run, as if it crashed after step 3 (checkpoints at 2 and 3; 3 is also a keep step)
     assert run(with_max_steps(cfg, 3), run_dir, smoke=True) == 0
+    assert list((run_dir / "metrics" / "tensorboard").glob("events.out.tfevents.*")), "no TensorBoard events"
     ckpts = run_dir / "checkpoints"
     assert (ckpts / "checkpoint-3").is_dir()
     keep = ckpts / "keep" / "step-000003"

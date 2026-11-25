@@ -203,7 +203,7 @@ def freeze_parameters(model: Any, patterns: list[str], cast_frozen_to: torch.dty
 
 
 def preflight(cfg: RunConfig, run_dir: str | Path | None = None) -> None:
-    """GPU free of other jobs, FA2 usable, enough disk. Skipped (with a note) without CUDA."""
+    """GPU free of other jobs, attention kernel loads, enough disk. Skipped (with a note) without CUDA."""
     if not torch.cuda.is_available():
         log.warning("preflight: no CUDA device; skipping GPU and disk checks")
         return
@@ -219,16 +219,16 @@ def preflight(cfg: RunConfig, run_dir: str | Path | None = None) -> None:
                                + "; ".join(others))
     cap = torch.cuda.get_device_capability()
     log.info("preflight: %s, sm_%d%d", torch.cuda.get_device_name(), *cap)
-    if cfg.model.attn_implementation == "flash_attention_2":
-        try:
-            import flash_attn  # noqa: F401
+    attn = cfg.model.attn_implementation or ""
+    if "/" in attn:  # a hub kernel, e.g. kernels-community/flash-attn2: load it now, before the 24 GB model
+        from transformers.integrations.hub_kernels import load_and_register_attn_kernel
 
-            ok = cap[0] in (8, 9)
-        except ImportError:
-            ok = False
-        if not ok:
-            log.warning("preflight: flash_attention_2 may not be usable on sm_%d%d (TG-P1 picks the fallback)",
-                        *cap)
+        try:
+            load_and_register_attn_kernel(attn)
+        except Exception as e:
+            raise RuntimeError(f"preflight: attention kernel {attn!r} does not load here ({e}); "
+                               "set model.attn_implementation: sdpa to fall back") from e
+        log.info("preflight: attention kernel %s loaded", attn)
     rd = run_dir_for(cfg, run_dir)
     probe = next((p for p in (rd, *rd.parents) if p.exists()), Path("."))
     need = (2 + len(cfg.training.save.get("keep_steps") or [])) * CHECKPOINT_BYTES
@@ -367,6 +367,9 @@ def build_trainer(
         optimizers=(optimizer, scheduler),
         callbacks=_callbacks(cfg, rd),
     )
+    for cb in trainer.callback_handler.callbacks:  # TensorBoard into metrics/: local + pushed to HF with the run
+        if type(cb).__name__ == "TensorBoardCallback":
+            cb.logging_dir = str(rd / "metrics" / "tensorboard")  # its writer is created at train begin
     trainer.full_processor = tokenizer  # saved with the final weights (chat template, image processor)
     skip = continue_stream(cfg, trainer) if continue_parent_stream else 0
     if skip:
