@@ -39,3 +39,7 @@ tokenized/
 # ── OS / tooling noise ──
 .DS_Store
 .ruff_cache/
+
+# ── Loader disk cache (src/datasets): arrow files + sidecars ──
+data/cache/
+

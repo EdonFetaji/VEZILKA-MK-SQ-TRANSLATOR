@@ -1,13 +1,20 @@
 # Shared recipe for every TranslateGemma run (research_plan §05). Not a run itself.
 # Run files say `extends: _base.yaml` (or `_arms.yaml`) and override only what differs.
 # Mappings merge deeply (child wins); lists are replaced whole.
+#
+# Hardware: one NVIDIA DGX Spark (GB10, ~119.7 GB unified memory). No FSDP. Trainable weights stay
+# fp32 and the forward runs under bf16 autocast. Launch with PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+# (training_pipeline.py sets it) and run no vLLM or other GPU job alongside.
+# The run files (TG-*.yaml) are generated from tg_hyperparameters.csv and set every training value
+# explicitly; the values here are defaults for hand-written configs.
 
 seed: 42
 
 model:
   init_from: google/translategemma-12b-it
   revision: null            # pin before launching
-  dtype: bfloat16
+  dtype: float32            # master weights; never load trainable weights in bf16
+  attn_implementation: flash_attention_2   # TG-P1 decides the fallback if FA2 fails on sm_121
   freeze:                   # token embeddings (shared with the output layer) + vision encoder
     - "*embed_tokens*"
     - "*vision_tower*"
@@ -21,25 +28,32 @@ data:
     - {name: FLORES_DEV, loader: flores,  split: dev,        task: translation, directions: both}
 
 training:
-  epochs: 1
-  learning_rate: 1.0e-5
-  optimizer: {name: adafactor, beta1: null, factored: true}
-  lr_schedule: {type: cosine, warmup_ratio: 0.03, min_lr_ratio: 0.1}
+  micro_batch_rows: 4
+  micro_batch_tokens: 8192  # 4 packed rows × 2048
+  grad_accum: 8
   tokens_per_step: 65536    # = micro_batch_tokens × grad_accum × num_gpus
-  micro_batch_tokens: 8192
-  grad_accum: 4
+  optimizer: {name: adafactor, beta1: null, decay_rate: -0.8, clip_threshold: 1.0, eps: [1.0e-30, 1.0e-3],
+              scale_parameter: false, relative_step: false, warmup_init: false, weight_decay: 0.0}
+  max_grad_norm: 1.0
+  lr_schedule: {type: cosine, peak: 5.0e-6, min: 5.0e-7, warmup_start: null, warmup_steps: 0}
   gradient_checkpointing: true
-  bf16: true
+  fused_cross_entropy: true # chunked; never materialise the 262k-vocabulary logits
+  bf16: true                # autocast over fp32 master weights
   eval: {select_on: [GAZ_DEV, FLORES_DEV], metric: chrf++}
-  save: {strategy: end}
-  logging: {report_to: [tensorboard], every_steps: 10}
+  save: {every_steps: null, keep_steps: [], with_optimizer: false}
+  logging:
+    report_to: [tensorboard]
+    every_steps: 10
+    # W&B live tracking (src/pipeline/tracking.py). Env WANDB_MODE or `training_pipeline.py run --wandb`
+    # overrides mode. HF stays the checkpoint store; W&B only references it.
+    wandb: {enabled: true, mode: online, project: translategemma-mk-sq, entity: null, system_interval_s: 10}
 
 distributed:
-  strategy: fsdp2
-  num_gpus: 2
-  fsdp: {reshard_after_forward: true, fused_cross_entropy: true}
+  strategy: single
+  num_gpus: 1
 
 output:
   local_dir: runs/UNSET
-  private: true
+  repo: auto                # public | private | auto (private if the data or parent chain is restricted)
+  push_weights: true
   push: end

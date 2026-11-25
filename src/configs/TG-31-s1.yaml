@@ -1,13 +1,64 @@
+# GENERATED from src/configs/tg_hyperparameters.csv by `python training_pipeline.py configs`.
+# Edit the CSV and regenerate; only the `data:` section is hand-edited (it is kept on regeneration).
+# The CSV wins over the SFT summary where they differ: max_grad_norm 1.0 (summary 0); lr peak 5e-06
+# (summary 1e-5 or 5e-5); one GB10 device without FSDP (summary FSDP2 on 2 GPUs).
+
 extends: _arms.yaml
 run_id: TG-31-s1
 group: TG-31
 description: Fresh parallel sentences. Same tokens as TG-33's word task, spent on unseen Gazette issues.
 seed: 1
 
+model:
+  init_from: run:TG-20
+
 data:
   mixture:
     - {name: L_FRESH, loader: gazette, split: train, select: {slice: L_FRESH, max_rows: 28161}, task: translation, directions: both}
 
+training:
+  max_steps: 494
+  micro_batch_rows: 4
+  micro_batch_tokens: 8192
+  grad_accum: 8
+  tokens_per_step: 65536
+  optimizer:
+    name: adafactor
+    beta1: null
+    decay_rate: -0.8
+    clip_threshold: 1.0
+    eps: [1.0e-30, 0.001]
+    scale_parameter: false
+    relative_step: false
+    warmup_init: false
+    weight_decay: 0.0
+  max_grad_norm: 1.0
+  lr_schedule: {type: cosine, peak: 5.0e-06, min: 5.0e-07, warmup_start: 2.0e-07, warmup_steps: 15, constant_end_step: null, cooldown_steps: null}
+  dev_loss_every_steps: 25
+  save:
+    every_steps: 100
+    keep_steps: []
+    with_optimizer: false
+  resume: {from_run: null, from_step: null, optimizer_state: false, start_global_step: 0}
+  gradient_checkpointing: true
+  fused_cross_entropy: true
+  bf16: true
+
 output:
   local_dir: runs/TG-31-s1
-  hub_repo: EdonFetaji/translategemma-mk-sq-TG-31-s1
+  repo: auto
+  push_weights: true
+
+plan:
+  plan_order: '8'
+  stage: lexical
+  priority: 1 core
+  run_condition: after TG-20
+  init_checkpoint: TG-20 final weights
+  train_data: SHARED (L_ARMS both directions + equal G_REPLAY; ~24M) + L_FRESH 28,161 rows both directions (~8.4M)
+  est_train_hours_at_500_tok_s: '18.0'
+  checkpoint_selection: final checkpoint, always
+  save_at_end: bf16 weights
+  decoded_eval_points: end only
+  retention_check: FLORES_DEV chrF++ >= TG-20 minus 1.0 in each direction; report, never select on it
+  notes: Fresh-parallel-text arm; token-matched to TG-33.

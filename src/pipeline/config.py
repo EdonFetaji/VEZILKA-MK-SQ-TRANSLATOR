@@ -6,6 +6,9 @@ Merging is deep for mappings (child wins) and replaces lists whole.
 
 Validation is strict: unknown keys, unknown loaders/tasks/splits/selection rules, a task applied to
 the wrong record kind, or a batch size that doesn't add up all raise ``ConfigError``.
+
+The ``TG-*.yaml`` run files are generated from ``tg_hyperparameters.csv`` by
+``python training_pipeline.py configs``; only their ``data:`` section is edited by hand.
 """
 
 from __future__ import annotations
@@ -20,8 +23,40 @@ import yaml
 from src.pipeline import registry
 from src.train_tasks.base import DIRECTIONS
 
-LR_SCHEDULES = ("cosine", "wsd", "constant")
+LR_SCHEDULES = ("wsd", "cosine", "cooldown")
 PUSH_MODES = ("never", "end", "every_save")
+REPO_CHOICES = ("public", "private", "auto")
+
+#: Defaults of the dict-valued training fields. A YAML value is merged over these (so every key is
+#: always present for the trainer); keys not listed here are rejected (except in ``optimizer``).
+OPTIMIZER_DEFAULT: dict[str, Any] = {
+    "name": "adafactor",
+    "beta1": None,
+    "decay_rate": -0.8,
+    "clip_threshold": 1.0,
+    "eps": [1e-30, 1e-3],
+    "scale_parameter": False,
+    "relative_step": False,
+    "warmup_init": False,
+    "weight_decay": 0.0,
+}
+LR_SCHEDULE_DEFAULT: dict[str, Any] = {
+    "type": "cosine",
+    "peak": 5e-6,
+    "min": 5e-7,
+    "warmup_start": None,
+    "warmup_steps": 0,
+    "constant_end_step": None,
+    "cooldown_steps": None,
+}
+SAVE_DEFAULT: dict[str, Any] = {"every_steps": None, "keep_steps": [], "with_optimizer": False}
+RESUME_DEFAULT: dict[str, Any] = {
+    "from_run": None,
+    "from_step": None,
+    "optimizer_state": False,
+    "start_global_step": 0,
+}
+_STRICT_DICTS = {"lr_schedule": LR_SCHEDULE_DEFAULT, "save": SAVE_DEFAULT, "resume": RESUME_DEFAULT}
 
 
 class ConfigError(ValueError):
@@ -35,8 +70,9 @@ class ConfigError(ValueError):
 class ModelConfig:
     init_from: str
     revision: str | None = None
-    dtype: str = "bfloat16"
-    attn_implementation: str | None = None
+    #: Master-weight dtype. fp32: the forward runs under bf16 autocast (``training.bf16``).
+    dtype: str = "float32"
+    attn_implementation: str | None = "flash_attention_2"
     #: Parameter-name patterns (fnmatch) kept frozen.
     freeze: list[str] = field(default_factory=list)
 
@@ -75,32 +111,44 @@ class DataConfig:
 
 @dataclass(frozen=True)
 class TrainingConfig:
-    epochs: float = 1.0
-    learning_rate: float = 1e-5
-    optimizer: dict[str, Any] = field(default_factory=lambda: {"name": "adafactor"})
-    lr_schedule: dict[str, Any] = field(default_factory=lambda: {"type": "cosine"})
-    tokens_per_step: int = 65536
+    #: Optimizer updates (CSV ``planned_updates``; an estimate until tokens are counted).
+    max_steps: int | None = None
+    micro_batch_rows: int = 4
     micro_batch_tokens: int = 8192
-    grad_accum: int = 4
+    grad_accum: int = 8
+    tokens_per_step: int = 65536
+    optimizer: dict[str, Any] = field(default_factory=lambda: dict(OPTIMIZER_DEFAULT))
+    max_grad_norm: float = 1.0
+    #: ``{type: wsd|cosine|cooldown, peak, min, warmup_start, warmup_steps, constant_end_step,
+    #: cooldown_steps}`` (see ``LR_SCHEDULE_DEFAULT``).
+    lr_schedule: dict[str, Any] = field(default_factory=lambda: dict(LR_SCHEDULE_DEFAULT))
+    dev_loss_every_steps: int | None = None
+    #: ``{every_steps, keep_steps, with_optimizer}``: resumable checkpoints and kept branch points.
+    save: dict[str, Any] = field(default_factory=lambda: dict(SAVE_DEFAULT))
+    #: ``{from_run, from_step, optimizer_state, start_global_step}``: branch from a kept checkpoint.
+    resume: dict[str, Any] = field(default_factory=lambda: dict(RESUME_DEFAULT))
     gradient_checkpointing: bool = True
+    fused_cross_entropy: bool = True
     bf16: bool = True
     eval: dict[str, Any] = field(default_factory=dict)
-    save: dict[str, Any] = field(default_factory=lambda: {"strategy": "end"})
     logging: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
 class DistributedConfig:
-    strategy: str = "fsdp2"
-    num_gpus: int = 2
+    strategy: str = "single"
+    num_gpus: int = 1
     fsdp: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
 class OutputConfig:
     local_dir: str
-    hub_repo: str | None = None
-    private: bool = True
+    #: ``public`` | ``private`` | ``auto`` (private if the data or the parent chain is restricted).
+    repo: str = "auto"
+    #: Top-level folder in the HF repo; ``None`` means the ``run_id``.
+    folder: str | None = None
+    push_weights: bool = True
     push: str = "end"
 
 
@@ -115,6 +163,8 @@ class RunConfig:
     distributed: DistributedConfig = field(default_factory=DistributedConfig)
     group: str | None = None
     description: str = ""
+    #: The CSV row's descriptive columns, verbatim (stage, priority, run_condition, ...). Not interpreted.
+    plan: dict[str, Any] = field(default_factory=dict)
     #: Path of the YAML this config was loaded from (set by ``load_config``).
     source: str = ""
 
@@ -173,6 +223,23 @@ def _entries(items: Any, where: str) -> list[SourceEntry]:
 def parse(raw: dict[str, Any], source: str = "") -> RunConfig:
     raw = dict(raw)
     sections = {}
+    if isinstance(raw.get("training"), dict):
+        training = dict(raw["training"])
+        if isinstance(training.get("optimizer"), dict):
+            training["optimizer"] = {**OPTIMIZER_DEFAULT, **training["optimizer"]}
+        for key, default in _STRICT_DICTS.items():
+            value = training.get(key)
+            if value is None:
+                continue
+            if not isinstance(value, dict):
+                raise ConfigError(f"training.{key}: expected a mapping")
+            unknown = set(value) - set(default)
+            if unknown:
+                raise ConfigError(
+                    f"training.{key}: unknown keys {sorted(unknown)}; allowed: {sorted(default)}"
+                )
+            training[key] = {**default, **value}
+        raw["training"] = training
     for key, cls in (
         ("model", ModelConfig),
         ("training", TrainingConfig),
@@ -238,12 +305,27 @@ def validate(cfg: RunConfig, stem: str | None = None) -> None:
             f"training: micro_batch_tokens × grad_accum × num_gpus = "
             f"{t.micro_batch_tokens} × {t.grad_accum} × {d.num_gpus} ≠ tokens_per_step {t.tokens_per_step}"
         )
-    if t.lr_schedule.get("type") not in LR_SCHEDULES:
+    wb = t.logging.get("wandb")
+    if wb is not None:
+        from src.pipeline.tracking import MODES, WANDB_KEYS
+
+        if not isinstance(wb, dict) or set(wb) - WANDB_KEYS:
+            raise ConfigError(f"training.logging.wandb: allowed keys {sorted(WANDB_KEYS)}")
+        if wb.get("mode", "online") not in MODES:
+            raise ConfigError(f"training.logging.wandb.mode must be one of {MODES}")
+    sched = t.lr_schedule
+    if sched.get("type") not in LR_SCHEDULES:
         raise ConfigError(f"training.lr_schedule.type must be one of {LR_SCHEDULES}")
+    if sched["type"] == "wsd" and (sched["constant_end_step"] is None or sched["cooldown_steps"] is None):
+        raise ConfigError("training.lr_schedule: wsd needs constant_end_step and cooldown_steps")
+    if sched["type"] == "cooldown" and sched["cooldown_steps"] is None:
+        raise ConfigError("training.lr_schedule: cooldown needs cooldown_steps")
+    if t.resume["from_run"] is not None and t.resume["from_step"] is None:
+        raise ConfigError("training.resume: from_run needs from_step")
     if cfg.output.push not in PUSH_MODES:
         raise ConfigError(f"output.push must be one of {PUSH_MODES}")
-    if cfg.output.push != "never" and not cfg.output.hub_repo:
-        raise ConfigError("output.hub_repo is required unless output.push is 'never'")
+    if cfg.output.repo not in REPO_CHOICES:
+        raise ConfigError(f"output.repo must be one of {REPO_CHOICES}")
 
 
 def load_config(path: str | Path) -> RunConfig:

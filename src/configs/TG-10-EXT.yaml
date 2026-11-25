@@ -1,0 +1,84 @@
+# GENERATED from src/configs/tg_hyperparameters.csv by `python training_pipeline.py configs`.
+# Edit the CSV and regenerate; only the `data:` section is hand-edited (it is kept on regeneration).
+# The CSV wins over the SFT summary where they differ: max_grad_norm 1.0 (summary 0); lr peak 1e-05
+# (summary 1e-5 or 5e-5); one GB10 device without FSDP (summary FSDP2 on 2 GPUs).
+
+extends: _base.yaml
+run_id: TG-10-EXT
+group: TG-10
+description: rest of G from the cooldown start + next-ranked NLLB pairs (LaBSE >= 0.80) up to ~2.2M examples in
+  total
+seed: 1
+
+model:
+  init_from: run:TG-10
+
+data:
+  # TODO: rest of G from the cooldown start + next-ranked NLLB pairs (LaBSE >= 0.80), ~2.2M examples in total
+  mixture:                  # tag G, one shuffle (seed 42) over both parts
+    - name: G/human           # human translation: both directions
+      loader: opus
+      split: train
+      select: {tag: G, source_ids: [SETIMES, TED2020, ELRC-5067-SciPar, GlobalVoices, EUbookshop, NeuLab-TedTalks, Tatoeba, ELRC-wikipedia_health]}
+      task: translation
+      directions: both
+    - name: G/mined_subs      # NLLB top 900k, MultiHPLT top 300k (LaBSE >= 0.80), MultiMaCoCu, OpenSubtitles 100k: one direction each
+      loader: opus
+      split: train
+      select: {tag: G, source_ids: [NLLB, MultiHPLT, MultiMaCoCu, OpenSubtitles]}
+      task: translation
+      directions: alternating
+  eval:
+    - {name: FLORES_DEV, loader: flores, split: dev, task: translation, directions: both}
+
+training:
+  max_steps: 1429
+  micro_batch_rows: 4
+  micro_batch_tokens: 8192
+  grad_accum: 8
+  tokens_per_step: 65536
+  optimizer:
+    name: adafactor
+    beta1: null
+    decay_rate: -0.8
+    clip_threshold: 1.0
+    eps: [1.0e-30, 0.001]
+    scale_parameter: false
+    relative_step: false
+    warmup_init: false
+    weight_decay: 0.0
+  max_grad_norm: 1.0
+  lr_schedule: {type: wsd, peak: 1.0e-05, min: 1.0e-06, warmup_start: null, warmup_steps: 0, constant_end_step: 3728, cooldown_steps: 658}
+  dev_loss_every_steps: 175
+  save:
+    every_steps: 250
+    keep_steps: []
+    with_optimizer: false
+  resume: {from_run: TG-10, from_step: 2957, optimizer_state: true, start_global_step: 2957}
+  gradient_checkpointing: true
+  fused_cross_entropy: true
+  bf16: true
+  eval:
+    select_on: [FLORES_DEV]
+    metric: chrf++
+
+output:
+  local_dir: runs/TG-10-EXT
+  repo: auto
+  push_weights: true
+
+plan:
+  plan_order: '6'
+  stage: general (optional extension)
+  priority: 1 core (conditional; not in totals)
+  run_condition: only if the full TG-10 run beats the 1.0M branch beyond the bootstrap interval and the curve still
+    climbs steeply
+  init_checkpoint: TG-10 constant-LR checkpoint at cooldown start (step 2957)
+  train_data: rest of G from the cooldown start + next-ranked NLLB pairs (LaBSE >= 0.80) up to ~2.2M examples in
+    total
+  est_train_hours_at_500_tok_s: '52.0'
+  checkpoint_selection: final; replaces TG-10 as the endpoint if it wins on FLORES_DEV
+  save_at_end: bf16 weights + resumable state
+  decoded_eval_points: end only
+  retention_check: n/a
+  notes: Global steps 2957 to 4386; planned_updates counts only the added steps.

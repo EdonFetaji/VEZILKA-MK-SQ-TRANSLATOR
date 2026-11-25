@@ -1,7 +1,16 @@
+# GENERATED from src/configs/tg_hyperparameters.csv by `python training_pipeline.py configs`.
+# Edit the CSV and regenerate; only the `data:` section is hand-edited (it is kept on regeneration).
+# The CSV wins over the SFT summary where they differ: max_grad_norm 1.0 (summary 0); lr peak 1e-05
+# (summary 1e-5 or 5e-5); one GB10 device without FSDP (summary FSDP2 on 2 GPUs).
+
 extends: _base.yaml
 run_id: TG-10
 group: TG-10
 description: General MK-SQ adaptation on G (1.75M examples), with a built-in size check.
+seed: 1
+
+model:
+  init_from: google/translategemma-12b-it
 
 data:
   mixture:                  # tag G, one shuffle (seed 42) over both parts
@@ -21,10 +30,54 @@ data:
     - {name: FLORES_DEV, loader: flores, split: dev, task: translation, directions: both}
 
 training:
-  lr_schedule: {type: wsd, warmup_ratio: 0.03, cooldown_ratio: 0.15, cooldown: 1-sqrt}
-  eval: {select_on: [FLORES_DEV], metric: chrf++}
-  save: {at_examples: [600000, 1000000, 1483279], with_optimizer: true}
+  max_steps: 3479
+  micro_batch_rows: 4
+  micro_batch_tokens: 8192
+  grad_accum: 8
+  tokens_per_step: 65536
+  optimizer:
+    name: adafactor
+    beta1: null
+    decay_rate: -0.8
+    clip_threshold: 1.0
+    eps: [1.0e-30, 0.001]
+    scale_parameter: false
+    relative_step: false
+    warmup_init: false
+    weight_decay: 0.0
+  max_grad_norm: 1.0
+  lr_schedule: {type: wsd, peak: 1.0e-05, min: 1.0e-06, warmup_start: 4.0e-07, warmup_steps: 104, constant_end_step: 2957, cooldown_steps: 522}
+  dev_loss_every_steps: 175
+  save:
+    every_steps: 250
+    keep_steps: [1196, 1994, 2957]
+    with_optimizer: true
+  resume: {from_run: null, from_step: null, optimizer_state: false, start_global_step: 0}
+  gradient_checkpointing: true
+  fused_cross_entropy: true
+  bf16: true
+  eval:
+    select_on: [FLORES_DEV]
+    metric: chrf++
 
 output:
   local_dir: runs/TG-10
-  hub_repo: EdonFetaji/translategemma-mk-sq-TG-10
+  repo: auto
+  push_weights: true
+
+plan:
+  plan_order: '3'
+  stage: general
+  priority: 1 core
+  run_condition: always
+  init_checkpoint: original TranslateGemma-12B release weights
+  train_data: 'G: 1,523,490 rows -> 1,745,034 examples (human rows both directions, mined rows one direction each)'
+  est_train_hours_at_500_tok_s: '126.7'
+  checkpoint_selection: endpoint chosen by the size check on FLORES_DEV (plan section 06); frozen in the manifest
+    before TG-20
+  save_at_end: bf16 weights + resumable state; also constant-LR checkpoints WITH optimizer state at steps ~1196
+    (~0.6M examples), ~1994 (~1.0M examples) and 2957 (cooldown start, ~1.48M examples)
+  decoded_eval_points: end of TG-10-CD06, end of TG-10-CD10, end of TG-10 (and TG-10-EXT if run)
+  retention_check: n/a (reference for RQ2)
+  notes: Constant LR is what makes the size-check branches possible; do not switch to cosine. If the CD10 branch
+    shows the curve has flattened, the run may stop there.

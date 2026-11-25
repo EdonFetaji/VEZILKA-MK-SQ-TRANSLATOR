@@ -5,12 +5,16 @@ description = "Does learning a term's definition help a model translate it? Tran
 requires-python = ">=3.12,<3.13"
 dependencies = [
     "torch>=2.6",
-    "transformers>=4.56",
-    "trl>=0.21",
+    "transformers>=5.0",    # tested with 5.24.1 (dtype=, AutoModelForImageTextToText)
+    "trl>=1.18",            # tested with 1.18.2 (fused LM head, padding_free, completion_only_loss)
     "accelerate>=1.8",
     "datasets>=3.6",
+    "pyarrow>=21",          # datasets 5 needs pa.json_ (pyarrow 17 in the old lock breaks `import datasets`)
     "huggingface-hub>=0.30",
+    "hf_xet>=1.1",           # fast large-file uploads to the Hub
+    "liger-kernel>=0.6; sys_platform == 'linux'",  # needs triton (no macOS wheels)
     "pyyaml>=6.0",
+    "wandb>=0.21",          # live experiment tracking (src/pipeline/tracking.py)
     "sacrebleu>=2.4",
     "sentencepiece>=0.2.0",
 ]

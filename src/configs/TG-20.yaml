@@ -1,17 +1,65 @@
+# GENERATED from src/configs/tg_hyperparameters.csv by `python training_pipeline.py configs`.
+# Edit the CSV and regenerate; only the `data:` section is hand-edited (it is kept on regeneration).
+# The CSV wins over the SFT summary where they differ: max_grad_norm 1.0 (summary 0); lr peak 5e-06
+# (summary 1e-5 or 5e-5); one GB10 device without FSDP (summary FSDP2 on 2 GPUs).
+
 extends: _base.yaml
 run_id: TG-20
 group: TG-20
 description: Shared legal adaptation. L_MAIN (30%) + G_REPLAY (70%). Every arm branches from here.
+seed: 1
 
 model:
-  init_from: EdonFetaji/translategemma-mk-sq-TG-10   # the endpoint the size check picks
-  revision: null
+  init_from: run:TG-10
 
 data:
   mixture:
     - {name: L_MAIN,   loader: gazette, split: train, select: {slice: L_MAIN}, task: translation, directions: both}
     - {name: G_REPLAY, loader: opus,    split: train, select: {tag: G_REPLAY}, task: translation, directions: alternating, tokens_m: 119.0}
 
+training:
+  max_steps: 2594
+  micro_batch_rows: 4
+  micro_batch_tokens: 8192
+  grad_accum: 8
+  tokens_per_step: 65536
+  optimizer:
+    name: adafactor
+    beta1: null
+    decay_rate: -0.8
+    clip_threshold: 1.0
+    eps: [1.0e-30, 0.001]
+    scale_parameter: false
+    relative_step: false
+    warmup_init: false
+    weight_decay: 0.0
+  max_grad_norm: 1.0
+  lr_schedule: {type: cosine, peak: 5.0e-06, min: 5.0e-07, warmup_start: 2.0e-07, warmup_steps: 78, constant_end_step: null, cooldown_steps: null}
+  dev_loss_every_steps: 130
+  save:
+    every_steps: 250
+    keep_steps: []
+    with_optimizer: false
+  resume: {from_run: null, from_step: null, optimizer_state: false, start_global_step: 0}
+  gradient_checkpointing: true
+  fused_cross_entropy: true
+  bf16: true
+
 output:
   local_dir: runs/TG-20
-  hub_repo: EdonFetaji/translategemma-mk-sq-TG-20
+  repo: auto
+  push_weights: true
+
+plan:
+  plan_order: '7'
+  stage: domain
+  priority: 1 core
+  run_condition: after the TG-10 size check is settled
+  init_checkpoint: TG-10 endpoint chosen by the size check
+  train_data: L_MAIN both directions (170,000 rows; ~51M tokens, 30%) + G_REPLAY seed 1 (~119M tokens, 70%)
+  est_train_hours_at_500_tok_s: '94.4'
+  checkpoint_selection: final checkpoint
+  save_at_end: bf16 weights + resumable state (kept until the arms are checked)
+  decoded_eval_points: step ~1297 (halfway) and end
+  retention_check: report FLORES_DEV change vs TG-10 (RQ2); no threshold
+  notes: Every arm and TG-90 branches from its final weights. L_ARMS and L_FRESH must stay unseen.

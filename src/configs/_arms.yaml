@@ -3,8 +3,7 @@
 extends: _base.yaml
 
 model:
-  init_from: EdonFetaji/translategemma-mk-sq-TG-20
-  revision: null            # pin to TG-20's frozen revision
+  init_from: run:TG-20      # resolved by the pipeline to TG-20's pinned commit on the hub
 
 data:
   shared:                   # 24M tokens, same order for a given seed in every arm
