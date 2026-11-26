@@ -287,6 +287,30 @@ def _copy_checkpoint(src: Path, dst: Path, with_optimizer: bool) -> None:
     shutil.copytree(src, dst, copy_function=link, ignore=ignore)
 
 
+SAVE_SHARD_SIZE = "2GB"  # safetensors copies a whole shard to CPU before writing; on the GB10 that is the same
+                         # 119 GB pool as the 49 GB fp32 weights, so the 50GB default shard gets the process OOM-killed
+
+
+def release_memory() -> None:
+    """Return the CUDA caching allocator's free blocks to the (unified) system pool."""
+    import gc
+
+    gc.collect()
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+
+
+def small_shard_saves(model: Any, max_shard_size: str = SAVE_SHARD_SIZE) -> None:
+    """Make every ``model.save_pretrained`` (Trainer checkpoints and ``save_final``) write small shards."""
+    orig = model.save_pretrained
+
+    def save_pretrained(*args, **kwargs):
+        kwargs.setdefault("max_shard_size", max_shard_size)
+        return orig(*args, **kwargs)
+
+    model.save_pretrained = save_pretrained
+
+
 def _callbacks(cfg: RunConfig, run_dir: Path):
     from transformers import TrainerCallback
 
@@ -299,6 +323,8 @@ def _callbacks(cfg: RunConfig, run_dir: Path):
         def on_step_end(self, args, state, control, **kw):
             if state.global_step in keep:
                 control.should_save = True
+            if control.should_save or control.should_evaluate:
+                release_memory()  # unified memory: cached activation/grad blocks would starve the save copy
             return control
 
         def on_save(self, args, state, control, **kw):
@@ -397,6 +423,7 @@ def build_trainer(
         if type(cb).__name__ == "TensorBoardCallback":
             cb.logging_dir = str(rd / "metrics" / "tensorboard")  # its writer is created at train begin
     trainer.full_processor = tokenizer  # saved with the final weights (chat template, image processor)
+    small_shard_saves(trainer.accelerator.unwrap_model(trainer.model))
     skip = continue_stream(cfg, trainer) if continue_parent_stream else 0
     if skip:
         log.info("branch: continuing %s's stream after %d packed rows", t.resume["from_run"], skip)
@@ -455,7 +482,8 @@ def save_final(cfg: RunConfig, trainer: Any, run_dir: str | Path | None = None) 
     """bf16 weights + processor into ``runs/<id>/model/`` (the model is cast in place: training is over)."""
     out = run_dir_for(cfg, run_dir) / "model"
     model = trainer.accelerator.unwrap_model(trainer.model)
-    model.to(torch.bfloat16).save_pretrained(out)
+    release_memory()
+    model.to(torch.bfloat16).save_pretrained(out, max_shard_size=SAVE_SHARD_SIZE)
     proc = getattr(trainer, "full_processor", None) or trainer.processing_class
     if proc is not None:
         proc.save_pretrained(out)

@@ -107,3 +107,34 @@ def test_lambda_lr_offsets_global_step():
         opt.step()
         sched.step()
     assert close(lrs[0], 1e-5) and close(lrs[-1], 1e-6)
+
+
+def test_flash_override_only_for_flash_requests():
+    from transformers.models.gemma3 import modeling_gemma3 as g
+
+    from src.pipeline.trainer import allow_text_only_flash_attention
+
+    before = (g.Gemma3Model._supports_flash_attn, g.Gemma3ForConditionalGeneration._supports_flash_attn)
+    try:
+        assert allow_text_only_flash_attention("sdpa") == [] and allow_text_only_flash_attention(None) == []
+        assert (g.Gemma3Model._supports_flash_attn, g.Gemma3ForConditionalGeneration._supports_flash_attn) == before
+        allow_text_only_flash_attention("kernels-community/flash-attn2")
+        assert g.Gemma3Model._supports_flash_attn and g.Gemma3ForConditionalGeneration._supports_flash_attn
+    finally:
+        g.Gemma3Model._supports_flash_attn, g.Gemma3ForConditionalGeneration._supports_flash_attn = before
+
+
+def test_saves_use_small_shards():
+    from src.pipeline.trainer import SAVE_SHARD_SIZE, small_shard_saves
+
+    seen = []
+
+    class M:
+        def save_pretrained(self, out, **kw):
+            seen.append(kw)
+
+    m = M()
+    small_shard_saves(m)
+    m.save_pretrained("x")  # how Trainer._save calls it: no max_shard_size
+    m.save_pretrained("y", max_shard_size="1GB")
+    assert seen == [{"max_shard_size": SAVE_SHARD_SIZE}, {"max_shard_size": "1GB"}]
