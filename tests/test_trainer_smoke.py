@@ -165,3 +165,23 @@ def test_branch_from_keep(model_dir, tmp_path):
 def test_smoke_dataset_shape():
     ds = smoke_dataset(64)
     assert len(ds) == 64 and set(ds.column_names) == {"prompt", "completion"}
+
+
+def test_string_completions_end_once_at_end_of_turn(model_dir, tmp_path):
+    """The real TG path: prompt/completion strings ending in <end_of_turn>; TRL must not append <eos>."""
+    from datasets import Dataset
+
+    rd = tmp_path / "runs" / "SMOKE"
+    cfg = make_cfg(model_dir, rd)
+    model, proc = tr.load_model_and_tokenizer(cfg, rd)
+    words = SMOKE_WORDS[:6]
+    rows = [{"prompt": f"<start_of_turn>user {' '.join(words[i:i + 3])}<end_of_turn><start_of_turn>model",
+             "completion": f"{' '.join(words[i + 1:i + 3])}<end_of_turn>"} for i in range(4)]
+    trainer = tr.build_trainer(cfg, model, proc, Dataset.from_list(rows), {}, rd, continue_parent_stream=False)
+    tok = trainer.processing_class
+    eot, eos = tok.convert_tokens_to_ids("<end_of_turn>"), tok.convert_tokens_to_ids("<eos>")
+    ids = [i for row in trainer.train_dataset["input_ids"] for i in row]
+    assert eos not in ids  # no second, never-generated <eos> after <end_of_turn>
+    assert ids.count(eot) == 2 * len(rows)  # one in each prompt, one ending each completion
+    tr.save_final(cfg, trainer, rd)
+    assert json.loads((rd / "model" / "tokenizer_config.json").read_text())["eos_token"] == "<eos>"  # shipped as-is

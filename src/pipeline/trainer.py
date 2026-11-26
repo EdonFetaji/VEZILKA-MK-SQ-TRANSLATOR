@@ -35,6 +35,7 @@ import torch
 
 from src.pipeline.config import RunConfig
 
+END_OF_TURN = "<end_of_turn>"  # TranslateGemma end of the model turn
 log = logging.getLogger(__name__)
 
 #: Trainable-parameter window for the 12B model (CSV: ~10.8B); checked only for models > 5e9 params.
@@ -380,12 +381,16 @@ def build_trainer(
     ck = "activation_checkpointing" if hasattr(SFTConfig, "activation_checkpointing") else "gradient_checkpointing"
     checkpointing = {ck: t.gradient_checkpointing,
                      f"{ck}_kwargs": {"use_reentrant": False} if t.gradient_checkpointing else None}
+    release_eos = getattr(getattr(tokenizer, "tokenizer", tokenizer), "eos_token", None)
     args = SFTConfig(
         output_dir=str(rd / "checkpoints"),
         max_length=cfg.data.max_length,
         packing=cfg.data.packing,
         padding_free=cfg.data.packing,
         completion_only_loss=True,
+        # completions already end in <end_of_turn>, TranslateGemma's stop token (generation eos ids [1, 106]);
+        # with the tokenizer default (<eos>) TRL would append a second, never-generated <eos> to every target
+        eos_token=END_OF_TURN,
         per_device_train_batch_size=t.micro_batch_rows,
         per_device_eval_batch_size=t.micro_batch_rows,
         gradient_accumulation_steps=t.grad_accum,
@@ -423,6 +428,7 @@ def build_trainer(
         if type(cb).__name__ == "TensorBoardCallback":
             cb.logging_dir = str(rd / "metrics" / "tensorboard")  # its writer is created at train begin
     trainer.full_processor = tokenizer  # saved with the final weights (chat template, image processor)
+    trainer.release_eos_token = release_eos  # restored before save: training-only eos, not shipped
     small_shard_saves(trainer.accelerator.unwrap_model(trainer.model))
     skip = continue_stream(cfg, trainer) if continue_parent_stream else 0
     if skip:
@@ -495,6 +501,9 @@ def save_final(cfg: RunConfig, trainer: Any, run_dir: str | Path | None = None) 
     release_memory()
     model.to(torch.bfloat16).save_pretrained(out, max_shard_size=SAVE_SHARD_SIZE)
     proc = getattr(trainer, "full_processor", None) or trainer.processing_class
+    eos = getattr(trainer, "release_eos_token", None)
+    if eos is not None:  # TRL set tokenizer.eos_token = <end_of_turn> for training; ship the original config
+        trainer.processing_class.eos_token = eos
     if proc is not None:
         proc.save_pretrained(out)
     log.info("saved bf16 model to %s", out)
