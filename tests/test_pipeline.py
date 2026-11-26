@@ -63,15 +63,15 @@ def test_csv_mapping(configs):
     assert tg10.training.lr_schedule["warmup_start"] == 4e-7
     assert tg10.training.save == {
         "every_steps": 250,
-        "keep_steps": [1196, 1994, 2957],
+        "keep_steps": [1568, 2614, 3877],
         "with_optimizer": True,
     }
-    assert tg10.training.max_steps == 3479 and tg10.seed == 1
+    assert tg10.training.max_steps == 4561 and tg10.seed == 1
 
     for rid, step, kind in (
-        ("TG-10-CD06", 1196, "cooldown"),
-        ("TG-10-CD10", 1994, "cooldown"),
-        ("TG-10-EXT", 2957, "wsd"),
+        ("TG-10-CD06", 1568, "cooldown"),
+        ("TG-10-CD10", 2614, "cooldown"),
+        ("TG-10-EXT", 3877, "wsd"),
     ):
         c = configs[rid]
         assert c.training.lr_schedule["type"] == kind
@@ -172,7 +172,7 @@ def test_resolve_init(configs, tmp_path, monkeypatch):
     assert hub.resolve_init(configs["TG-20"], state) == (hub.PUBLIC_REPO, "TG-10-CD10/model", "abc")
     with pytest.raises(hub.HubError, match="kept checkpoint"):
         hub.resolve_init(configs["TG-10-CD06"], state)
-    keep = hub.keep_dir("TG-10", 1196)
+    keep = hub.keep_dir("TG-10", 1568)
     keep.mkdir(parents=True)
     assert hub.resolve_init(configs["TG-10-CD06"], state) == (str(keep), None, None)
 

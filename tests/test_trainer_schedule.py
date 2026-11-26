@@ -42,17 +42,17 @@ def close(a: float, b: float) -> bool:
 
 def test_tg10_wsd():
     s, start, end = csv_schedule("TG-10")
-    assert (start, end) == (0, 3479)
+    assert (start, end) == (0, 4561)
     assert close(lr_at(0, s, end), 4e-7)
-    assert close(lr_at(52, s, end), 4e-7 + (1e-5 - 4e-7) * 52 / 104)
-    assert close(lr_at(104, s, end), 1e-5)
-    assert close(lr_at(1196, s, end), 1e-5)
-    assert close(lr_at(2957, s, end), 1e-5)
-    assert close(lr_at(2957 + 261, s, end), 1e-6 + 9e-6 * (1 - math.sqrt(0.5)))
-    assert close(lr_at(3479, s, end), 1e-6)
+    assert close(lr_at(68, s, end), 4e-7 + (1e-5 - 4e-7) * 68 / 137)
+    assert close(lr_at(137, s, end), 1e-5)
+    assert close(lr_at(1568, s, end), 1e-5)
+    assert close(lr_at(3877, s, end), 1e-5)
+    assert close(lr_at(3877 + 342, s, end), 1e-6 + 9e-6 * (1 - math.sqrt(0.5)))
+    assert close(lr_at(4561, s, end), 1e-6)
 
 
-@pytest.mark.parametrize("run_id,branch", [("TG-10-CD06", 1196), ("TG-10-CD10", 1994)])
+@pytest.mark.parametrize("run_id,branch", [("TG-10-CD06", 1568), ("TG-10-CD10", 2614)])
 def test_cooldown_branches(run_id, branch):
     s, start, end = csv_schedule(run_id)
     assert start == branch
@@ -63,16 +63,16 @@ def test_cooldown_branches(run_id, branch):
 
 def test_cd06_end_step():
     s, _start, end = csv_schedule("TG-10-CD06")
-    assert end == 1316
-    assert close(lr_at(1316, s, end), 1e-6)
+    assert end == 1568 + 157
+    assert close(lr_at(1725, s, end), 1e-6)
 
 
 def test_tg10_ext():
     s, start, end = csv_schedule("TG-10-EXT")
-    assert (start, end) == (2957, 4386)
-    assert close(lr_at(2957, s, end), 1e-5)
-    assert close(lr_at(3727, s, end), 1e-5)
-    assert close(lr_at(4386, s, end), 1e-6)
+    assert (start, end) == (3877, 5751)
+    assert close(lr_at(3877, s, end), 1e-5)
+    assert close(lr_at(4887, s, end), 1e-5)
+    assert close(lr_at(5751, s, end), 1e-6)
 
 
 def test_tg20_cosine():

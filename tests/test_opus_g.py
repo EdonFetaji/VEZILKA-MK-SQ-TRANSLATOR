@@ -215,6 +215,6 @@ def test_continue_stream_skips_parent_steps():
 
     trainer = types.SimpleNamespace(train_dataset=DS(range(200_000)))
     skip = continue_stream(cfg, trainer)
-    assert skip == 1196 * 4 * 8 and trainer.train_dataset[0] == skip
+    assert skip == 1568 * 4 * 8 and trainer.train_dataset[0] == skip
     plain = types.SimpleNamespace(train_dataset=DS(range(10)))
     assert continue_stream(load_config(CONFIGS / "TG-10.yaml"), plain) == 0 and len(plain.train_dataset) == 10

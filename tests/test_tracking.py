@@ -130,7 +130,7 @@ def test_online_failure_falls_back_to_offline_then_gives_up(fake_wandb, tmp_path
 
 def test_branch_rows_use_global_step(fake_wandb, tmp_path):
     cfg = cfg_of("TG-10-CD06")
-    tr = tracking.WandbTracker(cfg, tmp_path, start_global_step=1196)
+    tr = tracking.WandbTracker(cfg, tmp_path, start_global_step=1568)
     tr.on_train_begin(None, State(0, 0), None)
     tr.on_log(
         None,
@@ -145,7 +145,7 @@ def test_branch_rows_use_global_step(fake_wandb, tmp_path):
         logs={"eval_FLORES_DEV.mk-sq_loss": 2.1, "eval_GAZ_DEV.sq-mk_runtime": 3.0},
     )
     train_row, eval_row = fake_wandb.runs[0].rows
-    assert train_row["global_step"] == 1201 and train_row["local_step"] == 5
+    assert train_row["global_step"] == 1573 and train_row["local_step"] == 5
     assert train_row["train/loss"] == 1.5 and train_row["train/learning_rate"] == 9e-6
     assert train_row["train/grad_norm"] == 0.4 and train_row["train/epoch"] == 0.01
     assert "perf/tokens_per_s" in train_row and "mem/system_used_gb" in train_row

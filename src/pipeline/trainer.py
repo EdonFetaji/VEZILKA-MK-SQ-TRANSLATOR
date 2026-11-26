@@ -427,6 +427,16 @@ def build_trainer(
     skip = continue_stream(cfg, trainer) if continue_parent_stream else 0
     if skip:
         log.info("branch: continuing %s's stream after %d packed rows", t.resume["from_run"], skip)
+    try:  # one pass over the packed stream vs max_steps (CSV rule: max_steps = one pass for TG-10)
+        rows = len(trainer.train_dataset)
+        per_pass = math.ceil(rows / t.micro_batch_rows) // t.grad_accum
+        log.info("data: %d packed rows of %d tokens = %d updates per pass; max_steps %d",
+                 rows, cfg.data.max_length, per_pass, t.max_steps)
+        if not skip and not (0.99 * per_pass <= t.max_steps <= per_pass):
+            log.warning("data: max_steps %d != one pass (%d updates): the run %s", t.max_steps, per_pass,
+                        "repeats data" if t.max_steps > per_pass else "stops before the end of the stream")
+    except TypeError:  # an IterableDataset has no len
+        pass
     for cb in trainer.callback_handler.callbacks:  # parameter counts + init for the W&B run config
         if hasattr(cb, "extra"):
             cb.extra.update(

@@ -32,7 +32,7 @@ data:
     - {name: FLORES_DEV, loader: flores, split: dev, task: translation, directions: both}
 
 training:
-  max_steps: 1429
+  max_steps: 1874
   micro_batch_rows: 4
   micro_batch_tokens: 8192
   grad_accum: 8
@@ -48,13 +48,13 @@ training:
     warmup_init: false
     weight_decay: 0.0
   max_grad_norm: 1.0
-  lr_schedule: {type: wsd, peak: 1.0e-05, min: 1.0e-06, warmup_start: null, warmup_steps: 0, constant_end_step: 3728, cooldown_steps: 658}
+  lr_schedule: {type: wsd, peak: 1.0e-05, min: 1.0e-06, warmup_start: null, warmup_steps: 0, constant_end_step: 4888, cooldown_steps: 863}
   dev_loss_every_steps: 175
   save:
     every_steps: 250
     keep_steps: []
     with_optimizer: false
-  resume: {from_run: TG-10, from_step: 2957, optimizer_state: true, start_global_step: 2957}
+  resume: {from_run: TG-10, from_step: 3877, optimizer_state: true, start_global_step: 3877}
   gradient_checkpointing: true
   fused_cross_entropy: true
   bf16: true
@@ -73,12 +73,13 @@ plan:
   priority: 1 core (conditional; not in totals)
   run_condition: only if the full TG-10 run beats the 1.0M branch beyond the bootstrap interval and the curve still
     climbs steeply
-  init_checkpoint: TG-10 constant-LR checkpoint at cooldown start (step 2957)
+  init_checkpoint: TG-10 constant-LR checkpoint at cooldown start (step 3877)
   train_data: rest of G from the cooldown start + next-ranked NLLB pairs (LaBSE >= 0.80) up to ~2.2M examples in
     total
-  est_train_hours_at_500_tok_s: '52.0'
+  est_train_hours_at_500_tok_s: '68.2'
   checkpoint_selection: final; replaces TG-10 as the endpoint if it wins on FLORES_DEV
   save_at_end: bf16 weights + resumable state
   decoded_eval_points: end only
   retention_check: n/a
-  notes: Global steps 2957 to 4386; planned_updates counts only the added steps.
+  notes: Global steps 3877 to 5751 (~2.2M examples at G's measured 4561 updates per 1,744,871 examples); planned_updates
+    counts only the added steps.

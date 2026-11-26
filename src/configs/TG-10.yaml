@@ -20,7 +20,7 @@ data:
     - {name: FLORES_DEV, loader: flores, split: dev, task: translation, directions: both}
 
 training:
-  max_steps: 3479
+  max_steps: 4561
   micro_batch_rows: 4
   micro_batch_tokens: 8192
   grad_accum: 8
@@ -36,11 +36,11 @@ training:
     warmup_init: false
     weight_decay: 0.0
   max_grad_norm: 1.0
-  lr_schedule: {type: wsd, peak: 1.0e-05, min: 1.0e-06, warmup_start: 4.0e-07, warmup_steps: 104, constant_end_step: 2957, cooldown_steps: 522}
+  lr_schedule: {type: wsd, peak: 1.0e-05, min: 1.0e-06, warmup_start: 4.0e-07, warmup_steps: 137, constant_end_step: 3877, cooldown_steps: 684}
   dev_loss_every_steps: 175
   save:
     every_steps: 250
-    keep_steps: [1196, 1994, 2957]
+    keep_steps: [1568, 2614, 3877]
     with_optimizer: true
   resume: {from_run: null, from_step: null, optimizer_state: false, start_global_step: 0}
   gradient_checkpointing: true
@@ -62,12 +62,14 @@ plan:
   run_condition: always
   init_checkpoint: original TranslateGemma-12B release weights
   train_data: 'G: 1,523,490 rows -> 1,745,034 examples (human rows both directions, mined rows one direction each)'
-  est_train_hours_at_500_tok_s: '126.7'
+  est_train_hours_at_500_tok_s: '166.1'
   checkpoint_selection: endpoint chosen by the size check on FLORES_DEV (plan section 06); frozen in the manifest
     before TG-20
-  save_at_end: bf16 weights + resumable state; also constant-LR checkpoints WITH optimizer state at steps ~1196
-    (~0.6M examples), ~1994 (~1.0M examples) and 2957 (cooldown start, ~1.48M examples)
+  save_at_end: bf16 weights + resumable state; also constant-LR checkpoints WITH optimizer state at steps ~1568
+    (~0.6M examples), ~2614 (~1.0M examples) and 3877 (cooldown start, ~1.48M examples)
   decoded_eval_points: end of TG-10-CD06, end of TG-10-CD10, end of TG-10 (and TG-10-EXT if run)
   retention_check: n/a (reference for RQ2)
-  notes: Constant LR is what makes the size-check branches possible; do not switch to cosine. If the CD10 branch
-    shows the curve has flattened, the run may stop there.
+  notes: 'Constant LR is what makes the size-check branches possible; do not switch to cosine. If the CD10 branch
+    shows the curve has flattened, the run may stop there. Measured on the GB10 pilot (2026-11-26): one pass over
+    G = 4561 updates (3 updates = 0.0006577 epoch), so max_steps = 4561; warm-up 3%, cooldown final 15%, kept steps
+    re-derived from the example counts.'

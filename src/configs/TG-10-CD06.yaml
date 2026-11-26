@@ -20,7 +20,7 @@ data:
     - {name: FLORES_DEV, loader: flores, split: dev, task: translation, directions: both}
 
 training:
-  max_steps: 120
+  max_steps: 157
   micro_batch_rows: 4
   micro_batch_tokens: 8192
   grad_accum: 8
@@ -36,13 +36,13 @@ training:
     warmup_init: false
     weight_decay: 0.0
   max_grad_norm: 1.0
-  lr_schedule: {type: cooldown, peak: 1.0e-05, min: 1.0e-06, warmup_start: null, warmup_steps: 0, constant_end_step: 1196, cooldown_steps: 120}
+  lr_schedule: {type: cooldown, peak: 1.0e-05, min: 1.0e-06, warmup_start: null, warmup_steps: 0, constant_end_step: 1568, cooldown_steps: 157}
   dev_loss_every_steps: 20
   save:
     every_steps: null
     keep_steps: []
     with_optimizer: false
-  resume: {from_run: TG-10, from_step: 1196, optimizer_state: true, start_global_step: 1196}
+  resume: {from_run: TG-10, from_step: 1568, optimizer_state: true, start_global_step: 1568}
   gradient_checkpointing: true
   fused_cross_entropy: true
   bf16: true
@@ -60,11 +60,11 @@ plan:
   stage: general (size-check branch)
   priority: 1 core
   run_condition: after TG-10 reaches the checkpoint
-  init_checkpoint: TG-10 constant-LR checkpoint at ~0.6M examples (step ~1196)
+  init_checkpoint: TG-10 constant-LR checkpoint at ~0.6M examples (step ~1568)
   train_data: next 10% of TG-10's own G stream after the 0.6M-example checkpoint
-  est_train_hours_at_500_tok_s: '4.4'
+  est_train_hours_at_500_tok_s: '5.7'
   checkpoint_selection: final (candidate TG-10 endpoint)
   save_at_end: bf16 weights
   decoded_eval_points: end only
   retention_check: n/a
-  notes: 'Branch, not a new stage: optimizer state carries over. planned_updates = 10% of the 1196 updates so far.'
+  notes: 'Branch, not a new stage: optimizer state carries over. planned_updates = 10% of the 1568 updates so far.'
